@@ -1,8 +1,8 @@
 import path from "path"
 import { Effect, Layer, Record, Result, Schema, Context } from "effect"
-import { NonNegativeInt } from "@opencode-ai/core/schema"
-import { Global } from "@opencode-ai/core/global"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { NonNegativeInt } from "@openloom/core/schema"
+import { Global } from "@openloom/core/global"
+import { AppFileSystem } from "@openloom/core/filesystem"
 
 export const OAUTH_DUMMY_KEY = "opencode-oauth-dummy-key"
 
@@ -55,9 +55,9 @@ export const layer = Layer.effect(
     const decode = Schema.decodeUnknownOption(Info)
 
     const all = Effect.fn("Auth.all")(function* () {
-      if (process.env.OPENCODE_AUTH_CONTENT) {
+      if (process.env.OPENLOOM_AUTH_CONTENT) {
         try {
-          return JSON.parse(process.env.OPENCODE_AUTH_CONTENT)
+          return JSON.parse(process.env.OPENLOOM_AUTH_CONTENT)
         } catch (err) {}
       }
 

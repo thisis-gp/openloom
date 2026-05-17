@@ -5,7 +5,7 @@ import { Session } from "@/session/session"
 import { MessageV2 } from "@/session/message-v2"
 import { SessionID } from "@/session/schema"
 import { SessionStatus } from "@/session/status"
-import { PositiveInt } from "@opencode-ai/core/schema"
+import { PositiveInt } from "@openloom/core/schema"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Effect, Option, Schema } from "effect"
 
@@ -112,7 +112,7 @@ export const TaskStatusTool = Tool.define(
       _ctx: Tool.Context,
     ) {
       if (!flags.experimentalBackgroundSubagents) {
-        return yield* Effect.fail(new Error("task_status requires OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true"))
+        return yield* Effect.fail(new Error("task_status requires OPENLOOM_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true"))
       }
 
       const session = yield* sessions.get(params.task_id).pipe(Effect.catchCause(() => Effect.succeed(undefined)))

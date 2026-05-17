@@ -1,9 +1,9 @@
 export * as ConfigCommand from "./command"
 
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { Cause, Exit, Schema } from "effect"
-import { NamedError } from "@opencode-ai/core/util/error"
-import { Glob } from "@opencode-ai/core/util/glob"
+import { NamedError } from "@openloom/core/util/error"
+import { Glob } from "@openloom/core/util/glob"
 import { Bus } from "@/bus"
 import { configEntryNameFromPath } from "./entry-name"
 import { InvalidError } from "./error"
@@ -43,7 +43,7 @@ export async function load(dir: string) {
     })
     if (!md) continue
 
-    const patterns = ["/.opencode/command/", "/.opencode/commands/", "/command/", "/commands/"]
+    const patterns = ["/.openloom/command/", "/.openloom/commands/", "/command/", "/commands/"]
     const name = configEntryNameFromPath(item, patterns)
 
     const config = {

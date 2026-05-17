@@ -6,9 +6,9 @@ import { GlobalBus } from "@/bus/global"
 import { InstanceRef, WorkspaceRef } from "@/effect/instance-ref"
 import { InstanceStore } from "@/project/instance-store"
 import { SyncEvent } from "@/sync"
-import { EventV2 } from "@opencode-ai/core/event"
-import "@opencode-ai/core/catalog"
-import "@opencode-ai/core/session-event"
+import { EventV2 } from "@openloom/core/event"
+import "@openloom/core/catalog"
+import "@openloom/core/session-event"
 import { Context, Effect, Layer, Option } from "effect"
 
 export function toSyncDefinition<D extends EventV2.Definition>(definition: D) {

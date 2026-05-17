@@ -2,10 +2,10 @@ export * as ConfigAgent from "./agent"
 
 import { Exit, Schema, SchemaGetter } from "effect"
 import { Bus } from "@/bus"
-import { PositiveInt } from "@opencode-ai/core/schema"
-import * as Log from "@opencode-ai/core/util/log"
-import { NamedError } from "@opencode-ai/core/util/error"
-import { Glob } from "@opencode-ai/core/util/glob"
+import { PositiveInt } from "@openloom/core/schema"
+import * as Log from "@openloom/core/util/log"
+import { NamedError } from "@openloom/core/util/error"
+import { Glob } from "@openloom/core/util/glob"
 import { configEntryNameFromPath } from "./entry-name"
 import * as ConfigMarkdown from "./markdown"
 import { ConfigModelID } from "./model-id"
@@ -123,7 +123,7 @@ export async function load(dir: string) {
     })
     if (!md) continue
 
-    const patterns = ["/.opencode/agent/", "/.opencode/agents/", "/agent/", "/agents/"]
+    const patterns = ["/.openloom/agent/", "/.openloom/agents/", "/agent/", "/agents/"]
     const name = configEntryNameFromPath(item, patterns)
 
     const config = {

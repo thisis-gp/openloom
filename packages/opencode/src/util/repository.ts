@@ -1,6 +1,6 @@
 import path from "path"
 import { fileURLToPath } from "url"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 
 export type Reference = {
   host: string
@@ -49,7 +49,7 @@ function withSlash(input: string) {
 }
 
 function githubRemote(pathname: string) {
-  const base = process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL
+  const base = process.env.OPENLOOM_REPO_CLONE_GITHUB_BASE_URL
   if (!base) return `https://github.com/${pathname}.git`
   return new URL(`${pathname}.git`, withSlash(base)).href
 }

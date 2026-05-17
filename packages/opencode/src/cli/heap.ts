@@ -1,8 +1,8 @@
 import path from "path"
 import { writeHeapSnapshot } from "node:v8"
-import { Flag } from "@opencode-ai/core/flag/flag"
-import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
+import { Flag } from "@openloom/core/flag/flag"
+import { Global } from "@openloom/core/global"
+import * as Log from "@openloom/core/util/log"
 
 const log = Log.create({ service: "heap" })
 const MINUTE = 60_000
@@ -13,7 +13,7 @@ let lock = false
 let armed = true
 
 export function start() {
-  if (!Flag.OPENCODE_AUTO_HEAP_SNAPSHOT) return
+  if (!Flag.OPENLOOM_AUTO_HEAP_SNAPSHOT) return
   if (timer) return
 
   const run = async () => {

@@ -3,13 +3,13 @@ import { NodeServices } from "@effect/platform-node"
 import { mkdir } from "node:fs/promises"
 import path from "node:path"
 import { Effect, Layer } from "effect"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { Flag } from "@openloom/core/flag/flag"
 import { registerAdapter } from "../../src/control-plane/adapters"
 import type { WorkspaceAdapter } from "../../src/control-plane/types"
 import { Workspace } from "../../src/control-plane/workspace"
 import { WorkspacePaths } from "../../src/server/routes/instance/httpapi/groups/workspace"
 import { Session } from "@/session/session"
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { Server } from "../../src/server/server"
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, provideInstance, tmpdirScoped } from "../fixture/fixture"
@@ -22,7 +22,7 @@ import { testEffect } from "../lib/effect"
 
 void Log.init({ print: false })
 
-const originalWorkspaces = Flag.OPENCODE_EXPERIMENTAL_WORKSPACES
+const originalWorkspaces = Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES
 const workspaceLayer = Workspace.defaultLayer.pipe(
   Layer.provide(InstanceStore.defaultLayer),
   Layer.provide(InstanceBootstrap.defaultLayer),
@@ -161,7 +161,7 @@ function eventStreamResponse() {
 
 afterEach(async () => {
   mock.restore()
-  Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = originalWorkspaces
+  Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = originalWorkspaces
   await disposeAllInstances()
   await resetDatabase()
 })
@@ -194,7 +194,7 @@ describe("workspace HttpApi", () => {
 
   it.live("serves mutation endpoints", () =>
     Effect.gen(function* () {
-      Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = true
+      Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = true
       const dir = yield* tmpdirScoped({ git: true })
       const project = yield* Project.use.fromDirectory(dir)
       registerAdapter(project.project.id, "local-test", localAdapter(path.join(dir, ".workspace")))
@@ -228,7 +228,7 @@ describe("workspace HttpApi", () => {
 
   it.live("serves list sync endpoint", () =>
     Effect.gen(function* () {
-      Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = true
+      Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = true
       const dir = yield* tmpdirScoped({ git: true })
       const project = yield* Project.use.fromDirectory(dir)
       const type = `listed-${Math.random().toString(36).slice(2)}`
@@ -252,7 +252,7 @@ describe("workspace HttpApi", () => {
 
   it.live("creates workspace with the TUI payload shape", () =>
     Effect.gen(function* () {
-      Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = true
+      Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = true
       const dir = yield* tmpdirScoped({ git: true })
       const project = yield* Project.use.fromDirectory(dir)
       registerAdapter(project.project.id, "local-test", localAdapter(path.join(dir, ".workspace")))
@@ -273,7 +273,7 @@ describe("workspace HttpApi", () => {
 
   it.live("creates a real git worktree workspace via the builtin adapter", () =>
     Effect.gen(function* () {
-      Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = true
+      Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = true
       const dir = yield* tmpdirScoped({ git: true })
 
       const created = yield* request(WorkspacePaths.list, dir, {
@@ -291,7 +291,7 @@ describe("workspace HttpApi", () => {
 
   it.live("routes local workspace requests through the workspace target directory", () =>
     Effect.gen(function* () {
-      Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = true
+      Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = true
       const dir = yield* tmpdirScoped({ git: true })
       const workspaceDir = path.join(dir, ".workspace-local")
       const project = yield* Project.use.fromDirectory(dir)
@@ -316,7 +316,7 @@ describe("workspace HttpApi", () => {
 
   it.live("proxies remote workspace HTTP requests with sanitized forwarding", () =>
     Effect.gen(function* () {
-      Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = true
+      Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = true
       const dir = yield* tmpdirScoped({ git: true })
       const proxied: ProxiedRequest[] = []
       const remote = listenRemoteHttp((request) => {
@@ -401,7 +401,7 @@ describe("workspace HttpApi", () => {
 
   it.live("proxies remote workspace requests selected from session ownership", () =>
     Effect.gen(function* () {
-      Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = true
+      Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = true
       const dir = yield* tmpdirScoped({ git: true })
       const proxied: ProxiedRequest[] = []
       const remote = listenRemoteHttp((request) => {

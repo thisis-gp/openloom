@@ -3,10 +3,10 @@ import { ConfigProvider, Effect, Layer } from "effect"
 import type * as Scope from "effect/Scope"
 import { HttpRouter } from "effect/unstable/http"
 import { ChildProcessSpawner } from "effect/unstable/process"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
-import { Flag } from "@opencode-ai/core/flag/flag"
-import { createOpencodeClient } from "@opencode-ai/sdk/v2"
+import { AppFileSystem } from "@openloom/core/filesystem"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
+import { Flag } from "@openloom/core/flag/flag"
+import { createOpencodeClient } from "@openloom/sdk/v2"
 import { validateSession } from "../../src/cli/cmd/tui/validate-session"
 import { InstanceBootstrap } from "../../src/project/bootstrap-service"
 import { InstanceStore } from "../../src/project/instance-store"
@@ -34,8 +34,8 @@ const it = testEffect(
 )
 
 const original = {
-  OPENCODE_SERVER_PASSWORD: Flag.OPENCODE_SERVER_PASSWORD,
-  OPENCODE_SERVER_USERNAME: Flag.OPENCODE_SERVER_USERNAME,
+  OPENLOOM_SERVER_PASSWORD: Flag.OPENLOOM_SERVER_PASSWORD,
+  OPENLOOM_SERVER_USERNAME: Flag.OPENLOOM_SERVER_USERNAME,
 }
 
 type ServerPath = "default" | "raw"
@@ -48,8 +48,8 @@ type TestServices = AppFileSystem.Service | ChildProcessSpawner.ChildProcessSpaw
 type TestScope = Scope.Scope | TestServices
 
 function app(serverPath: ServerPath, input?: { password?: string; username?: string }) {
-  Flag.OPENCODE_SERVER_PASSWORD = input?.password
-  Flag.OPENCODE_SERVER_USERNAME = input?.username
+  Flag.OPENLOOM_SERVER_PASSWORD = input?.password
+  Flag.OPENLOOM_SERVER_USERNAME = input?.username
   if (serverPath === "default") return Server.Default().app
 
   const handler = HttpRouter.toWebHandler(
@@ -57,8 +57,8 @@ function app(serverPath: ServerPath, input?: { password?: string; username?: str
       Layer.provide(
         ConfigProvider.layer(
           ConfigProvider.fromUnknown({
-            OPENCODE_SERVER_PASSWORD: input?.password,
-            OPENCODE_SERVER_USERNAME: input?.username,
+            OPENLOOM_SERVER_PASSWORD: input?.password,
+            OPENLOOM_SERVER_USERNAME: input?.username,
           }),
         ),
       ),
@@ -317,7 +317,7 @@ function writeStandardFiles(dir: string) {
 function writeProjectSkill(dir: string) {
   return AppFileSystem.Service.use((fs) =>
     fs.writeWithDirs(
-      path.join(dir, ".opencode", "skills", "project-rest-skill", "SKILL.md"),
+      path.join(dir, ".openloom", "skills", "project-rest-skill", "SKILL.md"),
       `---
 name: project-rest-skill
 description: A project skill visible to REST API prompts.
@@ -360,8 +360,8 @@ function seedMessage(directory: string, sessionID: string) {
 }
 
 afterEach(async () => {
-  Flag.OPENCODE_SERVER_PASSWORD = original.OPENCODE_SERVER_PASSWORD
-  Flag.OPENCODE_SERVER_USERNAME = original.OPENCODE_SERVER_USERNAME
+  Flag.OPENLOOM_SERVER_PASSWORD = original.OPENLOOM_SERVER_PASSWORD
+  Flag.OPENLOOM_SERVER_USERNAME = original.OPENLOOM_SERVER_USERNAME
   await disposeAllInstances()
   await resetDatabase()
 })

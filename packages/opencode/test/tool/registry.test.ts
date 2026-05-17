@@ -3,13 +3,13 @@ import path from "path"
 import fs from "fs/promises"
 import { fileURLToPath, pathToFileURL } from "url"
 import { Effect, Layer, Result, Schema } from "effect"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
 import { ToolRegistry } from "@/tool/registry"
 import { Tool } from "@/tool/tool"
 import { disposeAllInstances, TestInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
 import { TestConfig } from "../fixture/config"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { Plugin } from "@/plugin"
 import { Question } from "@/question"
 import { Todo } from "@/session/todo"
@@ -36,7 +36,7 @@ import { RuntimeFlags } from "@/effect/runtime-flags"
 
 const node = CrossSpawnSpawner.defaultLayer
 const configLayer = TestConfig.layer({
-  directories: () => InstanceState.directory.pipe(Effect.map((dir) => [path.join(dir, ".opencode")])),
+  directories: () => InstanceState.directory.pipe(Effect.map((dir) => [path.join(dir, ".openloom")])),
 })
 
 const registryLayer = (flags: Partial<RuntimeFlags.Info> = {}) =>
@@ -134,7 +134,7 @@ describe("tool.registry", () => {
   it.instance("loads tools from .opencode/tool (singular)", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const opencode = path.join(test.directory, ".opencode")
+      const opencode = path.join(test.directory, ".openloom")
       const tool = path.join(opencode, "tool")
       yield* Effect.promise(() => fs.mkdir(tool, { recursive: true }))
       yield* Effect.promise(() =>
@@ -161,7 +161,7 @@ describe("tool.registry", () => {
   it.instance("ignores non-tool exports in .opencode/tool files", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const tool = path.join(test.directory, ".opencode", "tool")
+      const tool = path.join(test.directory, ".openloom", "tool")
       yield* Effect.promise(() => fs.mkdir(tool, { recursive: true }))
       yield* Effect.promise(() =>
         Bun.write(
@@ -188,7 +188,7 @@ describe("tool.registry", () => {
   it.instance("loads tools from .opencode/tools (plural)", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const opencode = path.join(test.directory, ".opencode")
+      const opencode = path.join(test.directory, ".openloom")
       const tools = path.join(opencode, "tools")
       yield* Effect.promise(() => fs.mkdir(tools, { recursive: true }))
       yield* Effect.promise(() =>
@@ -215,7 +215,7 @@ describe("tool.registry", () => {
   it.instance("loads Zod-schema custom tools with JSON Schema and validation", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const customTools = path.join(test.directory, ".opencode", "tools")
+      const customTools = path.join(test.directory, ".openloom", "tools")
       const pluginTool = pathToFileURL(path.resolve(import.meta.dir, "../../../plugin/src/tool.ts")).href
       yield* Effect.promise(() => fs.mkdir(customTools, { recursive: true }))
       yield* Effect.promise(() =>
@@ -268,9 +268,9 @@ describe("tool.registry", () => {
     () =>
       Effect.gen(function* () {
         const test = yield* TestInstance
-        const opencode = path.join(test.directory, ".opencode")
+        const opencode = path.join(test.directory, ".openloom")
         const customTools = path.join(opencode, "tools")
-        const plugin = path.join(opencode, "node_modules", "@opencode-ai", "plugin")
+        const plugin = path.join(opencode, "node_modules", "@openloom", "plugin")
         yield* Effect.promise(() => fs.mkdir(path.join(plugin, "dist"), { recursive: true }))
         yield* Effect.promise(() => fs.mkdir(customTools, { recursive: true }))
         yield* Effect.promise(() =>
@@ -282,7 +282,7 @@ describe("tool.registry", () => {
         yield* Effect.promise(() =>
           Bun.write(
             path.join(plugin, "package.json"),
-            JSON.stringify({ name: "@opencode-ai/plugin", type: "module", exports: { ".": "./dist/index.js" } }),
+            JSON.stringify({ name: "@openloom/plugin", type: "module", exports: { ".": "./dist/index.js" } }),
           ),
         )
         yield* Effect.promise(() =>
@@ -302,7 +302,7 @@ describe("tool.registry", () => {
           Bun.write(
             path.join(customTools, "addition.ts"),
             [
-              'import { tool } from "@opencode-ai/plugin"',
+              'import { tool } from "@openloom/plugin"',
               "export default tool({",
               "  description: 'Use this tool to add two numbers and return their sum.',",
               "  args: {",
@@ -333,7 +333,7 @@ describe("tool.registry", () => {
   it.instance("preserves attachments from structured custom tool results", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const customTools = path.join(test.directory, ".opencode", "tools")
+      const customTools = path.join(test.directory, ".openloom", "tools")
       const pluginTool = pathToFileURL(path.resolve(import.meta.dir, "../../../plugin/src/tool.ts")).href
       yield* Effect.promise(() => fs.mkdir(customTools, { recursive: true }))
       yield* Effect.promise(() =>
@@ -378,7 +378,7 @@ describe("tool.registry", () => {
   it.instance("loads legacy JSON-schema-shaped custom tools with wire schema", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const tools = path.join(test.directory, ".opencode", "tools")
+      const tools = path.join(test.directory, ".openloom", "tools")
       yield* Effect.promise(() => fs.mkdir(tools, { recursive: true }))
       yield* Effect.promise(() =>
         Bun.write(
@@ -410,7 +410,7 @@ describe("tool.registry", () => {
   it.instance("loads tools with external dependencies without crashing", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const opencode = path.join(test.directory, ".opencode")
+      const opencode = path.join(test.directory, ".openloom")
       const tools = path.join(opencode, "tools")
       yield* Effect.promise(() => fs.mkdir(tools, { recursive: true }))
       yield* Effect.promise(() =>
@@ -419,7 +419,7 @@ describe("tool.registry", () => {
           JSON.stringify({
             name: "custom-tools",
             dependencies: {
-              "@opencode-ai/plugin": "^0.0.0",
+              "@openloom/plugin": "^0.0.0",
               cowsay: "^1.6.0",
             },
           }),
@@ -434,7 +434,7 @@ describe("tool.registry", () => {
             packages: {
               "": {
                 dependencies: {
-                  "@opencode-ai/plugin": "^0.0.0",
+                  "@openloom/plugin": "^0.0.0",
                   cowsay: "^1.6.0",
                 },
               },

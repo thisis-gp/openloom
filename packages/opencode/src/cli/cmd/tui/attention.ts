@@ -8,18 +8,18 @@ import type {
   TuiAttentionSoundName,
   TuiAttentionSoundPack,
   TuiAttentionSoundPackInfo,
-} from "@opencode-ai/plugin/tui"
+} from "@openloom/plugin/tui"
 import stripAnsi from "strip-ansi"
 import type { TuiConfig } from "./config/tui"
 import { isAttentionSoundName } from "./config/tui-schema"
 import * as TuiAudio from "@tui/util/audio"
-import defaultSoundPath from "@opencode-ai/ui/audio/bip-bop-01.mp3" with { type: "file" }
-import questionSoundPath from "@opencode-ai/ui/audio/bip-bop-03.mp3" with { type: "file" }
-import permissionSoundPath from "@opencode-ai/ui/audio/staplebops-06.mp3" with { type: "file" }
-import errorSoundPath from "@opencode-ai/ui/audio/nope-03.mp3" with { type: "file" }
-import doneSoundPath from "@opencode-ai/ui/audio/bip-bop-01.mp3" with { type: "file" }
-import subagentDoneSoundPath from "@opencode-ai/ui/audio/yup-01.mp3" with { type: "file" }
-import * as Log from "@opencode-ai/core/util/log"
+import defaultSoundPath from "@openloom/ui/audio/bip-bop-01.mp3" with { type: "file" }
+import questionSoundPath from "@openloom/ui/audio/bip-bop-03.mp3" with { type: "file" }
+import permissionSoundPath from "@openloom/ui/audio/staplebops-06.mp3" with { type: "file" }
+import errorSoundPath from "@openloom/ui/audio/nope-03.mp3" with { type: "file" }
+import doneSoundPath from "@openloom/ui/audio/bip-bop-01.mp3" with { type: "file" }
+import subagentDoneSoundPath from "@openloom/ui/audio/yup-01.mp3" with { type: "file" }
+import * as Log from "@openloom/core/util/log"
 
 type FocusState = "unknown" | "focused" | "blurred"
 

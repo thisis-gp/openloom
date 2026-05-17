@@ -1,6 +1,6 @@
 import { describe, expect } from "bun:test"
 import path from "path"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { ConfigProvider, Deferred, Effect, Layer, Option } from "effect"
 import { TestInstance, provideInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
@@ -18,8 +18,8 @@ const describeWatcher = FileWatcher.hasNativeBinding() && !process.env.CI ? desc
 
 const watcherConfigLayer = ConfigProvider.layer(
   ConfigProvider.fromUnknown({
-    OPENCODE_EXPERIMENTAL_FILEWATCHER: "true",
-    OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER: "false",
+    OPENLOOM_EXPERIMENTAL_FILEWATCHER: "true",
+    OPENLOOM_EXPERIMENTAL_DISABLE_FILEWATCHER: "false",
   }),
 )
 

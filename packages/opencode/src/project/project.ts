@@ -3,8 +3,8 @@ import { Database } from "@/storage/db"
 import { eq } from "drizzle-orm"
 import { ProjectTable } from "./project.sql"
 import { SessionTable } from "../session/session.sql"
-import * as Log from "@opencode-ai/core/util/log"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import * as Log from "@openloom/core/util/log"
+import { Flag } from "@openloom/core/flag/flag"
 import { BusEvent } from "@/bus/bus-event"
 import { GlobalBus } from "@/bus/global"
 import { which } from "../util/which"
@@ -15,9 +15,9 @@ import { InstanceState } from "@/effect/instance-state"
 import { Effect, Layer, Path, Scope, Context, Stream, Types, Schema } from "effect"
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process"
 import { NodePath } from "@effect/platform-node"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
-import { NonNegativeInt, optionalOmitUndefined } from "@opencode-ai/core/schema"
+import { AppFileSystem } from "@openloom/core/filesystem"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
+import { NonNegativeInt, optionalOmitUndefined } from "@openloom/core/schema"
 import { serviceUse } from "@/effect/service-use"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
@@ -169,7 +169,7 @@ export const layer: Layer.Layer<
         }),
       )
 
-    const fakeVcs = Schema.decodeUnknownSync(Schema.optional(ProjectVcs))(Flag.OPENCODE_FAKE_VCS)
+    const fakeVcs = Schema.decodeUnknownSync(Schema.optional(ProjectVcs))(Flag.OPENLOOM_FAKE_VCS)
 
     const resolveGitPath = (cwd: string, name: string) => {
       if (!name) return cwd

@@ -2,11 +2,11 @@ import { afterEach, describe, expect } from "bun:test"
 import path from "path"
 import { pathToFileURL } from "node:url"
 import { Cause, Effect, Exit, Layer } from "effect"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { Agent } from "../../src/agent/agent"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
 import { Git } from "../../src/git"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 import { MessageID, SessionID } from "../../src/session/schema"
 import { Truncate } from "../../src/tool/truncate"
 import { RepoCloneTool } from "../../src/tool/repo_clone"
@@ -65,15 +65,15 @@ const git = Effect.fn("RepoCloneToolTest.git")(function* (cwd: string, args: str
 const githubBase = <A, E, R>(url: string, self: Effect.Effect<A, E, R>) =>
   Effect.acquireUseRelease(
     Effect.sync(() => {
-      const previous = process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL
-      process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL = url
+      const previous = process.env.OPENLOOM_REPO_CLONE_GITHUB_BASE_URL
+      process.env.OPENLOOM_REPO_CLONE_GITHUB_BASE_URL = url
       return previous
     }),
     () => self,
     (previous) =>
       Effect.sync(() => {
-        if (previous) process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL = previous
-        else delete process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL
+        if (previous) process.env.OPENLOOM_REPO_CLONE_GITHUB_BASE_URL = previous
+        else delete process.env.OPENLOOM_REPO_CLONE_GITHUB_BASE_URL
       }),
   )
 

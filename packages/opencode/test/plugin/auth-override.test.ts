@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import path from "path"
 import { pathToFileURL } from "url"
 import { Effect, Layer } from "effect"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { provideInstance, TestInstance, tmpdirScoped } from "../fixture/fixture"
 import { ProviderAuth } from "@/provider/auth"
 import { ProviderID } from "../../src/provider/schema"
@@ -12,7 +12,7 @@ import { Auth } from "@/auth"
 import { Bus } from "@/bus"
 import { TestConfig } from "../fixture/config"
 import { testEffect } from "../lib/effect"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
 
 const it = testEffect(Layer.mergeAll(CrossSpawnSpawner.defaultLayer, AppFileSystem.defaultLayer))
 
@@ -30,7 +30,7 @@ function layer(directory: string, plugins: string[]) {
                 plugin: plugins,
                 plugin_origins: plugins.map((plugin) => ({
                   spec: plugin,
-                  source: path.join(directory, "opencode.json"),
+                  source: path.join(directory, "openloom.json"),
                   scope: "local" as const,
                 })),
               }),
@@ -49,7 +49,7 @@ describe("plugin.auth-override", () => {
       Effect.gen(function* () {
         const tmp = yield* TestInstance
         const fs = yield* AppFileSystem.Service
-        const pluginDir = path.join(tmp.directory, ".opencode", "plugin")
+        const pluginDir = path.join(tmp.directory, ".openloom", "plugin")
 
         yield* fs.writeWithDirs(
           path.join(pluginDir, "custom-copilot-auth.ts"),

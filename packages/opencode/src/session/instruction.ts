@@ -4,10 +4,10 @@ import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/unstable/
 import { Config } from "@/config/config"
 import { InstanceState } from "@/effect/instance-state"
 import { RuntimeFlags } from "@/effect/runtime-flags"
-import { Flag } from "@opencode-ai/core/flag/flag"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { Flag } from "@openloom/core/flag/flag"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { withTransientReadRetry } from "@/util/effect-http-client"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 import type { MessageV2 } from "./message-v2"
 import type { MessageID } from "./schema"
 
@@ -77,7 +77,7 @@ export const layer: Layer.Layer<
 
     const relative = Effect.fnUntraced(function* (instruction: string) {
       const ctx = yield* InstanceState.context
-      if (!Flag.OPENCODE_DISABLE_PROJECT_CONFIG) {
+      if (!Flag.OPENLOOM_DISABLE_PROJECT_CONFIG) {
         return yield* fs
           .globUp(instruction, ctx.directory, ctx.worktree)
           .pipe(Effect.catch(() => Effect.succeed([] as string[])))
@@ -119,7 +119,7 @@ export const layer: Layer.Layer<
       }
 
       // The first project-level match wins so we don't stack AGENTS.md/CLAUDE.md from every ancestor.
-      if (!Flag.OPENCODE_DISABLE_PROJECT_CONFIG) {
+      if (!Flag.OPENLOOM_DISABLE_PROJECT_CONFIG) {
         for (const file of instructionFiles) {
           const matches = yield* fs
             .findUp(file, ctx.directory, ctx.worktree)

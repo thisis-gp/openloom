@@ -14,7 +14,7 @@ import PROMPT_SUMMARY from "./prompt/summary.txt"
 import PROMPT_TITLE from "./prompt/title.txt"
 import { Permission } from "@/permission"
 import { mergeDeep, pipe, sortBy, values } from "remeda"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 import path from "path"
 import { Plugin } from "@/plugin"
 import { Skill } from "../skill"
@@ -23,7 +23,7 @@ import { InstanceState } from "@/effect/instance-state"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import * as Option from "effect/Option"
 import * as OtelTracer from "@effect/opentelemetry/Tracer"
-import { type DeepMutable } from "@opencode-ai/core/schema"
+import { type DeepMutable } from "@openloom/core/schema"
 
 export const Info = Schema.Struct({
   name: Schema.String,
@@ -153,7 +153,7 @@ export const layer = Layer.effect(
                 },
                 edit: {
                   "*": "deny",
-                  [path.join(".opencode", "plans", "*.md")]: "allow",
+                  [path.join(".openloom", "plans", "*.md")]: "allow",
                   [path.relative(ctx.worktree, path.join(Global.Path.data, path.join("plans", "*.md")))]: "allow",
                 },
               }),

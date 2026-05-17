@@ -36,7 +36,7 @@ import { useRenderer, useTerminalDimensions, type JSX } from "@opentui/solid"
 import * as Editor from "@tui/util/editor"
 import { useExit } from "../../context/exit"
 import * as Clipboard from "../../util/clipboard"
-import type { AssistantMessage, FilePart, UserMessage } from "@opencode-ai/sdk/v2"
+import type { AssistantMessage, FilePart, UserMessage } from "@openloom/sdk/v2"
 import { TuiEvent } from "../../event"
 import { iife } from "@/util/iife"
 import { Locale } from "@/util/locale"
@@ -57,7 +57,7 @@ import {
 } from "../dialog-workspace-create"
 import { DialogWorkspaceUnavailable } from "../dialog-workspace-unavailable"
 import { useArgs } from "@tui/context/args"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { Flag } from "@openloom/core/flag/flag"
 import { type WorkspaceStatus } from "../workspace-label"
 import { useCommandPalette } from "../../context/command-palette"
 import { useBindings, useCommandShortcut, useLeaderActive, useOpencodeKeymap } from "../../keymap"
@@ -603,7 +603,7 @@ export function Prompt(props: PromptProps) {
         desc: "Change the workspace for the session",
         name: "workspace.set",
         category: "Session",
-        enabled: Flag.OPENCODE_EXPERIMENTAL_WORKSPACES,
+        enabled: Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES,
         slashName: "warp",
         run: () => {
           void openWorkspaceSelect({

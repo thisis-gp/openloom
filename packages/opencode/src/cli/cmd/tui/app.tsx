@@ -19,7 +19,7 @@ import {
   on,
 } from "solid-js"
 import { win32DisableProcessedInput, win32InstallCtrlCGuard } from "./win32"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { Flag } from "@openloom/core/flag/flag"
 import semver from "semver"
 import { DialogProvider, useDialog } from "@tui/ui/dialog"
 import { DialogProvider as DialogProviderList } from "@tui/component/dialog-provider"
@@ -117,7 +117,7 @@ const appBindingCommands = [
 ] as const
 
 function rendererConfig(_config: TuiConfig.Resolved): CliRendererConfig {
-  const mouseEnabled = !Flag.OPENCODE_DISABLE_MOUSE && (_config.mouse ?? true)
+  const mouseEnabled = !Flag.OPENLOOM_DISABLE_MOUSE && (_config.mouse ?? true)
 
   return {
     externalOutputMode: "passthrough",
@@ -318,7 +318,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
   const offSelectionKeys = keymap.intercept(
     "key",
     ({ event }) => {
-      if (!Flag.OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
+      if (!Flag.OPENLOOM_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
       Selection.handleSelectionKey(renderer, toast, event)
     },
     { priority: 1 },
@@ -345,7 +345,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
 
   // Update terminal window title based on current route and session
   createEffect(() => {
-    if (!terminalTitleEnabled() || Flag.OPENCODE_DISABLE_TERMINAL_TITLE) return
+    if (!terminalTitleEnabled() || Flag.OPENLOOM_DISABLE_TERMINAL_TITLE) return
 
     if (route.data.type === "home") {
       renderer.setTerminalTitle("OpenCode")
@@ -920,16 +920,16 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
       flexDirection="column"
       backgroundColor={theme.background}
       onMouseDown={(evt) => {
-        if (!Flag.OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
+        if (!Flag.OPENLOOM_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
         if (evt.button !== MouseButton.RIGHT) return
 
         if (!Selection.copy(renderer, toast)) return
         evt.preventDefault()
         evt.stopPropagation()
       }}
-      onMouseUp={Flag.OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT ? undefined : () => Selection.copy(renderer, toast)}
+      onMouseUp={Flag.OPENLOOM_EXPERIMENTAL_DISABLE_COPY_ON_SELECT ? undefined : () => Selection.copy(renderer, toast)}
     >
-      <Show when={Flag.OPENCODE_SHOW_TTFD}>
+      <Show when={Flag.OPENLOOM_SHOW_TTFD}>
         <TimeToFirstDraw />
       </Show>
       <Show when={ready()}>

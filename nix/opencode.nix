@@ -38,9 +38,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   '';
 
   env.MODELS_DEV_API_JSON = "${models-dev}/dist/_api.json";
-  env.OPENCODE_DISABLE_MODELS_FETCH = true;
-  env.OPENCODE_VERSION = finalAttrs.version;
-  env.OPENCODE_CHANNEL = "prod";
+  env.OPENLOOM_DISABLE_MODELS_FETCH = true;
+  env.OPENLOOM_VERSION = finalAttrs.version;
+  env.OPENLOOM_CHANNEL = "prod";
 
   buildPhase = ''
     runHook preBuild
@@ -84,7 +84,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     writableTmpDirAsHomeHook
   ];
   doInstallCheck = true;
-  versionCheckKeepEnvironment = [ "HOME" "OPENCODE_DISABLE_MODELS_FETCH" ];
+  versionCheckKeepEnvironment = [ "HOME" "OPENLOOM_DISABLE_MODELS_FETCH" ];
   versionCheckProgramArg = "--version";
 
   passthru = {

@@ -1,9 +1,9 @@
 import { describe, expect } from "bun:test"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { Effect, Layer } from "effect"
 import path from "path"
 import { Server } from "../../src/server/server"
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { resetDatabase } from "../fixture/db"
 import { TestInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
@@ -120,7 +120,7 @@ function writeProviderAuthPlugin(dir: string) {
     const fs = yield* AppFileSystem.Service
 
     yield* fs.writeWithDirs(
-      path.join(dir, ".opencode", "plugin", "provider-oauth-parity.ts"),
+      path.join(dir, ".openloom", "plugin", "provider-oauth-parity.ts"),
       [
         "export default {",
         '  id: "test.provider-oauth-parity",',
@@ -154,7 +154,7 @@ function writeProviderAuthValidationPlugin(dir: string) {
     const fs = yield* AppFileSystem.Service
 
     yield* fs.writeWithDirs(
-      path.join(dir, ".opencode", "plugin", "provider-oauth-validation.ts"),
+      path.join(dir, ".openloom", "plugin", "provider-oauth-validation.ts"),
       [
         "export default {",
         '  id: "test.provider-oauth-validation",',
@@ -195,7 +195,7 @@ function writeFunctionOptionsPlugin(dir: string) {
     const fs = yield* AppFileSystem.Service
 
     yield* fs.writeWithDirs(
-      path.join(dir, ".opencode", "plugin", "provider-function-options.ts"),
+      path.join(dir, ".openloom", "plugin", "provider-function-options.ts"),
       [
         "export default {",
         '  id: "test.provider-function-options",',
@@ -226,7 +226,7 @@ function writeProviderModelsMutationPlugin(dir: string) {
     const fs = yield* AppFileSystem.Service
 
     yield* fs.writeWithDirs(
-      path.join(dir, ".opencode", "plugin", "provider-models-mutation.ts"),
+      path.join(dir, ".openloom", "plugin", "provider-models-mutation.ts"),
       [
         "export default {",
         '  id: "test.provider-models-mutation",',
@@ -355,7 +355,7 @@ describe("provider HttpApi", () => {
       const instance = yield* TestInstance
       yield* writeFunctionOptionsPlugin(instance.directory)
       yield* setEnvScoped(
-        "OPENCODE_AUTH_CONTENT",
+        "OPENLOOM_AUTH_CONTENT",
         JSON.stringify({
           google: { type: "oauth", refresh: "dummy", access: "dummy", expires: 9999999999999 },
         }),

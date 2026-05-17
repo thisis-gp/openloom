@@ -4,7 +4,7 @@ import { useTheme } from "@tui/context/theme"
 import { MouseButton, Renderable, RGBA } from "@opentui/core"
 import { createStore } from "solid-js/store"
 import { useToast } from "./toast"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { Flag } from "@openloom/core/flag/flag"
 import * as Selection from "@tui/util/selection"
 import { useBindings } from "../keymap"
 
@@ -181,7 +181,7 @@ export function DialogProvider(props: ParentProps) {
         position="absolute"
         zIndex={3000}
         onMouseDown={(evt: { button: number; preventDefault(): void; stopPropagation(): void }) => {
-          if (!Flag.OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
+          if (!Flag.OPENLOOM_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
           if (evt.button !== MouseButton.RIGHT) return
 
           if (!Selection.copy(renderer, toast)) return
@@ -189,7 +189,7 @@ export function DialogProvider(props: ParentProps) {
           evt.stopPropagation()
         }}
         onMouseUp={
-          !Flag.OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT ? () => Selection.copy(renderer, toast) : undefined
+          !Flag.OPENLOOM_EXPERIMENTAL_DISABLE_COPY_ON_SELECT ? () => Selection.copy(renderer, toast) : undefined
         }
       >
         <Show when={value.stack.length}>

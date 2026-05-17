@@ -2,7 +2,7 @@ import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
 import { RunCommand } from "./cli/cmd/run"
 import { GenerateCommand } from "./cli/cmd/generate"
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { ConsoleCommand } from "./cli/cmd/account"
 import { ProvidersCommand } from "./cli/cmd/providers"
 import { AgentCommand } from "./cli/cmd/agent"
@@ -11,8 +11,8 @@ import { UninstallCommand } from "./cli/cmd/uninstall"
 import { ModelsCommand } from "./cli/cmd/models"
 import { UI } from "./cli/ui"
 import { Installation } from "./installation"
-import { InstallationVersion } from "@opencode-ai/core/installation/version"
-import { NamedError } from "@opencode-ai/core/util/error"
+import { InstallationVersion } from "@openloom/core/installation/version"
+import { NamedError } from "@openloom/core/util/error"
 import { FormatError } from "./cli/error"
 import { ServeCommand } from "./cli/cmd/serve"
 import { Filesystem } from "@/util/filesystem"
@@ -31,14 +31,14 @@ import { PrCommand } from "./cli/cmd/pr"
 import { SessionCommand } from "./cli/cmd/session"
 import { DbCommand } from "./cli/cmd/db"
 import path from "path"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 import { JsonMigration } from "@/storage/json-migration"
 import { Database } from "@/storage/db"
 import { errorMessage } from "./util/error"
 import { PluginCommand } from "./cli/cmd/plug"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
-import { ensureProcessMetadata } from "@opencode-ai/core/util/opencode-process"
+import { ensureProcessMetadata } from "@openloom/core/util/opencode-process"
 import { isRecord } from "@/util/record"
 
 const processMetadata = ensureProcessMetadata("main")
@@ -90,7 +90,7 @@ const cli = yargs(args)
   })
   .middleware(async (opts) => {
     if (opts.pure) {
-      process.env.OPENCODE_PURE = "1"
+      process.env.OPENLOOM_PURE = "1"
     }
 
     await Log.init({
@@ -107,7 +107,7 @@ const cli = yargs(args)
 
     process.env.AGENT = "1"
     process.env.OPENCODE = "1"
-    process.env.OPENCODE_PID = String(process.pid)
+    process.env.OPENLOOM_PID = String(process.pid)
 
     Log.Default.info("opencode", {
       version: InstallationVersion,

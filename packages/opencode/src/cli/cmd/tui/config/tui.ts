@@ -8,21 +8,21 @@ import { ConfigParse } from "@/config/parse"
 import * as ConfigPaths from "@/config/paths"
 import { migrateTuiConfig } from "./tui-migrate"
 import { KeymapLeaderTimeoutDefault, resolveAttentionSoundPaths, TuiInfo } from "./tui-schema"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { Flag } from "@openloom/core/flag/flag"
 import { isRecord } from "@/util/record"
-import { Global } from "@opencode-ai/core/global"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { Global } from "@openloom/core/global"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { CurrentWorkingDirectory } from "./cwd"
 import { ConfigPlugin } from "@/config/plugin"
 import { TuiKeybind } from "./keybind"
-import { InstallationLocal, InstallationVersion } from "@opencode-ai/core/installation/version"
-import { makeRuntime } from "@opencode-ai/core/effect/runtime"
+import { InstallationLocal, InstallationVersion } from "@openloom/core/installation/version"
+import { makeRuntime } from "@openloom/core/effect/runtime"
 import { Filesystem } from "@/util/filesystem"
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { ConfigVariable } from "@/config/variable"
-import { Npm } from "@opencode-ai/core/npm"
-import type { DeepMutable } from "@opencode-ai/core/schema"
-import type { TuiAttentionSoundName } from "@opencode-ai/plugin/tui"
+import { Npm } from "@openloom/core/npm"
+import type { DeepMutable } from "@openloom/core/schema"
+import type { TuiAttentionSoundName } from "@openloom/plugin/tui"
 import { FormatError, FormatUnknownError } from "@/cli/error"
 
 const log = Log.create({ service: "tui.config" })
@@ -118,7 +118,7 @@ const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: 
       const data = ConfigParse.jsonc(expanded, configFilepath)
       if (!isRecord(data)) return {} as Info
       // Flatten a nested "tui" key so users who wrote `{ "tui": { ... } }` inside tui.json
-      // (mirroring the old opencode.json shape) still get their settings applied.
+      // (mirroring the old openloom.json shape) still get their settings applied.
       const normalized = dropUnknownKeybinds(normalize(data), configFilepath)
       const parsed = ConfigParse.schema(Info, normalized, configFilepath)
       const validated = parsed.attention?.sounds
@@ -190,11 +190,11 @@ const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: 
     })
 
   // Every config dir we may read from: global config dir, any `.opencode`
-  // folders between cwd and home, and OPENCODE_CONFIG_DIR.
+  // folders between cwd and home, and OPENLOOM_CONFIG_DIR.
   const directories = yield* ConfigPaths.directories(ctx.directory)
   yield* Effect.promise(() => migrateTuiConfig({ directories, cwd: ctx.directory }))
 
-  const projectFiles = Flag.OPENCODE_DISABLE_PROJECT_CONFIG ? [] : yield* ConfigPaths.files("tui", ctx.directory)
+  const projectFiles = Flag.OPENLOOM_DISABLE_PROJECT_CONFIG ? [] : yield* ConfigPaths.files("tui", ctx.directory)
 
   const acc: Acc = {
     result: {},
@@ -206,9 +206,9 @@ const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: 
     yield* mergeFile(acc, file)
   }
 
-  // 2. Explicit OPENCODE_TUI_CONFIG override, if set.
-  if (Flag.OPENCODE_TUI_CONFIG) {
-    const configFile = Flag.OPENCODE_TUI_CONFIG
+  // 2. Explicit OPENLOOM_TUI_CONFIG override, if set.
+  if (Flag.OPENLOOM_TUI_CONFIG) {
+    const configFile = Flag.OPENLOOM_TUI_CONFIG
     yield* mergeFile(acc, configFile)
     log.debug("loaded custom tui config", { path: configFile })
   }
@@ -218,13 +218,13 @@ const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: 
     yield* mergeFile(acc, file)
   }
 
-  // 4. `.opencode` directories (and OPENCODE_CONFIG_DIR) discovered while
+  // 4. `.opencode` directories (and OPENLOOM_CONFIG_DIR) discovered while
   // walking up the tree. Also returned below so callers can install plugin
   // dependencies from each location.
-  const dirs = unique(directories).filter((dir) => dir.endsWith(".opencode") || dir === Flag.OPENCODE_CONFIG_DIR)
+  const dirs = unique(directories).filter((dir) => dir.endsWith(".openloom") || dir === Flag.OPENLOOM_CONFIG_DIR)
 
   for (const dir of dirs) {
-    if (!dir.endsWith(".opencode") && dir !== Flag.OPENCODE_CONFIG_DIR) continue
+    if (!dir.endsWith(".openloom") && dir !== Flag.OPENLOOM_CONFIG_DIR) continue
     for (const file of ConfigPaths.fileInDirectory(dir, "tui")) {
       yield* mergeFile(acc, file)
     }
@@ -275,7 +275,7 @@ export const layer = Layer.effect(
           .install(dir, {
             add: [
               {
-                name: "@opencode-ai/plugin",
+                name: "@openloom/plugin",
                 version: InstallationLocal ? undefined : InstallationVersion,
               },
             ],

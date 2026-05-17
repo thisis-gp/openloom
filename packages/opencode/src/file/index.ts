@@ -1,7 +1,7 @@
 import { BusEvent } from "@/bus/bus-event"
 import { InstanceState } from "@/effect/instance-state"
 
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { Git } from "@/git"
 import { Effect, Layer, Context, Schema, Scope } from "effect"
 import * as Stream from "effect/Stream"
@@ -9,12 +9,12 @@ import { formatPatch, structuredPatch } from "diff"
 import fuzzysort from "fuzzysort"
 import ignore from "ignore"
 import path from "path"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 import { containsPath } from "../project/instance-context"
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { Protected } from "./protected"
 import { Ripgrep } from "./ripgrep"
-import { NonNegativeInt, type DeepMutable } from "@opencode-ai/core/schema"
+import { NonNegativeInt, type DeepMutable } from "@openloom/core/schema"
 
 export const Info = Schema.Struct({
   path: Schema.String,
