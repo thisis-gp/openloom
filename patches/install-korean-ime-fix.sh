@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# opencode Korean IME Fix Installer
-# https://github.com/anomalyco/opencode/issues/14371
+# openloom Korean IME Fix Installer
+# https://github.com/anomalyco/openloom/issues/14371
 #
-# Patches opencode to prevent Korean (and other CJK) IME last character
+# Patches openloom to prevent Korean (and other CJK) IME last character
 # truncation when pressing Enter in Kitty and other terminals.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/claudianus/opencode/fix-zhipuai-coding-plan-thinking/patches/install-korean-ime-fix.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/claudianus/openloom/fix-zhipuai-coding-plan-thinking/patches/install-korean-ime-fix.sh | bash
 #   # or from a cloned repo:
 #   ./patches/install-korean-ime-fix.sh
 
@@ -18,9 +18,9 @@ ORANGE='\033[38;5;214m'
 MUTED='\033[0;2m'
 NC='\033[0m'
 
-OPENLOOM_DIR="${OPENLOOM_DIR:-$HOME/.opencode}"
-OPENLOOM_SRC="${OPENLOOM_SRC:-$HOME/.opencode-src}"
-FORK_REPO="${FORK_REPO:-https://github.com/claudianus/opencode.git}"
+OPENLOOM_DIR="${OPENLOOM_DIR:-$HOME/.openloom}"
+OPENLOOM_SRC="${OPENLOOM_SRC:-$HOME/.openloom-src}"
+FORK_REPO="${FORK_REPO:-https://github.com/claudianus/openloom.git}"
 FORK_BRANCH="${FORK_BRANCH:-fix-zhipuai-coding-plan-thinking}"
 
 info()  { echo -e "${MUTED}$*${NC}"; }
@@ -50,7 +50,7 @@ else
 fi
 
 # ── 2. Verify the IME fix is present in source ────────────────────────
-PROMPT_FILE="$OPENLOOM_SRC/packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx"
+PROMPT_FILE="$OPENLOOM_SRC/packages/openloom/src/cli/cmd/tui/component/prompt/index.tsx"
 if [ ! -f "$PROMPT_FILE" ]; then
   err "Prompt file not found: $PROMPT_FILE"
   exit 1
@@ -76,8 +76,8 @@ cd "$OPENLOOM_SRC"
 bun install --frozen-lockfile 2>/dev/null || bun install
 
 # ── 4. Build (current platform only) ──────────────────────────────────
-info "Building opencode for current platform ..."
-cd "$OPENLOOM_SRC/packages/opencode"
+info "Building openloom for current platform ..."
+cd "$OPENLOOM_SRC/packages/openloom"
 bun run build --single
 
 # ── 5. Install binary ──────────────────────────────────────────────────
@@ -90,23 +90,23 @@ ARCH=$(uname -m)
 [ "$PLATFORM" = "darwin" ] && true
 [ "$PLATFORM" = "linux" ] && true
 
-BUILT_BINARY="$OPENLOOM_SRC/packages/opencode/dist/opencode-${PLATFORM}-${ARCH}/bin/opencode"
+BUILT_BINARY="$OPENLOOM_SRC/packages/openloom/dist/openloom-${PLATFORM}-${ARCH}/bin/openloom"
 
 if [ ! -f "$BUILT_BINARY" ]; then
-  BUILT_BINARY=$(find "$OPENLOOM_SRC/packages/opencode/dist" -name "opencode" -type f -executable 2>/dev/null | head -1)
+  BUILT_BINARY=$(find "$OPENLOOM_SRC/packages/openloom/dist" -name "openloom" -type f -executable 2>/dev/null | head -1)
 fi
 
 if [ -f "$BUILT_BINARY" ]; then
-  if [ -f "$OPENLOOM_DIR/bin/opencode" ]; then
-    cp "$OPENLOOM_DIR/bin/opencode" "$OPENLOOM_DIR/bin/opencode.bak.$(date +%Y%m%d%H%M%S)"
+  if [ -f "$OPENLOOM_DIR/bin/openloom" ]; then
+    cp "$OPENLOOM_DIR/bin/openloom" "$OPENLOOM_DIR/bin/openloom.bak.$(date +%Y%m%d%H%M%S)"
   fi
-  cp "$BUILT_BINARY" "$OPENLOOM_DIR/bin/opencode"
-  chmod +x "$OPENLOOM_DIR/bin/opencode"
-  ok "Installed to $OPENLOOM_DIR/bin/opencode"
+  cp "$BUILT_BINARY" "$OPENLOOM_DIR/bin/openloom"
+  chmod +x "$OPENLOOM_DIR/bin/openloom"
+  ok "Installed to $OPENLOOM_DIR/bin/openloom"
 else
   err "Build failed - binary not found in dist/"
   info "Try running manually:"
-  echo "  cd $OPENLOOM_SRC/packages/opencode && bun run build --single"
+  echo "  cd $OPENLOOM_SRC/packages/openloom && bun run build --single"
   exit 1
 fi
 
@@ -114,7 +114,7 @@ echo ""
 ok "Done! Korean IME fix is now active."
 echo ""
 info "To uninstall and revert to the official release:"
-echo "  curl -fsSL https://opencode.ai/install | bash"
+echo "  curl -fsSL https://openloom.ai/install | bash"
 echo ""
 info "To update (re-pull and rebuild):"
 echo "  $0"

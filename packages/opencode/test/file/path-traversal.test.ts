@@ -127,7 +127,7 @@ describe("containsPath", () => {
         yield* Effect.promise(() => fs.mkdir(subdir, { recursive: true }))
         const ctx = { ...(yield* InstanceState.context), directory: subdir }
 
-        // .opencode at worktree root, but we're running from packages/lib
+        // .openloom at worktree root, but we're running from packages/lib
         expect(containsPath(path.join(test.directory, ".openloom", "state"), ctx)).toBe(true)
         // sibling package should also be accessible
         expect(containsPath(path.join(test.directory, "packages", "other", "file.ts"), ctx)).toBe(true)

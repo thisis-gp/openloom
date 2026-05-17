@@ -297,7 +297,7 @@ const ensureDir = Effect.fn("test.ensureDir")(function* (dir: string) {
 const writeConfig = Effect.fn("test.writeConfig")(function* (dir: string, config: Partial<Config.Info>) {
   yield* writeText(
     path.join(dir, "openloom.json"),
-    JSON.stringify({ $schema: "https://opencode.ai/config.json", ...config }),
+    JSON.stringify({ $schema: "https://openloom.ai/config.json", ...config }),
   )
 })
 
@@ -2135,7 +2135,7 @@ it.instance(
       const sessions = yield* Session.Service
       const session = yield* sessions.create({ title: "Prompt regression" })
 
-      yield* llm.text("packages/opencode/src/session/processor.ts")
+      yield* llm.text("packages/openloom/src/session/processor.ts")
 
       const result = yield* prompt.prompt({
         sessionID: session.id,
@@ -2208,7 +2208,7 @@ it.instance(
       const other = yield* prompt.prompt({
         sessionID: session.id,
         agent: "build",
-        model: { providerID: ProviderID.make("opencode"), modelID: ModelID.make("kimi-k2.5-free") },
+        model: { providerID: ProviderID.make("openloom"), modelID: ModelID.make("kimi-k2.5-free") },
         noReply: true,
         parts: [{ type: "text", text: "hello" }],
       })

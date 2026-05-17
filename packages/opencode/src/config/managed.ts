@@ -9,9 +9,9 @@ import { warn } from "console"
 
 const log = Log.create({ service: "config" })
 
-const MANAGED_PLIST_DOMAIN = "ai.opencode.managed"
+const MANAGED_PLIST_DOMAIN = "ai.openloom.managed"
 
-// Keys injected by macOS/MDM into the managed plist that are not OpenCode config
+// Keys injected by macOS/MDM into the managed plist that are not Openloom config
 const PLIST_META = new Set([
   "PayloadDisplayName",
   "PayloadIdentifier",
@@ -24,11 +24,11 @@ const PLIST_META = new Set([
 function systemManagedConfigDir(): string {
   switch (process.platform) {
     case "darwin":
-      return "/Library/Application Support/opencode"
+      return "/Library/Application Support/openloom"
     case "win32":
-      return path.join(process.env.ProgramData || "C:\\ProgramData", "opencode")
+      return path.join(process.env.ProgramData || "C:\\ProgramData", "openloom")
     default:
-      return "/etc/opencode"
+      return "/etc/openloom"
   }
 }
 

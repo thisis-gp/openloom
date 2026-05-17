@@ -9,7 +9,7 @@ const channel = (() => {
   return "dev"
 })()
 
-const OPENLOOM_SERVER_DIST = "../opencode/dist/node"
+const OPENLOOM_SERVER_DIST = "../openloom/dist/node"
 
 const nodePtyPkg = `@lydell/node-pty-${process.platform}-${process.arch}`
 
@@ -43,21 +43,21 @@ export default defineConfig({
     },
     plugins: [
       {
-        name: "opencode:node-pty-narrower",
+        name: "openloom:node-pty-narrower",
         enforce: "pre",
         resolveId(s) {
           if (s === "@lydell/node-pty") return nodePtyPkg
         },
       },
       {
-        name: "opencode:virtual-server-module",
+        name: "openloom:virtual-server-module",
         enforce: "pre",
         resolveId(id) {
-          if (id === "virtual:opencode-server") return this.resolve(`${OPENLOOM_SERVER_DIST}/node.js`)
+          if (id === "virtual:openloom-server") return this.resolve(`${OPENLOOM_SERVER_DIST}/node.js`)
         },
       },
       {
-        name: "opencode:copy-server-assets",
+        name: "openloom:copy-server-assets",
         async writeBundle() {
           for (const l of await fs.readdir(OPENLOOM_SERVER_DIST)) {
             if (!l.endsWith(".wasm")) continue

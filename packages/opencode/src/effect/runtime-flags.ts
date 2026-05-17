@@ -11,7 +11,7 @@ const experimental = bool("OPENLOOM_EXPERIMENTAL")
 const enabledByExperimental = (name: string) =>
   Config.all({ experimental, enabled: bool(name) }).pipe(Config.map((flags) => flags.experimental || flags.enabled))
 
-export class Service extends ConfigService.Service<Service>()("@opencode/RuntimeFlags", {
+export class Service extends ConfigService.Service<Service>()("@openloom/RuntimeFlags", {
   autoShare: bool("OPENLOOM_AUTO_SHARE"),
   pure: bool("OPENLOOM_PURE"),
   disableDefaultPlugins: bool("OPENLOOM_DISABLE_DEFAULT_PLUGINS"),

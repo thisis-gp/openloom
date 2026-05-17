@@ -27,7 +27,7 @@ const channel = (() => {
 })()
 
 const getBase = (): Configuration => ({
-  artifactName: "opencode-desktop-${os}-${arch}.${ext}",
+  artifactName: "openloom-desktop-${os}-${arch}.${ext}",
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -54,8 +54,8 @@ const getBase = (): Configuration => ({
     sign: true,
   },
   protocols: {
-    name: "OpenCode",
-    schemes: ["opencode"],
+    name: "Openloom",
+    schemes: ["openloom"],
   },
   win: {
     icon: `resources/icons/icon.ico`,
@@ -85,29 +85,29 @@ function getConfig() {
     case "dev": {
       return {
         ...base,
-        appId: "ai.opencode.desktop.dev",
-        productName: "OpenCode Dev",
-        rpm: { packageName: "opencode-dev" },
+        appId: "ai.openloom.desktop.dev",
+        productName: "Openloom Dev",
+        rpm: { packageName: "openloom-dev" },
       }
     }
     case "beta": {
       return {
         ...base,
-        appId: "ai.opencode.desktop.beta",
-        productName: "OpenCode Beta",
-        protocols: { name: "OpenCode Beta", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode-beta", channel: "latest" },
-        rpm: { packageName: "opencode-beta" },
+        appId: "ai.openloom.desktop.beta",
+        productName: "Openloom Beta",
+        protocols: { name: "Openloom Beta", schemes: ["openloom"] },
+        publish: { provider: "github", owner: "anomalyco", repo: "openloom-beta", channel: "latest" },
+        rpm: { packageName: "openloom-beta" },
       }
     }
     case "prod": {
       return {
         ...base,
-        appId: "ai.opencode.desktop",
-        productName: "OpenCode",
-        protocols: { name: "OpenCode", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode", channel: "latest" },
-        rpm: { packageName: "opencode" },
+        appId: "ai.openloom.desktop",
+        productName: "Openloom",
+        protocols: { name: "Openloom", schemes: ["openloom"] },
+        publish: { provider: "github", owner: "anomalyco", repo: "openloom", channel: "latest" },
+        rpm: { packageName: "openloom" },
       }
     }
   }

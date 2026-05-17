@@ -18,7 +18,7 @@ Example:
 
 ```json
 {
-  "$schema": "https://opencode.ai/tui.json",
+  "$schema": "https://openloom.ai/tui.json",
   "theme": "smoke-theme",
   "leader_timeout": 2000,
   "keybinds": {
@@ -26,7 +26,7 @@ Example:
     "command_list": "ctrl+p",
     "session_new": "<leader>n"
   },
-  "plugin": ["@acme/opencode-plugin@1.2.3", ["./plugins/demo.tsx", { "label": "demo" }]],
+  "plugin": ["@acme/openloom-plugin@1.2.3", ["./plugins/demo.tsx", { "label": "demo" }]],
   "plugin_enabled": {
     "acme.demo": false
   },
@@ -35,7 +35,7 @@ Example:
     "notifications": true,
     "sound": true,
     "volume": 0.4,
-    "sound_pack": "opencode.default",
+    "sound_pack": "openloom.default",
     "sounds": {
       "error": "/Users/me/sounds/error.mp3"
     }
@@ -153,7 +153,7 @@ Example:
 
 ```json
 {
-  "name": "@acme/opencode-plugin",
+  "name": "@acme/openloom-plugin",
   "type": "module",
   "main": "./dist/server.js",
   "exports": {
@@ -167,7 +167,7 @@ Example:
     }
   },
   "engines": {
-    "opencode": "^1.0.0"
+    "openloom": "^1.0.0"
   }
 }
 ```
@@ -179,24 +179,24 @@ npm plugins can declare a version compatibility range in `package.json` using th
 ```json
 {
   "engines": {
-    "opencode": "^1.0.0"
+    "openloom": "^1.0.0"
   }
 }
 ```
 
-- The value is a semver range checked against the running OpenCode version.
+- The value is a semver range checked against the running Openloom version.
 - If the range is not satisfied, the plugin is skipped with a warning and a session error.
-- If `engines.opencode` is absent, no check is performed (backward compatible).
+- If `engines.openloom` is absent, no check is performed (backward compatible).
 - File plugins are never checked; only npm package plugins are validated.
 
 - Install flow is shared by CLI and TUI in `src/plugin/install.ts`.
 - Shared helpers are `installPlugin`, `readPluginManifest`, and `patchPluginConfig`.
-- `opencode plugin <module>` and TUI install both run install → manifest read → config patch.
-- Alias: `opencode plug <module>`.
+- `openloom plugin <module>` and TUI install both run install → manifest read → config patch.
+- Alias: `openloom plug <module>`.
 - `-g` / `--global` writes into the global config dir.
 - Local installs resolve target dir inside `patchPluginConfig`.
-- For local scope, path is `<worktree>/.opencode` only when VCS is git and `worktree !== "/"`; otherwise `<directory>/.opencode`.
-- Root-worktree fallback (`worktree === "/"` uses `<directory>/.opencode`) is covered by regression tests.
+- For local scope, path is `<worktree>/.openloom` only when VCS is git and `worktree !== "/"`; otherwise `<directory>/.openloom`.
+- Root-worktree fallback (`worktree === "/"` uses `<directory>/.openloom`) is covered by regression tests.
 - `patchPluginConfig` applies all detected targets (`server` and/or `tui`) in one call.
 - `patchPluginConfig` returns structured result unions (`ok`, `code`, fields by error kind) instead of custom thrown errors.
 - `patchPluginConfig` serializes per-target config writes with `Flock.acquire(...)`.
@@ -213,7 +213,7 @@ npm plugins can declare a version compatibility range in `package.json` using th
 - There is no uninstall, list, or update CLI command for external plugins.
 - Local file plugins are configured directly in `tui.json`.
 
-When `plugin` entries exist in a writable `.opencode` dir or `OPENLOOM_CONFIG_DIR`, OpenCode installs `@openloom/plugin` into that dir and writes:
+When `plugin` entries exist in a writable `.openloom` dir or `OPENLOOM_CONFIG_DIR`, Openloom installs `@openloom/plugin` into that dir and writes:
 
 - `package.json`
 - `bun.lock`
@@ -246,7 +246,7 @@ Top-level API groups exposed to `tui(api, options, meta)`:
 ### Keymap
 
 - `api.keymap` exposes the raw `Keymap<Renderable, KeyEvent>` instance from the host.
-- The host already installs the default OpenTUI bundle (`default keys`, metadata fields, and enabled fields) plus OpenCode's comma bindings, leader token, base layout fallback, pending-sequence helpers, and managed textarea layer.
+- The host already installs the default OpenTUI bundle (`default keys`, metadata fields, and enabled fields) plus Openloom's comma bindings, leader token, base layout fallback, pending-sequence helpers, and managed textarea layer.
 - Register commands with `api.keymap.registerLayer({ commands: [...] })`.
 - Register key bindings with `bindings: [{ key, cmd, desc }]` in the same layer or a separate layer.
 - Use `api.keymap.acquireResource(...)` for shared plugin addon setup that should ref-count against the host keymap.
@@ -265,7 +265,7 @@ Top-level API groups exposed to `tui(api, options, meta)`:
 ### Attention
 
 - `api.attention.notify({ title?, message, notification?, sound? })` requests user attention while keeping terminal focus, notifications, and audio owned by the host.
-- `message` is required; `title` defaults to `"opencode"`; `notification` defaults to enabled with `when: "blurred"`; `sound` defaults to enabled with `when: "always"`.
+- `message` is required; `title` defaults to `"openloom"`; `notification` defaults to enabled with `when: "blurred"`; `sound` defaults to enabled with `when: "always"`.
 - `when: "always"` requests delivery regardless of terminal focus state.
 - `when: "focused"` only requests delivery after the terminal is known focused; `when: "blurred"` only requests delivery after the terminal is known blurred.
 - Example: `notification: { when: "blurred" }, sound: { name: "question", when: "always" }` plays sound while focused but only triggers system notifications when blurred.
@@ -275,7 +275,7 @@ Top-level API groups exposed to `tui(api, options, meta)`:
 - `api.attention.soundboard.registerPack({ id, name?, sounds })` registers a sound pack and returns a disposer. Relative paths resolve from the plugin root and are cleaned up on plugin deactivation.
 - `api.attention.soundboard.activate(id, { persist })` selects the active pack. `persist: true` writes the selected pack id to TUI KV state, not `tui.json`.
 - `api.attention.soundboard.current()` and `list()` expose the active/registered packs for plugin UX.
-- Config `attention.sounds` overrides active-pack sounds by slot. Failed loads fall back to the active pack and then `opencode.default`.
+- Config `attention.sounds` overrides active-pack sounds by slot. Failed loads fall back to the active pack and then `openloom.default`.
 - The host strips ANSI/control characters and collapses newlines before sending text to the terminal notification API.
 - Terminal and OS settings decide whether a requested notification is visibly displayed.
 - Prefer privacy-safe messages such as `"A question needs your input"`; avoid full commands, paths, prompts, errors, secrets, or file contents unless the plugin intentionally exposes them.
@@ -350,7 +350,7 @@ Theme install behavior:
 - If the theme name already exists, install is skipped unless plugin metadata state is `updated`.
 - On `updated`, host skips rewrite when tracked `mtime`/`size` is unchanged.
 - When a theme already exists and state is not `updated`, host can still persist theme metadata when destination already exists.
-- Local plugins persist installed themes under the local `.opencode/themes` area near the plugin config source.
+- Local plugins persist installed themes under the local `.openloom/themes` area near the plugin config source.
 - Global plugins persist installed themes under the global `themes` dir.
 - Invalid or unreadable theme files are ignored.
 
@@ -475,7 +475,7 @@ The plugin manager is exposed as a command with title `Plugins` and value `plugi
 
 ## Current in-repo examples
 
-- Local smoke plugin: `.opencode/plugins/tui-smoke.tsx`
-- Local vim plugin: `.opencode/plugins/tui-vim.tsx`
-- Local smoke config: `.opencode/tui.json`
-- Local smoke theme: `.opencode/plugins/smoke-theme.json`
+- Local smoke plugin: `.openloom/plugins/tui-smoke.tsx`
+- Local vim plugin: `.openloom/plugins/tui-vim.tsx`
+- Local smoke config: `.openloom/tui.json`
+- Local smoke theme: `.openloom/plugins/smoke-theme.json`

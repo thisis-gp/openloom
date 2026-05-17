@@ -55,7 +55,7 @@ await Bun.build({
     OPENLOOM_CHANNEL: `'${Script.channel}'`,
   },
   files: {
-    "opencode-web-ui.gen.ts": "",
+    "openloom-web-ui.gen.ts": "",
   },
 })
 

@@ -191,7 +191,7 @@ describe("HttpApi UI fallback", () => {
       const response = yield* uiApp({
         disableEmbeddedWebUi: true,
         client: httpClient(
-          new Response("<html>opencode</html>", { headers: { "content-type": "text/html" } }),
+          new Response("<html>openloom</html>", { headers: { "content-type": "text/html" } }),
           (request) => {
             proxiedUrl = request.url
           },
@@ -200,8 +200,8 @@ describe("HttpApi UI fallback", () => {
 
       expect(response.status).toBe(200)
       expect(response.headers.get("content-type")).toContain("text/html")
-      expect(yield* responseText(response)).toBe("<html>opencode</html>")
-      expect(proxiedUrl).toBe("https://app.opencode.ai/")
+      expect(yield* responseText(response)).toBe("<html>openloom</html>")
+      expect(proxiedUrl).toBe("https://app.openloom.ai/")
     }),
   )
 
@@ -246,7 +246,7 @@ describe("HttpApi UI fallback", () => {
       )
 
       expect(response.status).toBe(200)
-      expect(proxiedUrl).toBe("https://app.opencode.ai/assets/app.js")
+      expect(proxiedUrl).toBe("https://app.openloom.ai/assets/app.js")
       expect(response.headers.get("content-encoding")).toBeNull()
       expect(response.headers.get("content-length")).not.toBe("999")
       expect(response.headers.get("content-type")).toContain("text/javascript")
@@ -278,7 +278,7 @@ describe("HttpApi UI fallback", () => {
                 Effect.succeed(
                   HttpClientResponse.fromWeb(
                     request,
-                    new Response("<html>opencode</html>", {
+                    new Response("<html>openloom</html>", {
                       headers: {
                         "transfer-encoding": "chunked",
                         "content-type": "text/html",
@@ -295,7 +295,7 @@ describe("HttpApi UI fallback", () => {
 
       expect(response.status).toBe(200)
       expect(response.headers.get("transfer-encoding")).toBeNull()
-      expect(yield* responseText(response)).toBe("<html>opencode</html>")
+      expect(yield* responseText(response)).toBe("<html>openloom</html>")
     }),
   )
 
@@ -369,7 +369,7 @@ describe("HttpApi UI fallback", () => {
     Effect.gen(function* () {
       const response = yield* uiApp({
         password: "secret",
-        username: "opencode",
+        username: "openloom",
         disableEmbeddedWebUi: true,
       }).request("/")
 
@@ -382,13 +382,13 @@ describe("HttpApi UI fallback", () => {
     Effect.gen(function* () {
       const response = yield* uiApp({
         password: "secret",
-        username: "opencode",
+        username: "openloom",
         disableEmbeddedWebUi: true,
-        client: httpClient(new Response("<html>opencode</html>", { headers: { "content-type": "text/html" } })),
-      }).request(`/?auth_token=${btoa("opencode:secret")}`)
+        client: httpClient(new Response("<html>openloom</html>", { headers: { "content-type": "text/html" } })),
+      }).request(`/?auth_token=${btoa("openloom:secret")}`)
 
       expect(response.status).toBe(200)
-      expect(yield* responseText(response)).toBe("<html>opencode</html>")
+      expect(yield* responseText(response)).toBe("<html>openloom</html>")
     }),
   )
 
@@ -396,10 +396,10 @@ describe("HttpApi UI fallback", () => {
     Effect.gen(function* () {
       const response = yield* uiApp({
         password: "secret",
-        username: "opencode",
+        username: "openloom",
         disableEmbeddedWebUi: true,
       }).request("/", {
-        headers: { authorization: `Basic ${btoa("opencode:secret")}` },
+        headers: { authorization: `Basic ${btoa("openloom:secret")}` },
       })
 
       expect(response.status).toBe(200)
@@ -416,7 +416,7 @@ describe("HttpApi UI fallback", () => {
       for (const path of ["/site.webmanifest", "/web-app-manifest-192x192.png", "/web-app-manifest-512x512.png"]) {
         const response = yield* uiApp({
           password: "secret",
-          username: "opencode",
+          username: "openloom",
           disableEmbeddedWebUi: true,
           client: httpClient(new Response("ok")),
         }).request(path)
@@ -427,7 +427,7 @@ describe("HttpApi UI fallback", () => {
 
   it.live("allows web UI preflight without auth", () =>
     Effect.gen(function* () {
-      const response = yield* app({ password: "secret", username: "opencode" }).request("/", {
+      const response = yield* app({ password: "secret", username: "openloom" }).request("/", {
         method: "OPTIONS",
         headers: {
           origin: "http://localhost:3000",

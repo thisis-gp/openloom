@@ -44,7 +44,7 @@ afterEach(async () => {
 describe("HttpApi Server.listen mDNS", () => {
   test("skips publish for loopback hostnames", async () => {
     Flag.OPENLOOM_SERVER_PASSWORD = "mdns-secret"
-    Flag.OPENLOOM_SERVER_USERNAME = "opencode"
+    Flag.OPENLOOM_SERVER_USERNAME = "openloom"
     const listener = await Server.listen({ hostname: "127.0.0.1", port: 0, mdns: true })
     try {
       expect(events.filter((e) => e.kind === "publish")).toEqual([])
@@ -56,13 +56,13 @@ describe("HttpApi Server.listen mDNS", () => {
 
   test("publishes for non-loopback hostnames and unpublishes on stop", async () => {
     Flag.OPENLOOM_SERVER_PASSWORD = "mdns-secret"
-    Flag.OPENLOOM_SERVER_USERNAME = "opencode"
+    Flag.OPENLOOM_SERVER_USERNAME = "openloom"
     const listener = await Server.listen({ hostname: "0.0.0.0", port: 0, mdns: true })
     try {
       const published = events.filter((e) => e.kind === "publish")
       expect(published.length).toBe(1)
       expect(published[0]!.port).toBe(listener.port)
-      expect(published[0]!.name).toBe(`opencode-${listener.port}`)
+      expect(published[0]!.name).toBe(`openloom-${listener.port}`)
     } finally {
       await withTimeout(listener.stop(true), 10_000, "timed out stopping mdns listener")
     }
@@ -72,7 +72,7 @@ describe("HttpApi Server.listen mDNS", () => {
 
   test("scope finalizer unpublishes even if stop() is not called for force-close", async () => {
     Flag.OPENLOOM_SERVER_PASSWORD = "mdns-secret"
-    Flag.OPENLOOM_SERVER_USERNAME = "opencode"
+    Flag.OPENLOOM_SERVER_USERNAME = "openloom"
     const listener = await Server.listen({ hostname: "0.0.0.0", port: 0, mdns: true })
     expect(events.filter((e) => e.kind === "publish").length).toBe(1)
     // Plain (graceful) stop without close=true should still unpublish.

@@ -154,7 +154,7 @@ group identical rendered messages and list the affected request names once.
 For example:
 
 ```text
-Configuration is invalid at /path/to/opencode.json
+Configuration is invalid at /path/to/openloom.json
 ↳ Expected object, got "not-object" provider.bad.options
 Affected startup requests: config.providers, provider.list, app.agents, config.get
 ```

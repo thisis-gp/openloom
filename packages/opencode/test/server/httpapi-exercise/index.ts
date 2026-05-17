@@ -102,8 +102,8 @@ const scenarios: Scenario[] = [
     ),
   http.protected.get("/path", "path.get").json(200, (body, ctx) => {
     object(body)
-    check(body.directory === ctx.directory, "directory should resolve from x-opencode-directory")
-    check(body.worktree === ctx.directory, "worktree should resolve from x-opencode-directory")
+    check(body.directory === ctx.directory, "directory should resolve from x-openloom-directory")
+    check(body.worktree === ctx.directory, "worktree should resolve from x-openloom-directory")
   }),
   http.protected.get("/vcs", "vcs.get").json(),
   http.protected.get("/vcs/status", "vcs.status").json(200, array),
@@ -477,7 +477,7 @@ const scenarios: Scenario[] = [
   http.protected
     .get("/experimental/tool", "tool.list")
     .at((ctx) => ({
-      path: `/experimental/tool?${new URLSearchParams({ provider: "opencode", model: "test" })}`,
+      path: `/experimental/tool?${new URLSearchParams({ provider: "openloom", model: "test" })}`,
       headers: ctx.headers(),
     }))
     .json(200, array, "status"),

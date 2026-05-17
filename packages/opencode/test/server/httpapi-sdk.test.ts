@@ -498,13 +498,13 @@ describe("HttpApi SDK", () => {
         const bad = yield* capture(() =>
           client("raw", directory, {
             password: "secret",
-            headers: { authorization: authorization("opencode", "wrong") },
+            headers: { authorization: authorization("openloom", "wrong") },
           }).file.read({ path: "hello.txt" }),
         )
         const good = yield* capture(() =>
           client("raw", directory, {
             password: "secret",
-            headers: { authorization: authorization("opencode", "secret") },
+            headers: { authorization: authorization("openloom", "secret") },
           }).file.read({ path: "hello.txt" }),
         )
 

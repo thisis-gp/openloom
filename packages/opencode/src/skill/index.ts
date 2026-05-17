@@ -14,7 +14,7 @@ import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Glob } from "@openloom/core/util/glob"
 import * as Log from "@openloom/core/util/log"
 import { Discovery } from "./discovery"
-import CUSTOMIZE_OPENCODE_SKILL_BODY from "./prompt/customize-opencode.md" with { type: "text" }
+import CUSTOMIZE_OPENLOOM_SKILL_BODY from "./prompt/customize-openloom.md" with { type: "text" }
 import { isRecord } from "@/util/record"
 
 const log = Log.create({ service: "skill" })
@@ -24,13 +24,13 @@ const EXTERNAL_SKILL_PATTERN = "skills/**/SKILL.md"
 const OPENLOOM_SKILL_PATTERN = "{skill,skills}/**/SKILL.md"
 const SKILL_PATTERN = "**/SKILL.md"
 
-// Built-in skill that ships with opencode. The model's intuition for what an
-// openloom.json should look like is often wrong, and opencode hard-fails on
+// Built-in skill that ships with openloom. The model's intuition for what an
+// openloom.json should look like is often wrong, and openloom hard-fails on
 // invalid config, so users hit cryptic startup errors. Loading this skill
-// when the model is asked to touch opencode's own config files gives it the
+// when the model is asked to touch openloom's own config files gives it the
 // actual schemas instead of guesses.
-const CUSTOMIZE_OPENCODE_SKILL_NAME = "customize-openloom"
-const CUSTOMIZE_OPENCODE_SKILL_DESCRIPTION =
+const CUSTOMIZE_OPENLOOM_SKILL_NAME = "customize-openloom"
+const CUSTOMIZE_OPENLOOM_SKILL_DESCRIPTION =
   "Use ONLY when the user is editing or creating openloom's own configuration: openloom.json, openloom.jsonc, files under .openloom/, or files under ~/.config/openloom/. Also use when creating or fixing openloom agents, subagents, skills, plugins, MCP servers, or permission rules. Do not use for the user's own application code, or for any project that is not configuring openloom itself."
 
 export const Info = Schema.Struct({
@@ -231,7 +231,7 @@ const loadSkills = Effect.fnUntraced(function* (state: State, discovered: Discov
   log.info("init", { count: Object.keys(state.skills).length })
 })
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/Skill") {}
+export class Service extends Context.Service<Service, Interface>()("@openloom/Skill") {}
 
 export const layer = Layer.effect(
   Service,
@@ -261,11 +261,11 @@ export const layer = Layer.effect(
         const s: State = { skills: {}, dirs: new Set() }
         // Register the built-in skill BEFORE disk discovery so a user-disk
         // skill with the same name can override it.
-        s.skills[CUSTOMIZE_OPENCODE_SKILL_NAME] = {
-          name: CUSTOMIZE_OPENCODE_SKILL_NAME,
-          description: CUSTOMIZE_OPENCODE_SKILL_DESCRIPTION,
+        s.skills[CUSTOMIZE_OPENLOOM_SKILL_NAME] = {
+          name: CUSTOMIZE_OPENLOOM_SKILL_NAME,
+          description: CUSTOMIZE_OPENLOOM_SKILL_DESCRIPTION,
           location: "<built-in>",
-          content: CUSTOMIZE_OPENCODE_SKILL_BODY,
+          content: CUSTOMIZE_OPENLOOM_SKILL_BODY,
         }
         yield* loadSkills(s, yield* InstanceState.get(discovered), bus)
         return s

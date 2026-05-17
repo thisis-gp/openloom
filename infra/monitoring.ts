@@ -41,7 +41,7 @@ const modelHttpErrorsQuery = (product: "go" | "zen") => {
   const filters = [
     { column: "model", op: "exists" },
     { column: "event_type", op: "=", value: "completions" },
-    { column: "user_agent", op: "contains", value: "opencode" },
+    { column: "user_agent", op: "contains", value: "openloom" },
     { column: "isGoTier", op: "=", value: product === "go" ? "true" : "false" },
   ]
   const failedHttpStatus = calculatedField({
@@ -73,7 +73,7 @@ const modelHttpErrorsQuery = (product: "go" | "zen") => {
 const providerHttpErrorsQuery = () => {
   const filters = [
     { column: "provider", op: "exists" },
-    { column: "user_agent", op: "contains", value: "opencode" },
+    { column: "user_agent", op: "contains", value: "openloom" },
   ]
   const successHttpStatus = calculatedField({
     name: "is_success_http_status",
@@ -118,7 +118,7 @@ const modelLowTpsQuery = (product: "go" | "zen") => {
   const filters = [
     { column: "model", op: "exists" },
     { column: "event_type", op: "=", value: "completions" },
-    { column: "user_agent", op: "contains", value: "opencode" },
+    { column: "user_agent", op: "contains", value: "openloom" },
     { column: "isGoTier", op: "=", value: product === "go" ? "true" : "false" },
     { column: "status", op: ">=", value: "200" },
     { column: "status", op: "<", value: "400" },
@@ -244,7 +244,7 @@ new honeycomb.Trigger("IncreasedFreeTierRequests", {
     calculations: [{ op: "COUNT" }],
     filters: [
       { column: "event_type", op: "=", value: "completions" },
-      { column: "user_agent", op: "contains", value: "opencode" },
+      { column: "user_agent", op: "contains", value: "openloom" },
       { column: "isFreeTier", op: "=", value: "true" },
     ],
     timeRange: 3600,

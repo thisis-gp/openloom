@@ -9,7 +9,7 @@ import { ChildProcessSpawner } from "effect/unstable/process/ChildProcessSpawner
 import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
 import { Global } from "@openloom/core/global"
 import * as Log from "@openloom/core/util/log"
-import { sanitizedProcessEnv } from "@openloom/core/util/opencode-process"
+import { sanitizedProcessEnv } from "@openloom/core/util/openloom-process"
 import { which } from "@/util/which"
 import { NonNegativeInt } from "@openloom/core/schema"
 
@@ -139,7 +139,7 @@ export interface Interface {
   readonly search: (input: SearchInput) => Effect.Effect<SearchResult, PlatformError | Error>
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/Ripgrep") {}
+export class Service extends Context.Service<Service, Interface>()("@openloom/Ripgrep") {}
 
 function env() {
   const env = sanitizedProcessEnv()

@@ -11,7 +11,7 @@ import { InstallationChannel, InstallationVersion } from "./installation/version
 export const CatalogModelStatus = Schema.Literals(["alpha", "beta", "deprecated"])
 export type CatalogModelStatus = typeof CatalogModelStatus.Type
 
-const USER_AGENT = `opencode/${InstallationChannel}/${InstallationVersion}/${Flag.OPENLOOM_CLIENT}`
+const USER_AGENT = `openloom/${InstallationChannel}/${InstallationVersion}/${Flag.OPENLOOM_CLIENT}`
 
 const CostTier = Schema.Struct({
   input: Schema.Finite,
@@ -110,7 +110,7 @@ export interface Interface {
   readonly refresh: (force?: boolean) => Effect.Effect<void>
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/ModelsDev") {}
+export class Service extends Context.Service<Service, Interface>()("@openloom/ModelsDev") {}
 
 type Requirements = AppFileSystem.Service | HttpClient.HttpClient
 
@@ -176,7 +176,7 @@ export const layer: Layer.Layer<Service, never, Requirements> = Layer.effect(
       const snapshot = yield* loadSnapshot
       if (snapshot) return snapshot
       if (Flag.OPENLOOM_DISABLE_MODELS_FETCH) return {}
-      // Flock is cross-process: concurrent opencode CLIs can race on this cache file.
+      // Flock is cross-process: concurrent openloom CLIs can race on this cache file.
       const text = yield* Effect.scoped(
         Effect.gen(function* () {
           yield* Flock.effect(lockKey)

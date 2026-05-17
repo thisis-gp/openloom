@@ -99,7 +99,7 @@ const GO_UPSELL_FREE_TIER_DONT_SHOW = "go_upsell_dont_show"
 const GO_UPSELL_ACCOUNT_RATE_LIMIT_LAST_SEEN_AT = "go_upsell_account_rate_limit_last_seen_at"
 const GO_UPSELL_ACCOUNT_RATE_LIMIT_DONT_SHOW = "go_upsell_account_rate_limit_dont_show"
 const GO_UPSELL_WINDOW = 86_400_000 // 24 hrs
-const GO_UPSELL_PROVIDERS = new Set(["opencode", "opencode-go"])
+const GO_UPSELL_PROVIDERS = new Set(["openloom", "openloom-go"])
 
 function goUpsellKeys(action: SessionRetry.Retryable["action"]) {
   if (!action) return
@@ -349,7 +349,7 @@ export function Session() {
         `${logo[3] ?? ""}`,
         ``,
         `  ${weak("Session")}${UI.Style.TEXT_NORMAL_BOLD}${title}${UI.Style.TEXT_NORMAL}`,
-        `  ${weak("Continue")}${UI.Style.TEXT_NORMAL_BOLD}opencode -s ${session()?.id}${UI.Style.TEXT_NORMAL}`,
+        `  ${weak("Continue")}${UI.Style.TEXT_NORMAL_BOLD}openloom -s ${session()?.id}${UI.Style.TEXT_NORMAL}`,
         ``,
       ].join("\n"),
     )
@@ -1517,7 +1517,7 @@ function ReasoningPart(props: { last: boolean; part: ReasoningPart; message: Ass
     const end = props.part.time.end
     return end === undefined ? 0 : Math.max(0, end - props.part.time.start)
   })
-  // OpenAI / Copilot / opencode-via-OpenAI emit `**Title**\n\n<body>` summary
+  // OpenAI / Copilot / openloom-via-OpenAI emit `**Title**\n\n<body>` summary
   // blocks. Surface the title both while streaming and after settling so the
   // collapsed line carries real signal, not just a duration.
   const title = createMemo(() => reasoningTitle(content()))

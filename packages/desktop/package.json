@@ -4,10 +4,10 @@
   "version": "1.15.3",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://opencode.ai",
+  "homepage": "https://openloom.ai",
   "author": {
-    "name": "OpenCode",
-    "email": "hello@opencode.ai"
+    "name": "Openloom",
+    "email": "hello@openloom.ai"
   },
   "scripts": {
     "typecheck": "tsgo -b",

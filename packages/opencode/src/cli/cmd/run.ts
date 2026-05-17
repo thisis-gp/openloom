@@ -1,4 +1,4 @@
-// CLI entry point for `opencode run`.
+// CLI entry point for `openloom run`.
 //
 // Handles three modes:
 //   1. Non-interactive (default): sends a single prompt, streams events to
@@ -6,7 +6,7 @@
 //   2. Interactive local (`--interactive`): boots the split-footer direct mode
 //      with an in-process server (no external HTTP).
 //   3. Interactive attach (`--interactive --attach`): connects to a running
-//      opencode server and runs interactive mode against it.
+//      openloom server and runs interactive mode against it.
 //
 // Also supports `--command` for slash-command execution, `--format json` for
 // raw event streaming, `--continue` / `--session` for session resumption,
@@ -126,7 +126,7 @@ async function toolError(part: ToolPart) {
 
 export const RunCommand = effectCmd({
   command: "run [message..]",
-  describe: "run opencode with a message",
+  describe: "run openloom with a message",
   // --attach connects to a remote server (no local instance needed); the
   // default path runs an in-process server and needs the project instance.
   instance: (args) => !args.attach,
@@ -190,7 +190,7 @@ export const RunCommand = effectCmd({
       })
       .option("attach", {
         type: "string",
-        describe: "attach to a running opencode server (e.g., http://localhost:4096)",
+        describe: "attach to a running openloom server (e.g., http://localhost:4096)",
       })
       .option("password", {
         alias: ["p"],
@@ -842,7 +842,7 @@ export const RunCommand = effectCmd({
         return Server.Default().app.fetch(request)
       }) as typeof globalThis.fetch
       const sdk = createOpencodeClient({
-        baseUrl: "http://opencode.internal",
+        baseUrl: "http://openloom.internal",
         fetch: fetchFn,
         directory,
       })

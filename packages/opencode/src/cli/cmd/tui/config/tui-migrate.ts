@@ -11,7 +11,7 @@ import * as ConfigPaths from "@/config/paths"
 
 const log = Log.create({ service: "tui.migrate" })
 
-const TUI_SCHEMA_URL = "https://opencode.ai/tui.json"
+const TUI_SCHEMA_URL = "https://openloom.ai/tui.json"
 
 const decodeTheme = Schema.decodeUnknownOption(Schema.String)
 const decodeRecord = Schema.decodeUnknownOption(Schema.Record(Schema.String, Schema.Unknown))
@@ -30,8 +30,8 @@ interface MigrateInput {
  * skips only locations where a tui.json already exists.
  */
 export async function migrateTuiConfig(input: MigrateInput) {
-  const opencode = await opencodeFiles(input)
-  for (const file of opencode) {
+  const openloom = await openloomFiles(input)
+  for (const file of openloom) {
     const source = await Filesystem.readText(file).catch((error) => {
       log.warn("failed to read config for tui migration", { path: file, error })
       return undefined
@@ -134,13 +134,13 @@ async function backupAndStripLegacy(file: string, source: string) {
     })
 }
 
-async function opencodeFiles(input: { directories: string[]; cwd: string }) {
+async function openloomFiles(input: { directories: string[]; cwd: string }) {
   const files = [
-    ...ConfigPaths.fileInDirectory(Global.Path.config, "opencode"),
+    ...ConfigPaths.fileInDirectory(Global.Path.config, "openloom"),
     ...(await Filesystem.findUp(["openloom.json", "openloom.jsonc"], input.cwd, undefined, { rootFirst: true })),
   ]
   for (const dir of unique(input.directories)) {
-    files.push(...ConfigPaths.fileInDirectory(dir, "opencode"))
+    files.push(...ConfigPaths.fileInDirectory(dir, "openloom"))
   }
   if (Flag.OPENLOOM_CONFIG) files.push(Flag.OPENLOOM_CONFIG)
 

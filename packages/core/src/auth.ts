@@ -5,7 +5,7 @@ import { NonNegativeInt, withStatics } from "./schema"
 import { Global } from "./global"
 import { AppFileSystem } from "./filesystem"
 
-export const OAUTH_DUMMY_KEY = "opencode-oauth-dummy-key"
+export const OAUTH_DUMMY_KEY = "openloom-oauth-dummy-key"
 
 const AccountID = Schema.String.pipe(
   Schema.brand("AccountID"),
@@ -98,7 +98,7 @@ export interface Interface {
   readonly forService: (serviceID: ServiceID) => Effect.Effect<Account[], AuthError>
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/v2/Auth") {}
+export class Service extends Context.Service<Service, Interface>()("@openloom/v2/Auth") {}
 
 export const layer = Layer.effect(
   Service,

@@ -65,7 +65,7 @@ function normalizeLoadedConfig(data: unknown, source: string) {
   delete copy.theme
   delete copy.keybinds
   delete copy.tui
-  log.warn("tui keys in opencode config are deprecated; move them to tui.json", { path: source })
+  log.warn("tui keys in openloom config are deprecated; move them to tui.json", { path: source })
   return copy
 }
 
@@ -125,10 +125,10 @@ export const Info = Schema.Struct({
   }),
   logLevel: Schema.optional(LogLevelRef).annotate({ description: "Log level" }),
   server: Schema.optional(ConfigServer.Server).annotate({
-    description: "Server configuration for opencode serve and web commands",
+    description: "Server configuration for openloom serve and web commands",
   }),
   command: Schema.optional(Schema.Record(Schema.String, ConfigCommand.Info)).annotate({
-    description: "Command configuration, see https://opencode.ai/docs/commands",
+    description: "Command configuration, see https://openloom.ai/docs/commands",
   }),
   skills: Schema.optional(ConfigSkills.Info).annotate({ description: "Additional skill folder paths" }),
   reference: Schema.optional(ConfigReference.Info).annotate({
@@ -201,7 +201,7 @@ export const Info = Schema.Struct({
       }),
       [Schema.Record(Schema.String, ConfigAgent.Info)],
     ),
-  ).annotate({ description: "Agent configuration, see https://opencode.ai/docs/agents" }),
+  ).annotate({ description: "Agent configuration, see https://openloom.ai/docs/agents" }),
   provider: Schema.optional(Schema.Record(Schema.String, ConfigProvider.Info)).annotate({
     description: "Custom provider configurations and model overrides",
   }),
@@ -317,7 +317,7 @@ export interface Interface {
   readonly waitForDependencies: () => Effect.Effect<void>
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/Config") {}
+export class Service extends Context.Service<Service, Interface>()("@openloom/Config") {}
 
 function globalConfigFile() {
   const candidates = ["openloom.jsonc", "openloom.json", "config.json"].map((file) =>
@@ -388,8 +388,8 @@ export const layer = Layer.effect(
 
       yield* Effect.promise(() => resolveLoadedPlugins(data, options.path))
       if (!data.$schema) {
-        data.$schema = "https://opencode.ai/config.json"
-        const updated = text.replace(/^\s*\{/, '{\n  "$schema": "https://opencode.ai/config.json",')
+        data.$schema = "https://openloom.ai/config.json"
+        const updated = text.replace(/^\s*\{/, '{\n  "$schema": "https://openloom.ai/config.json",')
         yield* fs.writeFileString(options.path, updated).pipe(Effect.catch(() => Effect.void))
       }
       return data
@@ -410,7 +410,7 @@ export const layer = Layer.effect(
         const file = globalConfigFile()
         if (!existsSync(file)) {
           yield* fs
-            .writeWithDirs(file, JSON.stringify({ $schema: "https://opencode.ai/config.json" }, null, 2))
+            .writeWithDirs(file, JSON.stringify({ $schema: "https://openloom.ai/config.json" }, null, 2))
             .pipe(Effect.catch(() => Effect.void))
         }
       }
@@ -425,7 +425,7 @@ export const layer = Layer.effect(
             .then(async (mod) => {
               const { provider, model, ...rest } = mod.default
               if (provider && model) result.model = `${provider}/${model}`
-              result["$schema"] = "https://opencode.ai/config.json"
+              result["$schema"] = "https://openloom.ai/config.json"
               result = mergeConfig(result, rest)
               await fsNode.writeFile(path.join(Global.Path.config, "config.json"), JSON.stringify(result, null, 2))
               await fsNode.unlink(legacy)
@@ -514,8 +514,8 @@ export const layer = Layer.effect(
           if (value.type === "wellknown") {
             const url = key.replace(/\/+$/, "")
             process.env[value.key] = value.token
-            log.debug("fetching remote config", { url: `${url}/.well-known/opencode` })
-            const response = yield* Effect.promise(() => fetch(`${url}/.well-known/opencode`))
+            log.debug("fetching remote config", { url: `${url}/.well-known/openloom` })
+            const response = yield* Effect.promise(() => fetch(`${url}/.well-known/openloom`))
             if (!response.ok) {
               throw new Error(`failed to fetch remote config from ${url}: ${response.status}`)
             }
@@ -527,7 +527,7 @@ export const layer = Layer.effect(
               substituteWellKnownRemoteConfig({
                 value: wellknown.remote_config,
                 dir: url,
-                source: `${url}/.well-known/opencode`,
+                source: `${url}/.well-known/openloom`,
               }),
             )
             const fetchedConfig = remote
@@ -541,8 +541,8 @@ export const layer = Layer.effect(
                 })) as Record<string, unknown>)
               : {}
             const remoteConfig = mergeConfig(wellknown.config ?? {}, fetchedConfig as Info)
-            if (!remoteConfig.$schema) remoteConfig.$schema = "https://opencode.ai/config.json"
-            const source = `${url}/.well-known/opencode`
+            if (!remoteConfig.$schema) remoteConfig.$schema = "https://openloom.ai/config.json"
+            const source = `${url}/.well-known/openloom`
             const next = yield* loadConfig(JSON.stringify(remoteConfig), {
               dir: path.dirname(source),
               source,
@@ -561,7 +561,7 @@ export const layer = Layer.effect(
         }
 
         if (!Flag.OPENLOOM_DISABLE_PROJECT_CONFIG) {
-          for (const file of yield* ConfigPaths.files("opencode", ctx.directory, ctx.worktree).pipe(Effect.orDie)) {
+          for (const file of yield* ConfigPaths.files("openloom", ctx.directory, ctx.worktree).pipe(Effect.orDie)) {
             yield* merge(file, yield* loadFile(file), "local")
           }
         }
@@ -618,7 +618,7 @@ export const layer = Layer.effect(
           result.command = mergeDeep(result.command ?? {}, yield* Effect.promise(() => ConfigCommand.load(dir)))
           result.agent = mergeDeep(result.agent ?? {}, yield* Effect.promise(() => ConfigAgent.load(dir)))
           result.agent = mergeDeep(result.agent ?? {}, yield* Effect.promise(() => ConfigAgent.loadMode(dir)))
-          // Auto-discovered plugins under `.opencode/plugin(s)` are already local files, so ConfigPlugin.load
+          // Auto-discovered plugins under `.openloom/plugin(s)` are already local files, so ConfigPlugin.load
           // returns normalized Specs and we only need to attach origin metadata here.
           const list = yield* Effect.promise(() => ConfigPlugin.load(dir))
           yield* mergePluginOrigins(dir, list)

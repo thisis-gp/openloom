@@ -1,36 +1,36 @@
-id = "opencode"
-name = "OpenCode"
+id = "openloom"
+name = "Openloom"
 description = "The open source coding agent."
 version = "1.15.3"
 schema_version = 1
 authors = ["Anomaly"]
-repository = "https://github.com/anomalyco/opencode"
+repository = "https://github.com/anomalyco/openloom"
 
-[agent_servers.opencode]
-name = "OpenCode"
-icon = "./icons/opencode.svg"
+[agent_servers.openloom]
+name = "Openloom"
+icon = "./icons/openloom.svg"
 
-[agent_servers.opencode.targets.darwin-aarch64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.15.3/opencode-darwin-arm64.zip"
-cmd = "./opencode"
+[agent_servers.openloom.targets.darwin-aarch64]
+archive = "https://github.com/anomalyco/openloom/releases/download/v1.15.3/openloom-darwin-arm64.zip"
+cmd = "./openloom"
 args = ["acp"]
 
-[agent_servers.opencode.targets.darwin-x86_64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.15.3/opencode-darwin-x64.zip"
-cmd = "./opencode"
+[agent_servers.openloom.targets.darwin-x86_64]
+archive = "https://github.com/anomalyco/openloom/releases/download/v1.15.3/openloom-darwin-x64.zip"
+cmd = "./openloom"
 args = ["acp"]
 
-[agent_servers.opencode.targets.linux-aarch64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.15.3/opencode-linux-arm64.tar.gz"
-cmd = "./opencode"
+[agent_servers.openloom.targets.linux-aarch64]
+archive = "https://github.com/anomalyco/openloom/releases/download/v1.15.3/openloom-linux-arm64.tar.gz"
+cmd = "./openloom"
 args = ["acp"]
 
-[agent_servers.opencode.targets.linux-x86_64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.15.3/opencode-linux-x64.tar.gz"
-cmd = "./opencode"
+[agent_servers.openloom.targets.linux-x86_64]
+archive = "https://github.com/anomalyco/openloom/releases/download/v1.15.3/openloom-linux-x64.tar.gz"
+cmd = "./openloom"
 args = ["acp"]
 
-[agent_servers.opencode.targets.windows-x86_64]
-archive = "https://github.com/anomalyco/opencode/releases/download/v1.15.3/opencode-windows-x64.zip"
-cmd = "./opencode.exe"
+[agent_servers.openloom.targets.windows-x86_64]
+archive = "https://github.com/anomalyco/openloom/releases/download/v1.15.3/openloom-windows-x64.zip"
+cmd = "./openloom.exe"
 args = ["acp"]
