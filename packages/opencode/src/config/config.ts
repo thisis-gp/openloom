@@ -1,26 +1,26 @@
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import path from "path"
 import { pathToFileURL } from "url"
 import os from "os"
 import { mergeDeep } from "remeda"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 import fsNode from "fs/promises"
-import { NamedError } from "@opencode-ai/core/util/error"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { NamedError } from "@openloom/core/util/error"
+import { Flag } from "@openloom/core/flag/flag"
 import { Auth } from "../auth"
 import { Env } from "../env"
 import { applyEdits, modify } from "jsonc-parser"
-import { InstallationLocal, InstallationVersion } from "@opencode-ai/core/installation/version"
+import { InstallationLocal, InstallationVersion } from "@openloom/core/installation/version"
 import { existsSync } from "fs"
 import { Account } from "@/account/account"
 import { isRecord } from "@/util/record"
 import type { ConsoleState } from "./console-state"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { InstanceState } from "@/effect/instance-state"
 import { Context, Duration, Effect, Exit, Fiber, Layer, Option, Schema } from "effect"
-import { EffectFlock } from "@opencode-ai/core/util/effect-flock"
+import { EffectFlock } from "@openloom/core/util/effect-flock"
 import { containsPath, type InstanceContext } from "../project/instance-context"
-import { NonNegativeInt, PositiveInt, type DeepMutable } from "@opencode-ai/core/schema"
+import { NonNegativeInt, PositiveInt, type DeepMutable } from "@openloom/core/schema"
 import { ConfigAgent } from "./agent"
 import { ConfigAttachment } from "./attachment"
 import { ConfigCommand } from "./command"
@@ -39,7 +39,7 @@ import { ConfigReference } from "./reference"
 import { ConfigServer } from "./server"
 import { ConfigSkills } from "./skills"
 import { ConfigVariable } from "./variable"
-import { Npm } from "@opencode-ai/core/npm"
+import { Npm } from "@openloom/core/npm"
 
 const log = Log.create({ service: "config" })
 
@@ -290,7 +290,7 @@ export const Info = Schema.Struct({
   ),
 }).annotate({ identifier: "Config" })
 
-// Uses the shared `DeepMutable` from `@opencode-ai/core/schema`. See the definition
+// Uses the shared `DeepMutable` from `@openloom/core/schema`. See the definition
 // there for why the local variant is needed over `Types.DeepMutable` from
 // effect-smol (the upstream version collapses `unknown` to `{}`).
 export type Info = DeepMutable<Schema.Schema.Type<typeof Info>> & {
@@ -320,7 +320,7 @@ export interface Interface {
 export class Service extends Context.Service<Service, Interface>()("@opencode/Config") {}
 
 function globalConfigFile() {
-  const candidates = ["opencode.jsonc", "opencode.json", "config.json"].map((file) =>
+  const candidates = ["openloom.jsonc", "openloom.json", "config.json"].map((file) =>
     path.join(Global.Path.config, file),
   )
   for (const file of candidates) {
@@ -406,7 +406,7 @@ export const layer = Layer.effect(
       let result: Info = {}
       // Seed the default global config with the schema for editor completion, but avoid writing when the user
       // explicitly routes config through env-provided paths or content.
-      if (!Flag.OPENCODE_CONFIG && !Flag.OPENCODE_CONFIG_DIR && !Flag.OPENCODE_CONFIG_CONTENT) {
+      if (!Flag.OPENLOOM_CONFIG && !Flag.OPENLOOM_CONFIG_DIR && !Flag.OPENLOOM_CONFIG_CONTENT) {
         const file = globalConfigFile()
         if (!existsSync(file)) {
           yield* fs
@@ -415,8 +415,8 @@ export const layer = Layer.effect(
         }
       }
       result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "config.json")))
-      result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "opencode.json")))
-      result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "opencode.jsonc")))
+      result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "openloom.json")))
+      result = mergeConfig(result, yield* loadFile(path.join(Global.Path.config, "openloom.jsonc")))
 
       const legacy = path.join(Global.Path.config, "config")
       if (existsSync(legacy)) {
@@ -479,7 +479,7 @@ export const layer = Layer.effect(
 
         const pluginScopeForSource = Effect.fnUntraced(function* (source: string) {
           if (source.startsWith("http://") || source.startsWith("https://")) return "global"
-          if (source === "OPENCODE_CONFIG_CONTENT") return "local"
+          if (source === "OPENLOOM_CONFIG_CONTENT") return "local"
           if (containsPath(source, ctx)) return "local"
           return "global"
         })
@@ -555,12 +555,12 @@ export const layer = Layer.effect(
         const global = yield* getGlobal()
         yield* merge(Global.Path.config, global, "global")
 
-        if (Flag.OPENCODE_CONFIG) {
-          yield* merge(Flag.OPENCODE_CONFIG, yield* loadFile(Flag.OPENCODE_CONFIG))
-          log.debug("loaded custom config", { path: Flag.OPENCODE_CONFIG })
+        if (Flag.OPENLOOM_CONFIG) {
+          yield* merge(Flag.OPENLOOM_CONFIG, yield* loadFile(Flag.OPENLOOM_CONFIG))
+          log.debug("loaded custom config", { path: Flag.OPENLOOM_CONFIG })
         }
 
-        if (!Flag.OPENCODE_DISABLE_PROJECT_CONFIG) {
+        if (!Flag.OPENLOOM_DISABLE_PROJECT_CONFIG) {
           for (const file of yield* ConfigPaths.files("opencode", ctx.directory, ctx.worktree).pipe(Effect.orDie)) {
             yield* merge(file, yield* loadFile(file), "local")
           }
@@ -572,15 +572,15 @@ export const layer = Layer.effect(
 
         const directories = yield* ConfigPaths.directories(ctx.directory, ctx.worktree)
 
-        if (Flag.OPENCODE_CONFIG_DIR) {
-          log.debug("loading config from OPENCODE_CONFIG_DIR", { path: Flag.OPENCODE_CONFIG_DIR })
+        if (Flag.OPENLOOM_CONFIG_DIR) {
+          log.debug("loading config from OPENLOOM_CONFIG_DIR", { path: Flag.OPENLOOM_CONFIG_DIR })
         }
 
         const deps: Fiber.Fiber<void, never>[] = []
 
         for (const dir of directories) {
-          if (dir.endsWith(".opencode") || dir === Flag.OPENCODE_CONFIG_DIR) {
-            for (const file of ["opencode.json", "opencode.jsonc"]) {
+          if (dir.endsWith(".openloom") || dir === Flag.OPENLOOM_CONFIG_DIR) {
+            for (const file of ["openloom.json", "openloom.jsonc"]) {
               const source = path.join(dir, file)
               log.debug(`loading config from ${source}`)
               yield* merge(source, yield* loadFile(source))
@@ -596,7 +596,7 @@ export const layer = Layer.effect(
             .install(dir, {
               add: [
                 {
-                  name: "@opencode-ai/plugin",
+                  name: "@openloom/plugin",
                   version: InstallationLocal ? undefined : InstallationVersion,
                 },
               ],
@@ -624,14 +624,14 @@ export const layer = Layer.effect(
           yield* mergePluginOrigins(dir, list)
         }
 
-        if (process.env.OPENCODE_CONFIG_CONTENT) {
-          const source = "OPENCODE_CONFIG_CONTENT"
-          const next = yield* loadConfig(process.env.OPENCODE_CONFIG_CONTENT, {
+        if (process.env.OPENLOOM_CONFIG_CONTENT) {
+          const source = "OPENLOOM_CONFIG_CONTENT"
+          const next = yield* loadConfig(process.env.OPENLOOM_CONFIG_CONTENT, {
             dir: ctx.directory,
             source,
           })
           yield* merge(source, next, "local")
-          log.debug("loaded custom config from OPENCODE_CONFIG_CONTENT")
+          log.debug("loaded custom config from OPENLOOM_CONFIG_CONTENT")
         }
 
         const activeAccount = Option.getOrUndefined(
@@ -647,8 +647,8 @@ export const layer = Layer.effect(
               { concurrency: 2 },
             )
             if (Option.isSome(tokenOpt)) {
-              process.env["OPENCODE_CONSOLE_TOKEN"] = tokenOpt.value
-              yield* env.set("OPENCODE_CONSOLE_TOKEN", tokenOpt.value)
+              process.env["OPENLOOM_CONSOLE_TOKEN"] = tokenOpt.value
+              yield* env.set("OPENLOOM_CONSOLE_TOKEN", tokenOpt.value)
             }
 
             if (Option.isSome(configOpt)) {
@@ -675,7 +675,7 @@ export const layer = Layer.effect(
 
         const managedDir = ConfigManaged.managedConfigDir()
         if (existsSync(managedDir)) {
-          for (const file of ["opencode.json", "opencode.jsonc"]) {
+          for (const file of ["openloom.json", "openloom.jsonc"]) {
             const source = path.join(managedDir, file)
             yield* merge(source, yield* loadFile(source), "global")
           }
@@ -702,8 +702,8 @@ export const layer = Layer.effect(
           })
         }
 
-        if (Flag.OPENCODE_PERMISSION) {
-          result.permission = mergeDeep(result.permission ?? {}, JSON.parse(Flag.OPENCODE_PERMISSION))
+        if (Flag.OPENLOOM_PERMISSION) {
+          result.permission = mergeDeep(result.permission ?? {}, JSON.parse(Flag.OPENLOOM_PERMISSION))
         }
 
         if (result.tools) {
@@ -725,10 +725,10 @@ export const layer = Layer.effect(
           result.share = "auto"
         }
 
-        if (Flag.OPENCODE_DISABLE_AUTOCOMPACT) {
+        if (Flag.OPENLOOM_DISABLE_AUTOCOMPACT) {
           result.compaction = { ...result.compaction, auto: false }
         }
-        if (Flag.OPENCODE_DISABLE_PRUNE) {
+        if (Flag.OPENLOOM_DISABLE_PRUNE) {
           result.compaction = { ...result.compaction, prune: false }
         }
 

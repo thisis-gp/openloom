@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { $ } from "bun"
 import pkg from "../package.json"
-import { Script } from "@opencode-ai/script"
+import { Script } from "@openloom/script"
 import { fileURLToPath } from "url"
 
 const dir = fileURLToPath(new URL("..", import.meta.url))
@@ -108,8 +108,8 @@ if (!Script.preview) {
     "url='https://github.com/anomalyco/opencode'",
     "arch=('aarch64' 'x86_64')",
     "license=('MIT')",
-    "provides=('opencode')",
-    "conflicts=('opencode')",
+    "provides=('openloom')",
+    "conflicts=('openloom')",
     "depends=('ripgrep')",
     "",
     `source_aarch64=("\${pkgname}_\${pkgver}_aarch64.tar.gz::https://github.com/anomalyco/opencode/releases/download/v\${pkgver}\${_subver}/opencode-linux-arm64.tar.gz")`,

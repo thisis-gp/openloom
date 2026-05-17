@@ -12,8 +12,8 @@ import type { Permission } from "../../src/permission"
 import { Agent } from "../../src/agent/agent"
 import { Truncate } from "@/tool/truncate"
 import { SessionID, MessageID } from "../../src/session/schema"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { Plugin } from "../../src/plugin"
 import { testEffect } from "../lib/effect"
 import { Tool } from "@/tool/tool"
@@ -547,7 +547,7 @@ describe("tool.shell permissions", () => {
           item,
           Effect.acquireUseRelease(
             Effect.sync(() => {
-              const key = "OPENCODE_TEST_MISSING"
+              const key = "OPENLOOM_TEST_MISSING"
               const prev = process.env[key]
               delete process.env[key]
               return { key, prev }

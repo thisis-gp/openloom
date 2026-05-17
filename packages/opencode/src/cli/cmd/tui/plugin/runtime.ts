@@ -10,11 +10,11 @@ import {
   type TuiPluginStatus,
   type TuiSlotPlugin,
   type TuiTheme,
-} from "@opencode-ai/plugin/tui"
+} from "@openloom/plugin/tui"
 import path from "path"
 import { fileURLToPath } from "url"
 import { TuiConfig } from "@/cli/cmd/tui/config/tui"
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { errorData, errorMessage } from "@/util/error"
 import { isRecord } from "@/util/record"
 import { resolveAttentionSoundPaths } from "../config/tui-schema"
@@ -30,11 +30,11 @@ import { PluginLoader } from "@/plugin/loader"
 import { PluginMeta } from "@/plugin/meta"
 import { installPlugin as installModulePlugin, patchPluginConfig, readPluginManifest } from "@/plugin/install"
 import { hasTheme, upsertTheme } from "../context/theme"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 import { Filesystem } from "@/util/filesystem"
 import { Process } from "@/util/process"
-import { Flock } from "@opencode-ai/core/util/flock"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { Flock } from "@openloom/core/util/flock"
+import { Flag } from "@openloom/core/flag/flag"
 import { internalTuiPlugins, type InternalTuiPlugin } from "./internal"
 import { setupSlots, Slot as View } from "./slots"
 import type { HostPluginApi, HostSlots } from "./slots"
@@ -243,9 +243,9 @@ function createThemeInstaller(
     const name = path.basename(src, path.extname(src))
     const source_dir = path.dirname(meta.source)
     const local_dir =
-      path.basename(source_dir) === ".opencode"
+      path.basename(source_dir) === ".openloom"
         ? path.join(source_dir, "themes")
-        : path.join(source_dir, ".opencode", "themes")
+        : path.join(source_dir, ".openloom", "themes")
     const dest_dir = meta.scope === "local" ? local_dir : path.join(Global.Path.config, "themes")
     const dest = path.join(dest_dir, `${name}.json`)
     const stat = await Filesystem.statAsync(src)
@@ -830,7 +830,7 @@ function defaultPluginOrigin(state: RuntimeState, spec: string): ConfigPlugin.Or
   return {
     spec,
     scope: "local",
-    source: state.api.state.path.config || path.join(state.directory, ".opencode", "tui.json"),
+    source: state.api.state.path.config || path.join(state.directory, ".openloom", "tui.json"),
   }
 }
 
@@ -1072,8 +1072,8 @@ async function load(input: { api: Api; config: TuiConfig.Resolved; dispose?: () 
         return yield* RuntimeFlags.Service
       }).pipe(Effect.provide(RuntimeFlags.defaultLayer)),
     )
-    const records = Flag.OPENCODE_PURE ? [] : (config.plugin_origins ?? [])
-    if (Flag.OPENCODE_PURE && config.plugin_origins?.length) {
+    const records = Flag.OPENLOOM_PURE ? [] : (config.plugin_origins ?? [])
+    if (Flag.OPENLOOM_PURE && config.plugin_origins?.length) {
       log.info("skipping external tui plugins in pure mode", { count: config.plugin_origins.length })
     }
 

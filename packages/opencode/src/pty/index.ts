@@ -3,14 +3,14 @@ import { Bus } from "@/bus"
 import { Config } from "@/config/config"
 import { InstanceState } from "@/effect/instance-state"
 import { EffectBridge } from "@/effect/bridge"
-import { lazy } from "@opencode-ai/core/util/lazy"
+import { lazy } from "@openloom/core/util/lazy"
 import { Plugin } from "@/plugin"
 import { Shell } from "@/shell/shell"
 import type { Proc } from "#pty"
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { PtyID } from "./schema"
 import { Effect, Layer, Context, Schema, Types } from "effect"
-import { NonNegativeInt, PositiveInt } from "@opencode-ai/core/schema"
+import { NonNegativeInt, PositiveInt } from "@openloom/core/schema"
 
 const log = Log.create({ service: "pty" })
 
@@ -188,7 +188,7 @@ export const layer = Layer.effect(
         ...input.env,
         ...shell.env,
         TERM: "xterm-256color",
-        OPENCODE_TERMINAL: "1",
+        OPENLOOM_TERMINAL: "1",
       } as Record<string, string>
 
       if (process.platform === "win32") {

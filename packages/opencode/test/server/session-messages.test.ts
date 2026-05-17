@@ -5,7 +5,7 @@ import { Session as SessionNs } from "@/session/session"
 import { MessageV2 } from "../../src/session/message-v2"
 import { ModelID, ProviderID } from "../../src/provider/schema"
 import { MessageID, PartID, type SessionID } from "../../src/session/schema"
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import { disposeAllInstances, TestInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
 
@@ -26,15 +26,15 @@ const withoutWatcher = <A, E, R>(effect: Effect.Effect<A, E, R>) => {
   if (process.platform !== "win32") return effect
   return Effect.acquireUseRelease(
     Effect.sync(() => {
-      const previous = process.env.OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER
-      process.env.OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER = "true"
+      const previous = process.env.OPENLOOM_EXPERIMENTAL_DISABLE_FILEWATCHER
+      process.env.OPENLOOM_EXPERIMENTAL_DISABLE_FILEWATCHER = "true"
       return previous
     }),
     () => effect,
     (previous) =>
       Effect.sync(() => {
-        if (previous === undefined) delete process.env.OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER
-        else process.env.OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER = previous
+        if (previous === undefined) delete process.env.OPENLOOM_EXPERIMENTAL_DISABLE_FILEWATCHER
+        else process.env.OPENLOOM_EXPERIMENTAL_DISABLE_FILEWATCHER = previous
       }),
   )
 }

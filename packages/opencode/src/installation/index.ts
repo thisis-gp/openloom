@@ -3,14 +3,14 @@ import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } fr
 import { withTransientReadRetry } from "@/util/effect-http-client"
 import { errorMessage } from "@/util/error"
 import { ChildProcess } from "effect/unstable/process"
-import { AppProcess } from "@opencode-ai/core/process"
+import { AppProcess } from "@openloom/core/process"
 import path from "path"
 import { BusEvent } from "@/bus/bus-event"
-import * as Log from "@opencode-ai/core/util/log"
-import { makeRuntime } from "@opencode-ai/core/effect/runtime"
+import * as Log from "@openloom/core/util/log"
+import { makeRuntime } from "@openloom/core/effect/runtime"
 import semver from "semver"
-import { InstallationChannel, InstallationVersion } from "@opencode-ai/core/installation/version"
-import { NpmConfig } from "@opencode-ai/core/npm-config"
+import { InstallationChannel, InstallationVersion } from "@openloom/core/installation/version"
+import { NpmConfig } from "@openloom/core/npm-config"
 
 const log = Log.create({ service: "installation" })
 
@@ -162,7 +162,7 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProce
         }
       }),
       method: Effect.fn("Installation.method")(function* () {
-        if (process.execPath.includes(path.join(".opencode", "bin"))) return "curl" as Method
+        if (process.execPath.includes(path.join(".openloom", "bin"))) return "curl" as Method
         if (process.execPath.includes(path.join(".local", "bin"))) return "curl" as Method
         const exec = process.execPath.toLowerCase()
 
@@ -206,7 +206,7 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProce
             return info.formulae[0].versions.stable
           }
           const response = yield* httpOk.execute(
-            HttpClientRequest.get("https://formulae.brew.sh/api/formula/opencode.json").pipe(
+            HttpClientRequest.get("https://formulae.brew.sh/api/formula/openloom.json").pipe(
               HttpClientRequest.acceptJson,
             ),
           )
@@ -237,7 +237,7 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProce
         if (detectedMethod === "scoop") {
           const response = yield* httpOk.execute(
             HttpClientRequest.get(
-              "https://raw.githubusercontent.com/ScoopInstaller/Main/master/bucket/opencode.json",
+              "https://raw.githubusercontent.com/ScoopInstaller/Main/master/bucket/openloom.json",
             ).pipe(HttpClientRequest.setHeaders({ Accept: "application/json" })),
           )
           const data = yield* HttpClientResponse.schemaBodyJson(ScoopManifest)(response)

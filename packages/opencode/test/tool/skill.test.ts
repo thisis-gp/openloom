@@ -1,4 +1,4 @@
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
 import { Effect, Layer } from "effect"
 import { afterEach, describe, expect } from "bun:test"
 import path from "path"
@@ -34,7 +34,7 @@ describe("tool.skill", () => {
     provideTmpdirInstance(
       (dir) =>
         Effect.gen(function* () {
-          const skill = path.join(dir, ".opencode", "skill", "tool-skill")
+          const skill = path.join(dir, ".openloom", "skill", "tool-skill")
           yield* Effect.promise(() =>
             Bun.write(
               path.join(skill, "SKILL.md"),
@@ -51,11 +51,11 @@ Use this skill.
           )
           yield* Effect.promise(() => Bun.write(path.join(skill, "scripts", "demo.txt"), "demo"))
 
-          const home = process.env.OPENCODE_TEST_HOME
-          process.env.OPENCODE_TEST_HOME = dir
+          const home = process.env.OPENLOOM_TEST_HOME
+          process.env.OPENLOOM_TEST_HOME = dir
           yield* Effect.addFinalizer(() =>
             Effect.sync(() => {
-              process.env.OPENCODE_TEST_HOME = home
+              process.env.OPENLOOM_TEST_HOME = home
             }),
           )
 

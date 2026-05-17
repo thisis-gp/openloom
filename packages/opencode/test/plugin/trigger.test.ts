@@ -1,8 +1,8 @@
 import { describe, expect } from "bun:test"
 import { Effect, Layer, Option } from "effect"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
-import { EffectFlock } from "@opencode-ai/core/util/effect-flock"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
+import { AppFileSystem } from "@openloom/core/filesystem"
+import { EffectFlock } from "@openloom/core/util/effect-flock"
 import path from "path"
 import { pathToFileURL } from "url"
 import { Account } from "../../src/account/account"
@@ -53,7 +53,7 @@ function withProject<A, E, R>(source: string, self: Effect.Effect<A, E, R>) {
           Effect.promise(() => Bun.write(file, source)),
           Effect.promise(() =>
             Bun.write(
-              path.join(dir, "opencode.json"),
+              path.join(dir, "openloom.json"),
               JSON.stringify(
                 {
                   $schema: "https://opencode.ai/config.json",

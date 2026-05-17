@@ -17011,7 +17011,7 @@ export const snapshot = {
   },
   "opencode-go": {
     id: "opencode-go",
-    env: ["OPENCODE_API_KEY"],
+    env: ["OPENLOOM_API_KEY"],
     npm: "@ai-sdk/openai-compatible",
     api: "https://opencode.ai/zen/go/v1",
     name: "OpenCode Go",
@@ -35154,7 +35154,7 @@ export const snapshot = {
   },
   opencode: {
     id: "opencode",
-    env: ["OPENCODE_API_KEY"],
+    env: ["OPENLOOM_API_KEY"],
     npm: "@ai-sdk/openai-compatible",
     api: "https://opencode.ai/zen/v1",
     name: "OpenCode Zen",

@@ -2,9 +2,9 @@ import { expect } from "bun:test"
 import { Effect } from "effect"
 import fs from "fs/promises"
 import path from "path"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
-import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
+import { Global } from "@openloom/core/global"
+import * as Log from "@openloom/core/util/log"
 import { tmpdirScoped } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
 
@@ -51,22 +51,22 @@ it.live("init cleanup keeps the newest timestamped logs", () =>
 it.live("local dev log is not truncated twice for the same run", () =>
   Effect.gen(function* () {
     const log = Global.Path.log
-    const runID = process.env.OPENCODE_RUN_ID
-    const initialized = process.env.OPENCODE_LOG_INITIALIZED_RUN_ID
+    const runID = process.env.OPENLOOM_RUN_ID
+    const initialized = process.env.OPENLOOM_LOG_INITIALIZED_RUN_ID
     yield* Effect.addFinalizer(() =>
       Effect.sync(() => {
         Global.Path.log = log
-        if (runID === undefined) delete process.env.OPENCODE_RUN_ID
-        else process.env.OPENCODE_RUN_ID = runID
-        if (initialized === undefined) delete process.env.OPENCODE_LOG_INITIALIZED_RUN_ID
-        else process.env.OPENCODE_LOG_INITIALIZED_RUN_ID = initialized
+        if (runID === undefined) delete process.env.OPENLOOM_RUN_ID
+        else process.env.OPENLOOM_RUN_ID = runID
+        if (initialized === undefined) delete process.env.OPENLOOM_LOG_INITIALIZED_RUN_ID
+        else process.env.OPENLOOM_LOG_INITIALIZED_RUN_ID = initialized
       }),
     )
 
     const dir = yield* tmpdirScoped()
     Global.Path.log = dir
-    process.env.OPENCODE_RUN_ID = "run-1"
-    delete process.env.OPENCODE_LOG_INITIALIZED_RUN_ID
+    process.env.OPENLOOM_RUN_ID = "run-1"
+    delete process.env.OPENLOOM_LOG_INITIALIZED_RUN_ID
 
     yield* Effect.promise(() => Log.init({ print: false, dev: true }))
     yield* Effect.promise(() => fs.writeFile(path.join(dir, "dev.log"), "main startup\n"))

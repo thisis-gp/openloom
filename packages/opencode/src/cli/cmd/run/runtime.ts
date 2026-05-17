@@ -12,8 +12,8 @@
 //   3. starts the stream transport (SDK event subscription), lazily for fresh
 //      local sessions,
 //   4. runs the prompt queue until the footer closes.
-import { createOpencodeClient } from "@opencode-ai/sdk/v2"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { createOpencodeClient } from "@openloom/sdk/v2"
+import { Flag } from "@openloom/core/flag/flag"
 import { createRunDemo } from "./demo"
 import { resolveDiffStyle, resolveFooterKeybinds, resolveModelInfo, resolveSessionInfo } from "./runtime.boot"
 import { createRuntimeLifecycle } from "./runtime.lifecycle"
@@ -414,7 +414,7 @@ async function runInteractiveRuntime(input: RunRuntimeInput): Promise<void> {
         .then(loadCatalog)
         .catch(() => {})
 
-      if (Flag.OPENCODE_SHOW_TTFD) {
+      if (Flag.OPENLOOM_SHOW_TTFD) {
         footer.append({
           kind: "system",
           text: `startup ${Math.max(0, Math.round(performance.now() - start))}ms`,

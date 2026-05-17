@@ -1,5 +1,5 @@
 import { NodeHttpServer, NodeServices } from "@effect/platform-node"
-import { NamedError } from "@opencode-ai/core/util/error"
+import { NamedError } from "@openloom/core/util/error"
 import { describe, expect } from "bun:test"
 import { ConfigError } from "../../src/config/error"
 import { Effect, Layer } from "effect"
@@ -54,7 +54,7 @@ describe("HttpApi error middleware", () => {
   it.live("preserves config defects as client-visible bad requests", () =>
     Effect.gen(function* () {
       const configError = new ConfigError.InvalidError({
-        path: "/tmp/opencode.json",
+        path: "/tmp/openloom.json",
         issues: [{ message: "Expected object", path: ["provider", "anthropic", "options"] }],
       })
 

@@ -10,11 +10,11 @@ import { GlobalBus } from "@/bus/global"
 import { Auth } from "@/auth"
 import { SyncEvent } from "@/sync"
 import { EventSequenceTable, EventTable } from "@/sync/event.sql"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
-import * as Log from "@opencode-ai/core/util/log"
+import { AppFileSystem } from "@openloom/core/filesystem"
+import * as Log from "@openloom/core/util/log"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { ProjectID } from "@/project/schema"
-import { Slug } from "@opencode-ai/core/util/slug"
+import { Slug } from "@openloom/core/util/slug"
 import { WorkspaceTable } from "./workspace.sql"
 import { getAdapter, registeredAdapters } from "./adapters"
 import { type Target, type WorkspaceInfo, WorkspaceInfo as WorkspaceInfoSchema } from "./types"
@@ -563,9 +563,9 @@ export const layer = Layer.effect(
       })
 
       const env = {
-        OPENCODE_AUTH_CONTENT: JSON.stringify(yield* auth.all()),
-        OPENCODE_WORKSPACE_ID: config.id,
-        OPENCODE_EXPERIMENTAL_WORKSPACES: "true",
+        OPENLOOM_AUTH_CONTENT: JSON.stringify(yield* auth.all()),
+        OPENLOOM_WORKSPACE_ID: config.id,
+        OPENLOOM_EXPERIMENTAL_WORKSPACES: "true",
         OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
         OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
         OTEL_RESOURCE_ATTRIBUTES: process.env.OTEL_RESOURCE_ATTRIBUTES,

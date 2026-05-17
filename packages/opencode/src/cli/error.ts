@@ -1,4 +1,4 @@
-import { NamedError } from "@opencode-ai/core/util/error"
+import { NamedError } from "@openloom/core/util/error"
 import { errorFormat } from "@/util/error"
 import { isRecord } from "@/util/record"
 
@@ -65,7 +65,7 @@ export function FormatError(input: unknown): string | undefined {
       `Model not found: ${stringField(providerModelNotFound, "providerID")}/${stringField(providerModelNotFound, "modelID")}`,
       ...(suggestions.length ? ["Did you mean: " + suggestions.join(", ")] : []),
       `Try: \`opencode models\` to list available models`,
-      `Or check your config (opencode.json) provider/model names`,
+      `Or check your config (openloom.json) provider/model names`,
     ].join("\n")
   }
 

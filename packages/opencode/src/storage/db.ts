@@ -4,18 +4,18 @@ import { type SQLiteTransaction } from "drizzle-orm/sqlite-core"
 export * from "drizzle-orm"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { LocalContext } from "@/util/local-context"
-import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
-import { NamedError } from "@opencode-ai/core/util/error"
+import { Global } from "@openloom/core/global"
+import * as Log from "@openloom/core/util/log"
+import { NamedError } from "@openloom/core/util/error"
 import path from "path"
 import { readFileSync, readdirSync, existsSync } from "fs"
-import { Flag } from "@opencode-ai/core/flag/flag"
-import { InstallationChannel } from "@opencode-ai/core/installation/version"
+import { Flag } from "@openloom/core/flag/flag"
+import { InstallationChannel } from "@openloom/core/installation/version"
 import { EffectBridge } from "@/effect/bridge"
 import { init } from "#db"
 import { Effect, Schema } from "effect"
 
-declare const OPENCODE_MIGRATIONS: { sql: string; timestamp: number; name: string }[] | undefined
+declare const OPENLOOM_MIGRATIONS: { sql: string; timestamp: number; name: string }[] | undefined
 
 export const NotFoundError = NamedError.create("NotFoundError", {
   message: Schema.String,
@@ -36,9 +36,9 @@ export function getChannelPath(flags: Pick<DatabaseFlags, "disableChannelDb"> = 
 }
 
 export const getPath = (flags?: Pick<DatabaseFlags, "disableChannelDb">) => {
-  if (Flag.OPENCODE_DB) {
-    if (Flag.OPENCODE_DB === ":memory:" || path.isAbsolute(Flag.OPENCODE_DB)) return Flag.OPENCODE_DB
-    return path.join(Global.Path.data, Flag.OPENCODE_DB)
+  if (Flag.OPENLOOM_DB) {
+    if (Flag.OPENLOOM_DB === ":memory:" || path.isAbsolute(Flag.OPENLOOM_DB)) return Flag.OPENLOOM_DB
+    return path.join(Global.Path.data, Flag.OPENLOOM_DB)
   }
   return getChannelPath(flags)
 }
@@ -110,13 +110,13 @@ export const Client = Object.assign(
 
     // Apply schema migrations
     const entries =
-      typeof OPENCODE_MIGRATIONS !== "undefined"
-        ? OPENCODE_MIGRATIONS
+      typeof OPENLOOM_MIGRATIONS !== "undefined"
+        ? OPENLOOM_MIGRATIONS
         : migrations(path.join(import.meta.dirname, "../../migration"))
     if (entries.length > 0) {
       log.info("applying migrations", {
         count: entries.length,
-        mode: typeof OPENCODE_MIGRATIONS !== "undefined" ? "bundled" : "dev",
+        mode: typeof OPENLOOM_MIGRATIONS !== "undefined" ? "bundled" : "dev",
       })
       if (flags.skipMigrations) {
         for (const item of entries) {

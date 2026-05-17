@@ -4,7 +4,7 @@ import { expect } from "bun:test"
 import { Cause, Deferred, Duration, Effect, Exit, Fiber, Layer } from "effect"
 import path from "path"
 import { fileURLToPath, pathToFileURL } from "url"
-import { NamedError } from "@opencode-ai/core/util/error"
+import { NamedError } from "@openloom/core/util/error"
 import { Agent as AgentSvc } from "../../src/agent/agent"
 import { BackgroundJob } from "@/background/job"
 import { Bus } from "../../src/bus"
@@ -25,7 +25,7 @@ import { Session } from "@/session/session"
 import { SessionMessageTable } from "../../src/session/session.sql"
 import { LLM } from "../../src/session/llm"
 import { MessageV2 } from "../../src/session/message-v2"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { SessionCompaction } from "../../src/session/compaction"
 import { SessionSummary } from "../../src/session/summary"
 import { Instruction } from "../../src/session/instruction"
@@ -42,8 +42,8 @@ import { Shell } from "../../src/shell/shell"
 import { Snapshot } from "../../src/snapshot"
 import { ToolRegistry } from "@/tool/registry"
 import { Truncate } from "@/tool/truncate"
-import * as Log from "@opencode-ai/core/util/log"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
+import * as Log from "@openloom/core/util/log"
+import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
 import * as Database from "../../src/storage/db"
 import { Ripgrep } from "../../src/file/ripgrep"
 import { Format } from "../../src/format"
@@ -296,7 +296,7 @@ const ensureDir = Effect.fn("test.ensureDir")(function* (dir: string) {
 
 const writeConfig = Effect.fn("test.writeConfig")(function* (dir: string, config: Partial<Config.Info>) {
   yield* writeText(
-    path.join(dir, "opencode.json"),
+    path.join(dir, "openloom.json"),
     JSON.stringify({ $schema: "https://opencode.ai/config.json", ...config }),
   )
 })

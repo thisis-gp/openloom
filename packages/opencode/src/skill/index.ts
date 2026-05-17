@@ -1,18 +1,18 @@
 import path from "path"
 import { pathToFileURL } from "url"
 import { Effect, Layer, Context, Schema } from "effect"
-import { NamedError } from "@opencode-ai/core/util/error"
+import { NamedError } from "@openloom/core/util/error"
 import type { Agent } from "@/agent/agent"
 import { Bus } from "@/bus"
 import { InstanceState } from "@/effect/instance-state"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@openloom/core/global"
 import { Permission } from "@/permission"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { Config } from "@/config/config"
 import { ConfigMarkdown } from "@/config/markdown"
 import { RuntimeFlags } from "@/effect/runtime-flags"
-import { Glob } from "@opencode-ai/core/util/glob"
-import * as Log from "@opencode-ai/core/util/log"
+import { Glob } from "@openloom/core/util/glob"
+import * as Log from "@openloom/core/util/log"
 import { Discovery } from "./discovery"
 import CUSTOMIZE_OPENCODE_SKILL_BODY from "./prompt/customize-opencode.md" with { type: "text" }
 import { isRecord } from "@/util/record"
@@ -21,17 +21,17 @@ const log = Log.create({ service: "skill" })
 const CLAUDE_EXTERNAL_DIR = ".claude"
 const AGENTS_EXTERNAL_DIR = ".agents"
 const EXTERNAL_SKILL_PATTERN = "skills/**/SKILL.md"
-const OPENCODE_SKILL_PATTERN = "{skill,skills}/**/SKILL.md"
+const OPENLOOM_SKILL_PATTERN = "{skill,skills}/**/SKILL.md"
 const SKILL_PATTERN = "**/SKILL.md"
 
 // Built-in skill that ships with opencode. The model's intuition for what an
-// opencode.json should look like is often wrong, and opencode hard-fails on
+// openloom.json should look like is often wrong, and opencode hard-fails on
 // invalid config, so users hit cryptic startup errors. Loading this skill
 // when the model is asked to touch opencode's own config files gives it the
 // actual schemas instead of guesses.
-const CUSTOMIZE_OPENCODE_SKILL_NAME = "customize-opencode"
+const CUSTOMIZE_OPENCODE_SKILL_NAME = "customize-openloom"
 const CUSTOMIZE_OPENCODE_SKILL_DESCRIPTION =
-  "Use ONLY when the user is editing or creating opencode's own configuration: opencode.json, opencode.jsonc, files under .opencode/, or files under ~/.config/opencode/. Also use when creating or fixing opencode agents, subagents, skills, plugins, MCP servers, or permission rules. Do not use for the user's own application code, or for any project that is not configuring opencode itself."
+  "Use ONLY when the user is editing or creating openloom's own configuration: openloom.json, openloom.jsonc, files under .openloom/, or files under ~/.config/openloom/. Also use when creating or fixing openloom agents, subagents, skills, plugins, MCP servers, or permission rules. Do not use for the user's own application code, or for any project that is not configuring openloom itself."
 
 export const Info = Schema.Struct({
   name: Schema.String,
@@ -194,7 +194,7 @@ const discoverSkills = Effect.fnUntraced(function* (
 
   const configDirs = yield* config.directories()
   for (const dir of configDirs) {
-    yield* scan(state, dir, OPENCODE_SKILL_PATTERN)
+    yield* scan(state, dir, OPENLOOM_SKILL_PATTERN)
   }
 
   const cfg = yield* config.get()

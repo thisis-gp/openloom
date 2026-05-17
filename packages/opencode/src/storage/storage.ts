@@ -1,9 +1,9 @@
-import * as Log from "@opencode-ai/core/util/log"
+import * as Log from "@openloom/core/util/log"
 import path from "path"
-import { Global } from "@opencode-ai/core/global"
-import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { Global } from "@openloom/core/global"
+import { AppFileSystem } from "@openloom/core/filesystem"
 import { Effect, Exit, Layer, Option, RcMap, Schema, Context, TxReentrantLock } from "effect"
-import { NonNegativeInt } from "@opencode-ai/core/schema"
+import { NonNegativeInt } from "@openloom/core/schema"
 import { Git } from "@/git"
 
 const log = Log.create({ service: "storage" })

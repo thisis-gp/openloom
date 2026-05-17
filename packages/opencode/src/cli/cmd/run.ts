@@ -20,7 +20,7 @@ import { effectCmd } from "../effect-cmd"
 import { ServerAuth } from "@/server/auth"
 import { EOL } from "os"
 import { Filesystem } from "@/util/filesystem"
-import { createOpencodeClient, type OpencodeClient, type ToolPart } from "@opencode-ai/sdk/v2"
+import { createOpencodeClient, type OpencodeClient, type ToolPart } from "@openloom/sdk/v2"
 import { Agent } from "@/agent/agent"
 import { Permission } from "@/permission"
 import { RuntimeFlags } from "@/effect/runtime-flags"
@@ -195,12 +195,12 @@ export const RunCommand = effectCmd({
       .option("password", {
         alias: ["p"],
         type: "string",
-        describe: "basic auth password (defaults to OPENCODE_SERVER_PASSWORD)",
+        describe: "basic auth password (defaults to OPENLOOM_SERVER_PASSWORD)",
       })
       .option("username", {
         alias: ["u"],
         type: "string",
-        describe: "basic auth username (defaults to OPENCODE_SERVER_USERNAME or 'opencode')",
+        describe: "basic auth username (defaults to OPENLOOM_SERVER_USERNAME or 'openloom')",
       })
       .option("dir", {
         type: "string",

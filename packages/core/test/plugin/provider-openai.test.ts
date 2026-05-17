@@ -1,8 +1,8 @@
 import { describe, expect } from "bun:test"
 import { Effect } from "effect"
-import { ModelV2 } from "@opencode-ai/core/model"
-import { PluginV2 } from "@opencode-ai/core/plugin"
-import { OpenAIPlugin } from "@opencode-ai/core/plugin/provider/openai"
+import { ModelV2 } from "@openloom/core/model"
+import { PluginV2 } from "@openloom/core/plugin"
+import { OpenAIPlugin } from "@openloom/core/plugin/provider/openai"
 import { fakeSelectorSdk, it, model } from "./provider-helper"
 
 describe("OpenAIPlugin", () => {

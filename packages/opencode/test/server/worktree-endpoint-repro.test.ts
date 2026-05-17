@@ -1,7 +1,7 @@
 import { describe, expect } from "bun:test"
 import { Effect, Layer, Queue } from "effect"
 import { HttpRouter } from "effect/unstable/http"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { Flag } from "@openloom/core/flag/flag"
 import { GlobalBus, type GlobalEvent } from "@/bus/global"
 import { Worktree } from "@/worktree"
 import { HttpApiApp } from "../../src/server/routes/instance/httpapi/server"
@@ -14,14 +14,14 @@ import { testEffect } from "../lib/effect"
 const stateLayer = Layer.effectDiscard(
   Effect.gen(function* () {
     const original = {
-      OPENCODE_EXPERIMENTAL_WORKSPACES: Flag.OPENCODE_EXPERIMENTAL_WORKSPACES,
+      OPENLOOM_EXPERIMENTAL_WORKSPACES: Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES,
     }
 
-    Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = true
+    Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = true
 
     yield* Effect.addFinalizer(() =>
       Effect.promise(async () => {
-        Flag.OPENCODE_EXPERIMENTAL_WORKSPACES = original.OPENCODE_EXPERIMENTAL_WORKSPACES
+        Flag.OPENLOOM_EXPERIMENTAL_WORKSPACES = original.OPENLOOM_EXPERIMENTAL_WORKSPACES
         await resetDatabase()
       }),
     )
