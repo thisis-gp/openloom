@@ -1,13 +1,13 @@
 // @ts-nocheck
 
-import { OpenCode } from "@openloom/core"
+import { Openloom } from "@openloom/core"
 import { ReadTool } from "@openloom/core/tools"
 
-const opencode = OpenCode.make({})
+const openloom = Openloom.make({})
 
-opencode.tool.add(ReadTool)
+openloom.tool.add(ReadTool)
 
-opencode.tool.add({
+openloom.tool.add({
   name: "bash",
   schema: {
     type: "object",
@@ -22,13 +22,13 @@ opencode.tool.add({
   execute(input, ctx) {},
 })
 
-opencode.auth.add({
+openloom.auth.add({
   provider: "openai",
   type: "api",
   value: process.env.OPENAI_API_KEY,
 })
 
-opencode.agent.add({
+openloom.agent.add({
   name: "build",
   permissions: [],
   model: {
@@ -38,20 +38,20 @@ opencode.agent.add({
   },
 })
 
-const sessionID = await opencode.session.create({
+const sessionID = await openloom.session.create({
   agent: "build",
 })
 
-opencode.subscribe((event) => {
+openloom.subscribe((event) => {
   console.log(event)
 })
 
-await opencode.session.prompt({
+await openloom.session.prompt({
   sessionID,
   text: "hey what is up",
 })
 
-await opencode.session.prompt({
+await openloom.session.prompt({
   sessionID,
   text: "what is up with this",
   files: [
@@ -62,6 +62,6 @@ await opencode.session.prompt({
   ],
 })
 
-await opencode.session.wait()
+await openloom.session.wait()
 
-console.log(await opencode.session.messages(sessionID))
+console.log(await openloom.session.messages(sessionID))

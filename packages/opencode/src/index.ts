@@ -71,7 +71,7 @@ import { errorMessage } from "./util/error"
 import { PluginCommand } from "./cli/cmd/plug"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
-import { ensureProcessMetadata } from "@openloom/core/util/opencode-process"
+import { ensureProcessMetadata } from "@openloom/core/util/openloom-process"
 import { isRecord } from "@/util/record"
 
 const processMetadata = ensureProcessMetadata("main")
@@ -139,7 +139,7 @@ const cli = yargs(args)
     Heap.start()
 
     process.env.AGENT = "1"
-    process.env.OPENCODE = "1"
+    process.env.OPENLOOM = "1"
     process.env.OPENLOOM_PID = String(process.pid)
 
     Log.Default.info("openloom", {
@@ -149,7 +149,7 @@ const cli = yargs(args)
       run_id: processMetadata.runID,
     })
 
-    const marker = path.join(Global.Path.data, "opencode.db")
+    const marker = path.join(Global.Path.data, "openloom.db")
     if (!(await Filesystem.exists(marker))) {
       const tty = process.stderr.isTTY
       process.stderr.write("Performing one time database migration, may take a few minutes..." + EOL)

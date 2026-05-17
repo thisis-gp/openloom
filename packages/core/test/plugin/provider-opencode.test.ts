@@ -4,7 +4,7 @@ import { Catalog } from "@openloom/core/catalog"
 import { Location } from "@openloom/core/location"
 import { ModelV2 } from "@openloom/core/model"
 import { PluginV2 } from "@openloom/core/plugin"
-import { OpencodePlugin } from "@openloom/core/plugin/provider/opencode"
+import { OpencodePlugin } from "@openloom/core/plugin/provider/openloom"
 import { ProviderV2 } from "@openloom/core/provider"
 import { it, model, provider, withEnv } from "./provider-helper"
 
@@ -17,11 +17,11 @@ describe("OpencodePlugin", () => {
       Effect.gen(function* () {
         const plugin = yield* PluginV2.Service
         yield* plugin.add(OpencodePlugin)
-        const updated = yield* plugin.trigger("provider.update", {}, { provider: provider("opencode"), cancel: false })
+        const updated = yield* plugin.trigger("provider.update", {}, { provider: provider("openloom"), cancel: false })
         const paid = yield* plugin.trigger(
           "model.update",
           {},
-          { model: model("opencode", "paid", { cost: cost(1) }), cancel: false },
+          { model: model("openloom", "paid", { cost: cost(1) }), cancel: false },
         )
         expect(updated.provider.options.aisdk.provider.apiKey).toBe("public")
         expect(paid.cancel).toBe(true)
@@ -34,11 +34,11 @@ describe("OpencodePlugin", () => {
       Effect.gen(function* () {
         const plugin = yield* PluginV2.Service
         yield* plugin.add(OpencodePlugin)
-        yield* plugin.trigger("provider.update", {}, { provider: provider("opencode"), cancel: false })
+        yield* plugin.trigger("provider.update", {}, { provider: provider("openloom"), cancel: false })
         const free = yield* plugin.trigger(
           "model.update",
           {},
-          { model: model("opencode", "free", { cost: cost(0) }), cancel: false },
+          { model: model("openloom", "free", { cost: cost(0) }), cancel: false },
         )
         expect(free.cancel).toBe(false)
       }),
@@ -50,11 +50,11 @@ describe("OpencodePlugin", () => {
       Effect.gen(function* () {
         const plugin = yield* PluginV2.Service
         yield* plugin.add(OpencodePlugin)
-        yield* plugin.trigger("provider.update", {}, { provider: provider("opencode"), cancel: false })
+        yield* plugin.trigger("provider.update", {}, { provider: provider("openloom"), cancel: false })
         const outputOnly = yield* plugin.trigger(
           "model.update",
           {},
-          { model: model("opencode", "output-only", { cost: cost(0, 1) }), cancel: false },
+          { model: model("openloom", "output-only", { cost: cost(0, 1) }), cancel: false },
         )
         expect(outputOnly.cancel).toBe(false)
       }),
@@ -66,11 +66,11 @@ describe("OpencodePlugin", () => {
       Effect.gen(function* () {
         const plugin = yield* PluginV2.Service
         yield* plugin.add(OpencodePlugin)
-        const updated = yield* plugin.trigger("provider.update", {}, { provider: provider("opencode"), cancel: false })
+        const updated = yield* plugin.trigger("provider.update", {}, { provider: provider("openloom"), cancel: false })
         const paid = yield* plugin.trigger(
           "model.update",
           {},
-          { model: model("opencode", "paid", { cost: cost(1) }), cancel: false },
+          { model: model("openloom", "paid", { cost: cost(1) }), cancel: false },
         )
         expect(updated.provider.options.aisdk.provider.apiKey).toBeUndefined()
         expect(paid.cancel).toBe(false)
@@ -86,12 +86,12 @@ describe("OpencodePlugin", () => {
         const updated = yield* plugin.trigger(
           "provider.update",
           {},
-          { provider: provider("opencode", { env: ["CUSTOM_OPENLOOM_API_KEY"] }), cancel: false },
+          { provider: provider("openloom", { env: ["CUSTOM_OPENLOOM_API_KEY"] }), cancel: false },
         )
         const paid = yield* plugin.trigger(
           "model.update",
           {},
-          { model: model("opencode", "paid", { cost: cost(1) }), cancel: false },
+          { model: model("openloom", "paid", { cost: cost(1) }), cancel: false },
         )
         expect(updated.provider.options.aisdk.provider.apiKey).toBeUndefined()
         expect(paid.cancel).toBe(false)
@@ -108,7 +108,7 @@ describe("OpencodePlugin", () => {
           "provider.update",
           {},
           {
-            provider: provider("opencode", {
+            provider: provider("openloom", {
               options: {
                 headers: {},
                 body: {},
@@ -124,7 +124,7 @@ describe("OpencodePlugin", () => {
         const paid = yield* plugin.trigger(
           "model.update",
           {},
-          { model: model("opencode", "paid", { cost: cost(1) }), cancel: false },
+          { model: model("openloom", "paid", { cost: cost(1) }), cancel: false },
         )
         expect(updated.provider.options.aisdk.provider.apiKey).toBe("configured")
         expect(paid.cancel).toBe(false)
@@ -140,12 +140,12 @@ describe("OpencodePlugin", () => {
         const updated = yield* plugin.trigger(
           "provider.update",
           {},
-          { provider: provider("opencode", { enabled: { via: "auth", service: "opencode" } }), cancel: false },
+          { provider: provider("openloom", { enabled: { via: "auth", service: "openloom" } }), cancel: false },
         )
         const paid = yield* plugin.trigger(
           "model.update",
           {},
-          { model: model("opencode", "paid", { cost: cost(1) }), cancel: false },
+          { model: model("openloom", "paid", { cost: cost(1) }), cancel: false },
         )
         expect(updated.provider.options.aisdk.provider.apiKey).toBeUndefined()
         expect(paid.cancel).toBe(false)
@@ -153,7 +153,7 @@ describe("OpencodePlugin", () => {
     ),
   )
 
-  it.effect("ignores non-opencode providers and models", () =>
+  it.effect("ignores non-openloom providers and models", () =>
     withEnv({ OPENLOOM_API_KEY: undefined }, () =>
       Effect.gen(function* () {
         const plugin = yield* PluginV2.Service
@@ -170,10 +170,10 @@ describe("OpencodePlugin", () => {
     ),
   )
 
-  it.effect("prefers gpt-5-nano as the opencode small model", () =>
+  it.effect("prefers gpt-5-nano as the openloom small model", () =>
     Effect.gen(function* () {
       const catalog = yield* Catalog.Service
-      const providerID = ProviderV2.ID.opencode
+      const providerID = ProviderV2.ID.openloom
 
       yield* catalog.provider.update(providerID, () => {})
       yield* catalog.model.update(providerID, ModelV2.ID.make("cheap-mini"), (model) => {

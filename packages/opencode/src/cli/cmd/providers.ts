@@ -301,7 +301,7 @@ export const ProvidersLoginCommand = effectCmd({
   builder: (yargs) =>
     yargs
       .positional("url", {
-        describe: "opencode auth provider",
+        describe: "openloom auth provider",
         type: "string",
       })
       .option("provider", {
@@ -322,7 +322,7 @@ export const ProvidersLoginCommand = effectCmd({
     if (args.url) {
       const url = args.url.replace(/\/+$/, "")
       const wellknown = (yield* cliTry(`Failed to load auth provider metadata from ${url}: `, () =>
-        fetch(`${url}/.well-known/opencode`).then((x) => x.json()),
+        fetch(`${url}/.well-known/openloom`).then((x) => x.json()),
       )) as {
         auth: { command: string[]; env: string }
       }
@@ -366,7 +366,7 @@ export const ProvidersLoginCommand = effectCmd({
     const hooks = yield* pluginSvc.list()
 
     const priority: Record<string, number> = {
-      opencode: 0,
+      openloom: 0,
       openai: 1,
       "github-copilot": 2,
       google: 3,
@@ -393,7 +393,7 @@ export const ProvidersLoginCommand = effectCmd({
           label: x.name,
           value: x.id,
           hint: {
-            opencode: "recommended",
+            openloom: "recommended",
             openai: "ChatGPT Plus/Pro or API key",
           }[x.id],
         })),
@@ -460,8 +460,8 @@ export const ProvidersLoginCommand = effectCmd({
       )
     }
 
-    if (provider === "opencode") {
-      yield* Prompt.log.info("Create an api key at https://opencode.ai/auth")
+    if (provider === "openloom") {
+      yield* Prompt.log.info("Create an api key at https://openloom.ai/auth")
     }
 
     if (provider === "vercel") {
@@ -470,7 +470,7 @@ export const ProvidersLoginCommand = effectCmd({
 
     if (["cloudflare", "cloudflare-ai-gateway"].includes(provider)) {
       yield* Prompt.log.info(
-        "Cloudflare AI Gateway can be configured with CLOUDFLARE_GATEWAY_ID, CLOUDFLARE_ACCOUNT_ID, and CLOUDFLARE_API_TOKEN environment variables. Read more: https://opencode.ai/docs/providers/#cloudflare-ai-gateway",
+        "Cloudflare AI Gateway can be configured with CLOUDFLARE_GATEWAY_ID, CLOUDFLARE_ACCOUNT_ID, and CLOUDFLARE_API_TOKEN environment variables. Read more: https://openloom.ai/docs/providers/#cloudflare-ai-gateway",
       )
     }
 

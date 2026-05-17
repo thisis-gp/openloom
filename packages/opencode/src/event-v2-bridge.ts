@@ -1,5 +1,5 @@
 // Temporary V2 bridge: core events are the publish path, but the rest of
-// opencode and the HTTP event stream still expect legacy bus/sync payloads.
+// openloom and the HTTP event stream still expect legacy bus/sync payloads.
 // This layer goes away once consumers subscribe to core EventV2 directly.
 import { Bus as ProjectBus } from "@/bus"
 import { GlobalBus } from "@/bus/global"
@@ -22,7 +22,7 @@ export function toSyncDefinition<D extends EventV2.Definition>(definition: D) {
   return result as SyncEvent.Definition<D["type"], D["data"], D["data"]>
 }
 
-export class Service extends Context.Service<Service, EventV2.Interface>()("@opencode/EventV2Bridge") {}
+export class Service extends Context.Service<Service, EventV2.Interface>()("@openloom/EventV2Bridge") {}
 
 export const layer = Layer.effect(
   Service,

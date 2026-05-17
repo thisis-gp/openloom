@@ -28000,13 +28000,13 @@
       }
     }
   },
-  "opencode-go": {
-    "id": "opencode-go",
+  "openloom-go": {
+    "id": "openloom-go",
     "env": ["OPENLOOM_API_KEY"],
     "npm": "@ai-sdk/openai-compatible",
-    "api": "https://opencode.ai/zen/go/v1",
-    "name": "OpenCode Go",
-    "doc": "https://opencode.ai/docs/zen",
+    "api": "https://openloom.ai/zen/go/v1",
+    "name": "Openloom Go",
+    "doc": "https://openloom.ai/docs/zen",
     "models": {
       "minimax-m2.7": {
         "id": "minimax-m2.7",
@@ -57810,13 +57810,13 @@
       }
     }
   },
-  "opencode": {
-    "id": "opencode",
+  "openloom": {
+    "id": "openloom",
     "env": ["OPENLOOM_API_KEY"],
     "npm": "@ai-sdk/openai-compatible",
-    "api": "https://opencode.ai/zen/v1",
-    "name": "OpenCode Zen",
-    "doc": "https://opencode.ai/docs/zen",
+    "api": "https://openloom.ai/zen/v1",
+    "name": "Openloom Zen",
+    "doc": "https://openloom.ai/docs/zen",
     "models": {
       "minimax-m2.7": {
         "id": "minimax-m2.7",

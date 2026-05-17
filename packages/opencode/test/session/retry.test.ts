@@ -248,13 +248,13 @@ describe("session.retry.retryable", () => {
       }).toObject(),
     )
 
-    expect(SessionRetry.retryable(error, "opencode")).toEqual({
+    expect(SessionRetry.retryable(error, "openloom")).toEqual({
       message: SessionRetry.GO_UPSELL_MESSAGE,
       action: {
         reason: "free_tier_limit",
-        provider: "opencode",
+        provider: "openloom",
         title: "Free limit reached",
-        message: "Subscribe to OpenCode Go for reliable access to the best open-source models, starting at $5/month.",
+        message: "Subscribe to Openloom Go for reliable access to the best open-source models, starting at $5/month.",
         label: "subscribe",
         link: SessionRetry.GO_UPSELL_URL,
       },
@@ -284,17 +284,17 @@ describe("session.retry.retryable", () => {
       }).toObject(),
     )
 
-    expect(SessionRetry.retryable(error, "opencode-go")).toEqual({
+    expect(SessionRetry.retryable(error, "openloom-go")).toEqual({
       message:
-        "5 hour usage limit reached. It will reset in 5 hours 23 minutes. To continue using this model now, enable usage from your available balance - https://opencode.ai/workspace/wrk_01K6XGM22R6FM8JVABE9XDQXGH/go",
+        "5 hour usage limit reached. It will reset in 5 hours 23 minutes. To continue using this model now, enable usage from your available balance - https://openloom.ai/workspace/wrk_01K6XGM22R6FM8JVABE9XDQXGH/go",
       action: {
         reason: "account_rate_limit",
-        provider: "opencode-go",
+        provider: "openloom-go",
         title: "Go limit reached",
         message:
           "5 hour usage limit reached. It will reset in 5 hours 23 minutes. To continue using this model now, enable usage from your available balance",
         label: "open settings",
-        link: "https://opencode.ai/workspace/wrk_01K6XGM22R6FM8JVABE9XDQXGH/go",
+        link: "https://openloom.ai/workspace/wrk_01K6XGM22R6FM8JVABE9XDQXGH/go",
       },
     })
   })
@@ -321,7 +321,7 @@ describe("session.retry.retryable", () => {
       }).toObject(),
     )
 
-    expect(SessionRetry.retryable(error, "opencode-go")?.action?.message).toBe(
+    expect(SessionRetry.retryable(error, "openloom-go")?.action?.message).toBe(
       "Usage limit reached. It will reset in 15 minutes. To continue using this model now, enable usage from your available balance",
     )
   })

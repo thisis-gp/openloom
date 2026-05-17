@@ -1,141 +1,123 @@
-<p align="center">
-  <a href="https://opencode.ai">
-    <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
-    </picture>
-  </a>
-</p>
-<p align="center">The open source AI coding agent.</p>
-<p align="center">
-  <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
-  <a href="https://www.npmjs.com/package/opencode-ai"><img alt="npm" src="https://img.shields.io/npm/v/opencode-ai?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/publish.yml?style=flat-square&branch=dev" /></a>
-</p>
+# Openloom
 
-<p align="center">
-  <a href="README.md">English</a> |
-  <a href="README.zh.md">简体中文</a> |
-  <a href="README.zht.md">繁體中文</a> |
-  <a href="README.ko.md">한국어</a> |
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.fr.md">Français</a> |
-  <a href="README.it.md">Italiano</a> |
-  <a href="README.da.md">Dansk</a> |
-  <a href="README.ja.md">日本語</a> |
-  <a href="README.pl.md">Polski</a> |
-  <a href="README.ru.md">Русский</a> |
-  <a href="README.bs.md">Bosanski</a> |
-  <a href="README.ar.md">العربية</a> |
-  <a href="README.no.md">Norsk</a> |
-  <a href="README.br.md">Português (Brasil)</a> |
-  <a href="README.th.md">ไทย</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.uk.md">Українська</a> |
-  <a href="README.bn.md">বাংলা</a> |
-  <a href="README.gr.md">Ελληνικά</a> |
-  <a href="README.vi.md">Tiếng Việt</a>
-</p>
-
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
+An agentic OS for personal and team use — built on top of [OpenCode](https://github.com/anomalyco/opencode) (MIT), extended with Slate task tracking, session memory, and multi-agent coordination.
 
 ---
 
-### Installation
+## Quick Start
 
 ```bash
-# YOLO
-curl -fsSL https://opencode.ai/install | bash
+# 1. Clone
+git clone https://github.com/thisis-gp/openloom
+cd openloom
 
-# Package managers
-npm i -g opencode-ai@latest        # or bun/pnpm/yarn
-scoop install opencode             # Windows
-choco install opencode             # Windows
-brew install anomalyco/tap/opencode # macOS and Linux (recommended, always up to date)
-brew install opencode              # macOS and Linux (official brew formula, updated less)
-sudo pacman -S opencode            # Arch Linux (Stable)
-paru -S opencode-bin               # Arch Linux (Latest from AUR)
-mise use -g opencode               # Any OS
-nix run nixpkgs#opencode           # or github:anomalyco/opencode for latest dev branch
+# 2. Set up your API key
+cp .env.example .env
+# Edit .env and add your key — OpenRouter, Anthropic, OpenAI, etc.
+
+# 3. Install and run
+bun install
+bun run dev        # terminal UI
+bun run dev:web    # web app (localhost)
 ```
-
-> [!TIP]
-> Remove versions older than 0.1.x before installing.
-
-### Desktop App (BETA)
-
-OpenCode is also available as a desktop application. Download directly from the [releases page](https://github.com/anomalyco/opencode/releases) or [opencode.ai/download](https://opencode.ai/download).
-
-| Platform              | Download                           |
-| --------------------- | ---------------------------------- |
-| macOS (Apple Silicon) | `opencode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `opencode-desktop-mac-x64.dmg`     |
-| Windows               | `opencode-desktop-windows-x64.exe` |
-| Linux                 | `.deb`, `.rpm`, or `.AppImage`     |
-
-```bash
-# macOS (Homebrew)
-brew install --cask opencode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/opencode-desktop
-```
-
-#### Installation Directory
-
-The install script respects the following priority order for the installation path:
-
-1. `$OPENLOOM_INSTALL_DIR` - Custom installation directory
-2. `$XDG_BIN_DIR` - XDG Base Directory Specification compliant path
-3. `$HOME/bin` - Standard user binary directory (if it exists or can be created)
-4. `$HOME/.openloom/bin` - Default fallback
-
-```bash
-# Examples
-OPENLOOM_INSTALL_DIR=/usr/local/bin curl -fsSL https://opencode.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/install | bash
-```
-
-### Agents
-
-OpenCode includes two built-in agents you can switch between with the `Tab` key.
-
-- **build** - Default, full-access agent for development work
-- **plan** - Read-only agent for analysis and code exploration
-  - Denies file edits by default
-  - Asks permission before running bash commands
-  - Ideal for exploring unfamiliar codebases or planning changes
-
-Also included is a **general** subagent for complex searches and multistep tasks.
-This is used internally and can be invoked using `@general` in messages.
-
-Learn more about [agents](https://opencode.ai/docs/agents).
-
-### Documentation
-
-For more info on how to configure OpenCode, [**head over to our docs**](https://opencode.ai/docs).
-
-### Contributing
-
-If you're interested in contributing to OpenCode, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.
-
-### Building on OpenCode
-
-If you are working on a project that's related to OpenCode and is using "opencode" as part of its name, for example "opencode-dashboard" or "opencode-mobile", please add a note to your README to clarify that it is not built by the OpenCode team and is not affiliated with us in any way.
-
-### FAQ
-
-#### How is this different from Claude Code?
-
-It's very similar to Claude Code in terms of capability. Here are the key differences:
-
-- 100% open source
-- Not coupled to any provider. Although we recommend the models we provide through [OpenCode Zen](https://opencode.ai/zen), OpenCode can be used with Claude, OpenAI, Google, or even local models. As models evolve, the gaps between them will close and pricing will drop, so being provider-agnostic is important.
-- Built-in opt-in LSP support
-- A focus on TUI. OpenCode is built by neovim users and the creators of [terminal.shop](https://terminal.shop); we are going to push the limits of what's possible in the terminal.
-- A client/server architecture. This, for example, can allow OpenCode to run on your computer while you drive it remotely from a mobile app, meaning that the TUI frontend is just one of the possible clients.
 
 ---
 
-**Join our community** [Discord](https://discord.gg/opencode) | [X.com](https://x.com/opencode)
+## Configuration
+
+API keys go in `.env` at the repo root (loaded automatically on startup):
+
+```bash
+OPENROUTER_API_KEY=sk-or-v1-...
+ANTHROPIC_API_KEY=sk-ant-...
+# See .env.example for all supported providers
+```
+
+Project-level settings go in `openloom.json` in your project directory:
+
+```json
+{
+  "model": "anthropic/claude-sonnet-4-6",
+  "mcp": {
+    "my-server": { "type": "stdio", "command": "npx my-mcp-server" }
+  }
+}
+```
+
+Global settings go in `~/.config/openloom/openloom.json`.
+
+---
+
+## Agents
+
+Switch between agents with **Tab**:
+
+| Agent | Access | Use for |
+|-------|--------|---------|
+| `build` | Full (read + write + shell) | Active development |
+| `plan` | Read-only | Exploring and planning |
+| `general` | Full | Complex multi-step tasks (invoked via `@general`) |
+
+Custom agents: add `.md` files to `.openloom/agents/` in your project.
+
+---
+
+## Features
+
+| Feature | Status |
+|---------|--------|
+| Multi-provider LLM (Anthropic, OpenRouter, OpenAI, Gemini, Groq, Mistral, Bedrock, 15+ more) | ✅ |
+| Terminal UI (OpenTUI) | ✅ |
+| Desktop app (Tauri) | ✅ |
+| Web UI (React/Vite) | ✅ |
+| Session persistence (SQLite) + resume | ✅ |
+| Built-in tools: read, write, edit, shell, glob, grep, webfetch, websearch, LSP | ✅ |
+| MCP server support | ✅ |
+| Skills (context injection via `.openloom/skills/`) | ✅ |
+| Plugin system (`.openloom/plugins/`) | ✅ |
+| Custom tools (`.openloom/tools/`) | ✅ |
+| VS Code extension | ✅ |
+| Zed extension | ✅ |
+| Slack integration | ✅ |
+| `.env` file support | ✅ |
+
+---
+
+## Workspace Layout
+
+```
+openloom/
+├── packages/
+│   ├── opencode/     # Core CLI, agent runtime, server, tools, session DB
+│   ├── app/          # React web/desktop UI
+│   ├── desktop/      # Tauri desktop wrapper
+│   ├── ui/           # Shared UI components
+│   ├── llm/          # LLM provider abstraction
+│   ├── plugin/       # Plugin system
+│   ├── sdk/          # JavaScript/TypeScript SDK
+│   ├── slack/        # Slack bot integration
+│   └── ...
+├── sdks/vscode/      # VS Code extension
+├── .env.example      # API key template
+└── openloom.json     # (create this in your project dir)
+```
+
+---
+
+## Dev Scripts
+
+```bash
+bun run dev           # Start terminal UI
+bun run dev:web       # Start web app (React, localhost:5173)
+bun run dev:desktop   # Start desktop app (requires Rust + Tauri)
+bun run typecheck     # Type check all packages
+```
+
+---
+
+## Based On
+
+Openloom is a fork of [OpenCode](https://github.com/anomalyco/opencode) (MIT License) by the SST team.
+The core architecture — agent runtime, tool system, session persistence, TUI, desktop app — comes from OpenCode.
+
+Openloom adds: `.env` support, Slate task tracking integration, branding, and agentic OS features.

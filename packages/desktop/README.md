@@ -1,6 +1,6 @@
-# OpenCode Desktop
+# Openloom Desktop
 
-The OpenCode Desktop app, built with Electron.
+The Openloom Desktop app, built with Electron.
 
 ## Development
 

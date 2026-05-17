@@ -112,7 +112,7 @@ describe("tool.registry", () => {
       const build = yield* agent.get("build")
       if (!build) throw new Error("build agent not found")
       const task = (yield* registry.tools({
-        providerID: ProviderID.opencode,
+        providerID: ProviderID.openloom,
         modelID: ModelID.make("test"),
         agent: build,
       })).find((tool) => tool.id === "task")
@@ -131,11 +131,11 @@ describe("tool.registry", () => {
     }),
   )
 
-  it.instance("loads tools from .opencode/tool (singular)", () =>
+  it.instance("loads tools from .openloom/tool (singular)", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const opencode = path.join(test.directory, ".openloom")
-      const tool = path.join(opencode, "tool")
+      const openloom = path.join(test.directory, ".openloom")
+      const tool = path.join(openloom, "tool")
       yield* Effect.promise(() => fs.mkdir(tool, { recursive: true }))
       yield* Effect.promise(() =>
         Bun.write(
@@ -158,7 +158,7 @@ describe("tool.registry", () => {
     }),
   )
 
-  it.instance("ignores non-tool exports in .opencode/tool files", () =>
+  it.instance("ignores non-tool exports in .openloom/tool files", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
       const tool = path.join(test.directory, ".openloom", "tool")
@@ -185,11 +185,11 @@ describe("tool.registry", () => {
     }),
   )
 
-  it.instance("loads tools from .opencode/tools (plural)", () =>
+  it.instance("loads tools from .openloom/tools (plural)", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const opencode = path.join(test.directory, ".openloom")
-      const tools = path.join(opencode, "tools")
+      const openloom = path.join(test.directory, ".openloom")
+      const tools = path.join(openloom, "tools")
       yield* Effect.promise(() => fs.mkdir(tools, { recursive: true }))
       yield* Effect.promise(() =>
         Bun.write(
@@ -248,7 +248,7 @@ describe("tool.registry", () => {
 
       const agents = yield* Agent.Service
       const promptTools = yield* registry.tools({
-        providerID: ProviderID.opencode,
+        providerID: ProviderID.openloom,
         modelID: ModelID.make("test"),
         agent: yield* agents.defaultInfo(),
       })
@@ -268,13 +268,13 @@ describe("tool.registry", () => {
     () =>
       Effect.gen(function* () {
         const test = yield* TestInstance
-        const opencode = path.join(test.directory, ".openloom")
-        const customTools = path.join(opencode, "tools")
-        const plugin = path.join(opencode, "node_modules", "@openloom", "plugin")
+        const openloom = path.join(test.directory, ".openloom")
+        const customTools = path.join(openloom, "tools")
+        const plugin = path.join(openloom, "node_modules", "@openloom", "plugin")
         yield* Effect.promise(() => fs.mkdir(path.join(plugin, "dist"), { recursive: true }))
         yield* Effect.promise(() => fs.mkdir(customTools, { recursive: true }))
         yield* Effect.promise(() =>
-          fs.cp(path.dirname(fileURLToPath(import.meta.resolve("zod"))), path.join(opencode, "node_modules", "zod"), {
+          fs.cp(path.dirname(fileURLToPath(import.meta.resolve("zod"))), path.join(openloom, "node_modules", "zod"), {
             dereference: true,
             recursive: true,
           }),
@@ -410,12 +410,12 @@ describe("tool.registry", () => {
   it.instance("loads tools with external dependencies without crashing", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
-      const opencode = path.join(test.directory, ".openloom")
-      const tools = path.join(opencode, "tools")
+      const openloom = path.join(test.directory, ".openloom")
+      const tools = path.join(openloom, "tools")
       yield* Effect.promise(() => fs.mkdir(tools, { recursive: true }))
       yield* Effect.promise(() =>
         Bun.write(
-          path.join(opencode, "package.json"),
+          path.join(openloom, "package.json"),
           JSON.stringify({
             name: "custom-tools",
             dependencies: {
@@ -427,7 +427,7 @@ describe("tool.registry", () => {
       )
       yield* Effect.promise(() =>
         Bun.write(
-          path.join(opencode, "package-lock.json"),
+          path.join(openloom, "package-lock.json"),
           JSON.stringify({
             name: "custom-tools",
             lockfileVersion: 3,
@@ -443,7 +443,7 @@ describe("tool.registry", () => {
         ),
       )
 
-      const cowsay = path.join(opencode, "node_modules", "cowsay")
+      const cowsay = path.join(openloom, "node_modules", "cowsay")
       yield* Effect.promise(() => fs.mkdir(cowsay, { recursive: true }))
       yield* Effect.promise(() =>
         Bun.write(

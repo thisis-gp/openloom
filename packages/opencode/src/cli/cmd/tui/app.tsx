@@ -98,7 +98,7 @@ const appBindingCommands = [
   "variant.list",
   "provider.connect",
   "console.org.switch",
-  "opencode.status",
+  "openloom.status",
   "theme.switch",
   "theme.switch_mode",
   "theme.mode.lock",
@@ -348,14 +348,14 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     if (!terminalTitleEnabled() || Flag.OPENLOOM_DISABLE_TERMINAL_TITLE) return
 
     if (route.data.type === "home") {
-      renderer.setTerminalTitle("OpenCode")
+      renderer.setTerminalTitle("Openloom")
       return
     }
 
     if (route.data.type === "session") {
       const session = sync.session.get(route.data.sessionID)
       if (!session || SessionApi.isDefaultTitle(session.title)) {
-        renderer.setTerminalTitle("OpenCode")
+        renderer.setTerminalTitle("Openloom")
         return
       }
 
@@ -614,7 +614,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
           ]
         : []),
       {
-        name: "opencode.status",
+        name: "openloom.status",
         title: "View status",
         slashName: "status",
         run: () => {
@@ -663,7 +663,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         name: "docs.open",
         title: "Open docs",
         run: () => {
-          open("https://opencode.ai/docs").catch(() => {})
+          open("https://openloom.ai/docs").catch(() => {})
           dialog.clear()
         },
         category: "System",
@@ -899,7 +899,7 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
     await DialogAlert.show(
       dialog,
       "Update Complete",
-      `Successfully updated to OpenCode v${result.data.version}. Please restart the application.`,
+      `Successfully updated to Openloom v${result.data.version}. Please restart the application.`,
     )
 
     void exit()

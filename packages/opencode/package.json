@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "version": "1.15.3",
-  "name": "opencode",
+  "name": "openloom",
   "type": "module",
   "license": "MIT",
   "private": true,

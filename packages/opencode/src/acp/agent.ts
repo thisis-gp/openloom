@@ -508,18 +508,18 @@ export class Agent implements ACPAgent {
     log.info("initialize", { protocolVersion: params.protocolVersion })
 
     const authMethod: AuthMethod = {
-      description: "Run `opencode auth login` in the terminal",
-      name: "Login with opencode",
-      id: "opencode-login",
+      description: "Run `openloom auth login` in the terminal",
+      name: "Login with openloom",
+      id: "openloom-login",
     }
 
     // If client supports terminal-auth capability, use that instead.
     if (params.clientCapabilities?._meta?.["terminal-auth"] === true) {
       authMethod._meta = {
         "terminal-auth": {
-          command: "opencode",
+          command: "openloom",
           args: ["auth", "login"],
-          label: "OpenCode Login",
+          label: "Openloom Login",
         },
       }
     }
@@ -545,7 +545,7 @@ export class Agent implements ACPAgent {
       },
       authMethods: [authMethod],
       agentInfo: {
-        name: "OpenCode",
+        name: "Openloom",
         version: InstallationVersion,
       },
     }
@@ -932,7 +932,7 @@ export class Agent implements ACPAgent {
         }
       } else if (part.type === "file") {
         // Replay file attachments as appropriate ACP content blocks.
-        // OpenCode stores files internally as { type: "file", url, filename, mime }.
+        // Openloom stores files internally as { type: "file", url, filename, mime }.
         // We convert these back to ACP blocks based on the URL scheme and MIME type:
         // - file:// URLs → resource_link
         // - data: URLs with image/* → image block
@@ -1697,9 +1697,9 @@ async function defaultModel(config: ACPConfig, cwd?: string): Promise<{ provider
   const lastUsed = await lastUsedModel(sdk, directory, providers)
   if (lastUsed) return lastUsed
 
-  const opencodeProvider = providers.find((p) => p.id === "opencode")
-  if (opencodeProvider) {
-    const [best] = Provider.sort(Object.values(opencodeProvider.models))
+  const openloomProvider = providers.find((p) => p.id === "openloom")
+  if (openloomProvider) {
+    const [best] = Provider.sort(Object.values(openloomProvider.models))
     if (best) {
       return {
         providerID: ProviderID.make(best.providerID),
@@ -1868,7 +1868,7 @@ function buildVariantMeta(input: {
   availableVariants: string[]
 }) {
   return {
-    opencode: {
+    openloom: {
       modelId: `${input.model.providerID}/${input.model.modelID}`,
       variant: input.variant ?? null,
       availableVariants: input.availableVariants,

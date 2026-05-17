@@ -75,7 +75,7 @@ const withHome = <A, E, R>(home: string, self: Effect.Effect<A, E, R>) =>
   )
 
 describe("skill", () => {
-  it.live("discovers skills from .opencode/skill/ directory", () =>
+  it.live("discovers skills from .openloom/skill/ directory", () =>
     provideTmpdirInstance(
       (dir) =>
         Effect.gen(function* () {
@@ -135,7 +135,7 @@ description: Skill for dirs test.
     ),
   )
 
-  it.live("discovers multiple skills from .opencode/skill/ directory", () =>
+  it.live("discovers multiple skills from .openloom/skill/ directory", () =>
     provideTmpdirInstance(
       (dir) =>
         Effect.gen(function* () {
@@ -460,13 +460,13 @@ description: A skill in the .agents/skills directory.
 `,
               ),
               Bun.write(
-                path.join(dir, ".openloom", "skill", "opencode-skill", "SKILL.md"),
+                path.join(dir, ".openloom", "skill", "openloom-skill", "SKILL.md"),
                 `---
-name: opencode-skill
-description: A skill in the .opencode/skill directory.
+name: openloom-skill
+description: A skill in the .openloom/skill directory.
 ---
 
-# OpenCode Skill
+# Openloom Skill
 `,
               ),
             ]),
@@ -474,7 +474,7 @@ description: A skill in the .opencode/skill directory.
 
           const skill = yield* Skill.Service
           const list = (yield* skill.all()).filter((s) => s.location !== "<built-in>")
-          expect(list.map((s) => s.name)).toEqual(["opencode-skill"])
+          expect(list.map((s) => s.name)).toEqual(["openloom-skill"])
         }),
       { git: true },
     ),
@@ -509,21 +509,21 @@ description: A skill in the .agents/skills directory.
               Bun.write(
                 path.join(dir, ".openloom", "skill", "agent-skill", "SKILL.md"),
                 `---
-name: opencode-skill
-description: A skill in the .opencode/skill directory.
+name: openloom-skill
+description: A skill in the .openloom/skill directory.
 ---
 
-# OpenCode Skill
+# Openloom Skill
 `,
               ),
               Bun.write(
                 path.join(dir, ".openloom", "skills", "agent-skill", "SKILL.md"),
                 `---
-name: opencode-skill
-description: A skill in the .opencode/skills directory.
+name: openloom-skill
+description: A skill in the .openloom/skills directory.
 ---
 
-# OpenCode Skill
+# Openloom Skill
 `,
               ),
             ]),

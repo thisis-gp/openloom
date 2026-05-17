@@ -1,7 +1,7 @@
-export const deepLinkEvent = "opencode:deep-link"
+export const deepLinkEvent = "openloom:deep-link"
 
 const parseUrl = (input: string) => {
-  if (!input.startsWith("opencode://")) return
+  if (!input.startsWith("openloom://")) return
   if (typeof URL.canParse === "function" && !URL.canParse(input)) return
   try {
     return new URL(input)
@@ -36,13 +36,13 @@ export const collectOpenProjectDeepLinks = (urls: string[]) =>
 export const collectNewSessionDeepLinks = (urls: string[]) =>
   urls.map(parseNewSessionDeepLink).filter((link): link is { directory: string; prompt?: string } => !!link)
 
-type OpenCodeWindow = Window & {
+type OpenloomWindow = Window & {
   __OPENLOOM__?: {
     deepLinks?: string[]
   }
 }
 
-export const drainPendingDeepLinks = (target: OpenCodeWindow) => {
+export const drainPendingDeepLinks = (target: OpenloomWindow) => {
   const pending = target.__OPENLOOM__?.deepLinks ?? []
   if (pending.length === 0) return []
   if (target.__OPENLOOM__) target.__OPENLOOM__.deepLinks = []

@@ -1,17 +1,17 @@
 <p align="center">
-  <a href="https://opencode.ai">
+  <a href="https://openloom.ai">
     <picture>
       <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
       <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
+      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="Openloom logo">
     </picture>
   </a>
 </p>
 <p align="center">Otwartoźródłowy agent kodujący AI.</p>
 <p align="center">
-  <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
-  <a href="https://www.npmjs.com/package/opencode-ai"><img alt="npm" src="https://img.shields.io/npm/v/opencode-ai?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/publish.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://openloom.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
+  <a href="https://www.npmjs.com/package/openloom-ai"><img alt="npm" src="https://img.shields.io/npm/v/openloom-ai?style=flat-square" /></a>
+  <a href="https://github.com/anomalyco/openloom/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/openloom/publish.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@
   <a href="README.vi.md">Tiếng Việt</a>
 </p>
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
+[![Openloom Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://openloom.ai)
 
 ---
 
@@ -47,18 +47,18 @@
 
 ```bash
 # YOLO
-curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://openloom.ai/install | bash
 
 # Menedżery pakietów
 npm i -g opencode-ai@latest        # albo bun/pnpm/yarn
-scoop install opencode             # Windows
-choco install opencode             # Windows
-brew install anomalyco/tap/opencode # macOS i Linux (polecane, zawsze aktualne)
-brew install opencode              # macOS i Linux (oficjalna formuła brew, rzadziej aktualizowana)
-sudo pacman -S opencode            # Arch Linux (Stable)
-paru -S opencode-bin               # Arch Linux (Latest from AUR)
-mise use -g opencode               # dowolny system
-nix run nixpkgs#opencode           # lub github:anomalyco/opencode dla najnowszej gałęzi dev
+scoop install openloom             # Windows
+choco install openloom             # Windows
+brew install anomalyco/tap/openloom # macOS i Linux (polecane, zawsze aktualne)
+brew install openloom              # macOS i Linux (oficjalna formuła brew, rzadziej aktualizowana)
+sudo pacman -S openloom            # Arch Linux (Stable)
+paru -S openloom-bin               # Arch Linux (Latest from AUR)
+mise use -g openloom               # dowolny system
+nix run nixpkgs#openloom           # lub github:anomalyco/openloom dla najnowszej gałęzi dev
 ```
 
 > [!TIP]
@@ -66,20 +66,20 @@ nix run nixpkgs#opencode           # lub github:anomalyco/opencode dla najnowsze
 
 ### Aplikacja desktopowa (BETA)
 
-OpenCode jest także dostępny jako aplikacja desktopowa. Pobierz ją bezpośrednio ze strony [releases](https://github.com/anomalyco/opencode/releases) lub z [opencode.ai/download](https://opencode.ai/download).
+Openloom jest także dostępny jako aplikacja desktopowa. Pobierz ją bezpośrednio ze strony [releases](https://github.com/anomalyco/openloom/releases) lub z [openloom.ai/download](https://openloom.ai/download).
 
 | Platforma             | Pobieranie                         |
 | --------------------- | ---------------------------------- |
-| macOS (Apple Silicon) | `opencode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `opencode-desktop-mac-x64.dmg`     |
-| Windows               | `opencode-desktop-windows-x64.exe` |
+| macOS (Apple Silicon) | `openloom-desktop-mac-arm64.dmg`   |
+| macOS (Intel)         | `openloom-desktop-mac-x64.dmg`     |
+| Windows               | `openloom-desktop-windows-x64.exe` |
 | Linux                 | `.deb`, `.rpm` lub AppImage        |
 
 ```bash
 # macOS (Homebrew)
-brew install --cask opencode-desktop
+brew install --cask openloom-desktop
 # Windows (Scoop)
-scoop bucket add extras; scoop install extras/opencode-desktop
+scoop bucket add extras; scoop install extras/openloom-desktop
 ```
 
 #### Katalog instalacji
@@ -93,13 +93,13 @@ Skrypt instalacyjny stosuje następujący priorytet wyboru ścieżki instalacji:
 
 ```bash
 # Przykłady
-OPENLOOM_INSTALL_DIR=/usr/local/bin curl -fsSL https://opencode.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/install | bash
+OPENLOOM_INSTALL_DIR=/usr/local/bin curl -fsSL https://openloom.ai/install | bash
+XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://openloom.ai/install | bash
 ```
 
 ### Agents
 
-OpenCode zawiera dwóch wbudowanych agentów, między którymi możesz przełączać się klawiszem `Tab`.
+Openloom zawiera dwóch wbudowanych agentów, między którymi możesz przełączać się klawiszem `Tab`.
 
 - **build** - Domyślny agent z pełnym dostępem do pracy developerskiej
 - **plan** - Agent tylko do odczytu do analizy i eksploracji kodu
@@ -110,19 +110,19 @@ OpenCode zawiera dwóch wbudowanych agentów, między którymi możesz przełąc
 Dodatkowo jest subagent **general** do złożonych wyszukiwań i wieloetapowych zadań.
 Jest używany wewnętrznie i można go wywołać w wiadomościach przez `@general`.
 
-Dowiedz się więcej o [agents](https://opencode.ai/docs/agents).
+Dowiedz się więcej o [agents](https://openloom.ai/docs/agents).
 
 ### Dokumentacja
 
-Więcej informacji o konfiguracji OpenCode znajdziesz w [**dokumentacji**](https://opencode.ai/docs).
+Więcej informacji o konfiguracji Openloom znajdziesz w [**dokumentacji**](https://openloom.ai/docs).
 
 ### Współtworzenie
 
-Jeśli chcesz współtworzyć OpenCode, przeczytaj [contributing docs](./CONTRIBUTING.md) przed wysłaniem pull requesta.
+Jeśli chcesz współtworzyć Openloom, przeczytaj [contributing docs](./CONTRIBUTING.md) przed wysłaniem pull requesta.
 
-### Budowanie na OpenCode
+### Budowanie na Openloom
 
-Jeśli pracujesz nad projektem związanym z OpenCode i używasz "opencode" jako części nazwy (na przykład "opencode-dashboard" lub "opencode-mobile"), dodaj proszę notatkę do swojego README, aby wyjaśnić, że projekt nie jest tworzony przez zespół OpenCode i nie jest z nami w żaden sposób powiązany.
+Jeśli pracujesz nad projektem związanym z Openloom i używasz "openloom" jako części nazwy (na przykład "openloom-dashboard" lub "openloom-mobile"), dodaj proszę notatkę do swojego README, aby wyjaśnić, że projekt nie jest tworzony przez zespół Openloom i nie jest z nami w żaden sposób powiązany.
 
 ### FAQ
 
@@ -131,11 +131,11 @@ Jeśli pracujesz nad projektem związanym z OpenCode i używasz "opencode" jako 
 Jest bardzo podobne do Claude Code pod względem możliwości. Oto kluczowe różnice:
 
 - 100% open source
-- Niezależne od dostawcy. Chociaż polecamy modele oferowane przez [OpenCode Zen](https://opencode.ai/zen); OpenCode może być używany z Claude, OpenAI, Google, a nawet z modelami lokalnymi. W miarę jak modele ewoluują, różnice będą się zmniejszać, a ceny spadać, więc ważna jest niezależność od dostawcy.
+- Niezależne od dostawcy. Chociaż polecamy modele oferowane przez [Openloom Zen](https://openloom.ai/zen); Openloom może być używany z Claude, OpenAI, Google, a nawet z modelami lokalnymi. W miarę jak modele ewoluują, różnice będą się zmniejszać, a ceny spadać, więc ważna jest niezależność od dostawcy.
 - Wbudowane wsparcie LSP
-- Skupienie na TUI. OpenCode jest budowany przez użytkowników neovim i twórców [terminal.shop](https://terminal.shop); przesuwamy granice tego, co jest możliwe w terminalu.
-- Architektura klient/serwer. Pozwala np. uruchomić OpenCode na twoim komputerze, a sterować nim zdalnie z aplikacji mobilnej. To znaczy, że frontend TUI jest tylko jednym z możliwych klientów.
+- Skupienie na TUI. Openloom jest budowany przez użytkowników neovim i twórców [terminal.shop](https://terminal.shop); przesuwamy granice tego, co jest możliwe w terminalu.
+- Architektura klient/serwer. Pozwala np. uruchomić Openloom na twoim komputerze, a sterować nim zdalnie z aplikacji mobilnej. To znaczy, że frontend TUI jest tylko jednym z możliwych klientów.
 
 ---
 
-**Dołącz do naszej społeczności** [Discord](https://discord.gg/opencode) | [X.com](https://x.com/opencode)
+**Dołącz do naszej społeczności** [Discord](https://discord.gg/openloom) | [X.com](https://x.com/openloom)

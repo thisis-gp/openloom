@@ -1,4 +1,4 @@
-# opencode database guide
+# openloom database guide
 
 ## Database
 
@@ -11,10 +11,10 @@
 
 ## Development server
 
-- Running `bun dev` from `packages/opencode` starts the live interactive TUI. Do not run it as a blocking foreground command when you need to inspect the result.
-- Start it in `tmux` instead: `tmux new-session -d -s opencode-dev 'bun dev'`.
-- Capture the current TUI output with: `tmux capture-pane -pt opencode-dev`.
-- Stop the session explicitly when done: `tmux kill-session -t opencode-dev`.
+- Running `bun dev` from `packages/openloom` starts the live interactive TUI. Do not run it as a blocking foreground command when you need to inspect the result.
+- Start it in `tmux` instead: `tmux new-session -d -s openloom-dev 'bun dev'`.
+- Capture the current TUI output with: `tmux capture-pane -pt openloom-dev`.
+- Stop the session explicitly when done: `tmux kill-session -t openloom-dev`.
 
 # Module shape
 
@@ -26,7 +26,7 @@ of the file:
 ```ts
 // src/foo/foo.ts
 export interface Interface { ... }
-export class Service extends Context.Service<Service, Interface>()("@opencode/Foo") {}
+export class Service extends Context.Service<Service, Interface>()("@openloom/Foo") {}
 export const layer = Layer.effect(Service, ...)
 export const defaultLayer = layer.pipe(...)
 
@@ -73,7 +73,7 @@ import { SessionStatus } from "@/session/status"
 Barrels in multi-sibling directories force every import through the barrel to
 evaluate every sibling, which defeats tree-shaking and slows module load.
 
-# opencode Effect rules
+# openloom Effect rules
 
 Use these rules when writing or migrating Effect code.
 

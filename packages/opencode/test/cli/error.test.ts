@@ -13,9 +13,9 @@ describe("cli.error", () => {
       },
       {
         tag: "ConfigDirectoryTypoError",
-        data: { path: "/tmp/openloom.jsonc", dir: ".openloom", suggestion: "opencode" },
+        data: { path: "/tmp/openloom.jsonc", dir: ".openloom", suggestion: "openloom" },
         expected:
-          'Directory ".openloom" in /tmp/openloom.jsonc is not valid. Rename the directory to "opencode" or remove it. This is a common typo.',
+          'Directory ".openloom" in /tmp/openloom.jsonc is not valid. Rename the directory to "openloom" or remove it. This is a common typo.',
       },
       {
         tag: "ConfigFrontmatterError",
@@ -54,12 +54,12 @@ describe("cli.error", () => {
   test("formats account transport errors clearly", () => {
     const error = new AccountTransportError({
       method: "POST",
-      url: "https://console.opencode.ai/auth/device/code",
+      url: "https://console.openloom.ai/auth/device/code",
     })
 
     const formatted = FormatError(error)
 
-    expect(formatted).toContain("Could not reach POST https://console.opencode.ai/auth/device/code.")
+    expect(formatted).toContain("Could not reach POST https://console.openloom.ai/auth/device/code.")
     expect(formatted).toContain("This failed before the server returned an HTTP response.")
     expect(formatted).toContain("Check your network, proxy, or VPN configuration and try again.")
   })
@@ -73,7 +73,7 @@ describe("cli.error", () => {
     const expected = [
       "Model not found: anthropic/claude-sonet-4",
       "Did you mean: claude-sonnet-4",
-      "Try: `opencode models` to list available models",
+      "Try: `openloom models` to list available models",
       "Or check your config (openloom.json) provider/model names",
     ].join("\n")
 

@@ -62,7 +62,7 @@ Use this skill.
           const registry = yield* ToolRegistry.Service
           const agent = { name: "build", mode: "primary" as const, permission: [], options: {} }
           const tool = (yield* registry.tools({
-            providerID: "opencode" as any,
+            providerID: "openloom" as any,
             modelID: "gpt-5" as any,
             agent,
           })).find((tool) => tool.id === SkillTool.id)

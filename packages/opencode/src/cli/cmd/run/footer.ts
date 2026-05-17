@@ -425,7 +425,7 @@ export class RunFooter implements FooterApi {
         withRunSpan(
           "RunFooter.completeScrollback",
           {
-            "opencode.footer.phase": phase,
+            "openloom.footer.phase": phase,
             "session.id": this.options.sessionID() || undefined,
           },
           async () => {
@@ -877,8 +877,8 @@ export class RunFooter implements FooterApi {
         withRunSpan(
           "RunFooter.flush",
           {
-            "opencode.batch.commits": batch.length,
-            "opencode.footer.phase": phase,
+            "openloom.batch.commits": batch.length,
+            "openloom.footer.phase": phase,
             "session.id": this.options.sessionID() || undefined,
           },
           async () => {

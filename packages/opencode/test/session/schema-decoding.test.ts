@@ -53,7 +53,7 @@ describe("Session.Info", () => {
       projectID,
       workspaceID,
       directory: "/tmp/proj",
-      path: "packages/opencode",
+      path: "packages/openloom",
       parentID: sessionIDChild,
       summary: {
         additions: 10,
@@ -234,11 +234,11 @@ describe("SessionStatus.Info", () => {
       message: "transient",
       action: {
         reason: "free_tier_limit",
-        provider: "opencode",
+        provider: "openloom",
         title: "Free limit reached",
-        message: "Subscribe to OpenCode Go.",
+        message: "Subscribe to Openloom Go.",
         label: "subscribe",
-        link: "https://opencode.ai/go",
+        link: "https://openloom.ai/go",
       },
       next: 500,
     }

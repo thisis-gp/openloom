@@ -57,7 +57,7 @@ export interface Interface {
   readonly stream: (input: StreamInput) => Stream.Stream<Event, unknown>
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/LLM") {}
+export class Service extends Context.Service<Service, Interface>()("@openloom/LLM") {}
 
 const live: Layer.Layer<
   Service,
@@ -216,7 +216,7 @@ const live: Layer.Layer<
       const sortedTools = Object.fromEntries(Object.entries(tools).toSorted(([a], [b]) => a.localeCompare(b)))
 
       // Wire up toolExecutor for DWS workflow models so that tool calls
-      // from the workflow service are executed via opencode's tool system
+      // from the workflow service are executed via openloom's tool system
       // and results sent back over the WebSocket.
       if (language instanceof GitLabWorkflowLanguageModel) {
         const workflowModel = language as GitLabWorkflowLanguageModel & {
@@ -318,7 +318,7 @@ const live: Layer.Layer<
           })
         : undefined
 
-      const opencodeProjectID = input.model.providerID.startsWith("opencode")
+      const openloomProjectID = input.model.providerID.startsWith("openloom")
         ? (yield* InstanceState.context).project.id
         : undefined
 
@@ -359,18 +359,18 @@ const live: Layer.Layer<
         maxOutputTokens: params.maxOutputTokens,
         abortSignal: input.abort,
         headers: {
-          ...(input.model.providerID.startsWith("opencode")
+          ...(input.model.providerID.startsWith("openloom")
             ? {
-                "x-opencode-project": opencodeProjectID,
-                "x-opencode-session": input.sessionID,
-                "x-opencode-request": input.user.id,
-                "x-opencode-client": flags.client,
-                "User-Agent": `opencode/${InstallationVersion}`,
+                "x-openloom-project": openloomProjectID,
+                "x-openloom-session": input.sessionID,
+                "x-openloom-request": input.user.id,
+                "x-openloom-client": flags.client,
+                "User-Agent": `openloom/${InstallationVersion}`,
               }
             : {
                 "x-session-affinity": input.sessionID,
                 ...(input.parentSessionID ? { "x-parent-session-id": input.parentSessionID } : {}),
-                "User-Agent": `opencode/${InstallationVersion}`,
+                "User-Agent": `openloom/${InstallationVersion}`,
               }),
           ...input.model.headers,
           ...headers,

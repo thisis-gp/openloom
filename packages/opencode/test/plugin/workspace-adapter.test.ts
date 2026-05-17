@@ -104,7 +104,7 @@ describe("plugin.workspace", () => {
             path.join(dir, "openloom.json"),
             JSON.stringify(
               {
-                $schema: "https://opencode.ai/config.json",
+                $schema: "https://openloom.ai/config.json",
                 plugin: [pathToFileURL(file).href],
               },
               null,
