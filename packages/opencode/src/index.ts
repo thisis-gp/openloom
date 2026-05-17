@@ -1,3 +1,36 @@
+// Load .env file from cwd or repo root before anything else.
+// Existing process.env values are never overwritten.
+import { existsSync, readFileSync } from "fs"
+import { resolve, dirname } from "path"
+
+function loadDotEnv() {
+  const candidates = [process.cwd()]
+  // Walk up to find repo root (has package.json with "name": "openloom")
+  let dir = process.cwd()
+  for (let i = 0; i < 6; i++) {
+    const parent = dirname(dir)
+    if (parent === dir) break
+    dir = parent
+    candidates.push(dir)
+  }
+  for (const base of candidates) {
+    const envPath = resolve(base, ".env")
+    if (!existsSync(envPath)) continue
+    const lines = readFileSync(envPath, "utf-8").split("\n")
+    for (const raw of lines) {
+      const line = raw.trim()
+      if (!line || line.startsWith("#")) continue
+      const eq = line.indexOf("=")
+      if (eq === -1) continue
+      const key = line.slice(0, eq).trim()
+      const val = line.slice(eq + 1).trim().replace(/^["']|["']$/g, "")
+      if (key && !(key in process.env)) process.env[key] = val
+    }
+    break // only load the first .env found
+  }
+}
+loadDotEnv()
+
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
 import { RunCommand } from "./cli/cmd/run"
@@ -59,7 +92,7 @@ const args = hideBin(process.argv)
 
 function show(out: string) {
   const text = out.trimStart()
-  if (!text.startsWith("opencode ")) {
+  if (!text.startsWith("openloom ")) {
     process.stderr.write(UI.logo() + EOL + EOL)
     process.stderr.write(text)
     return
@@ -69,7 +102,7 @@ function show(out: string) {
 
 const cli = yargs(args)
   .parserConfiguration({ "populate--": true })
-  .scriptName("opencode")
+  .scriptName("openloom")
   .wrap(100)
   .help("help", "show help")
   .alias("help", "h")
@@ -109,7 +142,7 @@ const cli = yargs(args)
     process.env.OPENCODE = "1"
     process.env.OPENLOOM_PID = String(process.pid)
 
-    Log.Default.info("opencode", {
+    Log.Default.info("openloom", {
       version: InstallationVersion,
       args: process.argv.slice(2),
       process_role: processMetadata.processRole,
