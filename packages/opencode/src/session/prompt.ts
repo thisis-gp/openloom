@@ -1724,6 +1724,25 @@ NOTE: At any point in time through this workflow you should feel free to ask the
             yield* bus.publish(Session.Event.Error, { sessionID, error: error.toObject() })
             throw error
           }
+
+          // Budget circuit breaker — warn at 50/75/90%, stop at 100%
+          if (agent.maxCost !== undefined && agent.maxCost > 0) {
+            const liveSession = yield* sessions.get(sessionID).pipe(Effect.orDie)
+            const spent = liveSession.cost ?? 0
+            const ratio = spent / agent.maxCost
+            const pct = Math.round(ratio * 100)
+            if (ratio >= 1) {
+              const msg = `Budget limit reached: $${spent.toFixed(4)} of $${agent.maxCost.toFixed(4)} max (${pct}%) for agent "${agent.name}". Session stopped.`
+              yield* bus.publish(Session.Event.Error, {
+                sessionID,
+                error: new NamedError.Unknown({ message: msg }).toObject(),
+              })
+              break
+            } else if ((ratio >= 0.9 && step % 3 === 1) || (ratio >= 0.75 && step % 5 === 1) || (ratio >= 0.5 && step === 1)) {
+              yield* slog.warn("budget warning", { pct, spent, max: agent.maxCost, agent: agent.name })
+            }
+          }
+
           const maxSteps = agent.steps ?? Infinity
           const isLastStep = step >= maxSteps
           msgs = yield* insertReminders({ messages: msgs, agent, session })

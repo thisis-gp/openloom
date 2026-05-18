@@ -45,6 +45,10 @@ const AgentSchema = Schema.StructWithRest(
       description: "Maximum number of agentic iterations before forcing text-only response",
     }),
     maxSteps: Schema.optional(PositiveInt).annotate({ description: "@deprecated Use 'steps' field instead." }),
+    max_cost: Schema.optional(Schema.Finite).annotate({
+      description:
+        "Maximum USD cost allowed per session for this agent. Warnings at 50/75/90%; session is stopped at 100%.",
+    }),
     permission: Schema.optional(ConfigPermission.Info),
   }),
   [Schema.Record(Schema.String, Schema.Any)],
@@ -53,6 +57,7 @@ const AgentSchema = Schema.StructWithRest(
 const KNOWN_KEYS = new Set([
   "name",
   "model",
+  "max_cost",
   "variant",
   "prompt",
   "description",

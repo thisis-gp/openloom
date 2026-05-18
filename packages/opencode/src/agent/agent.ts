@@ -34,6 +34,7 @@ export const Info = Schema.Struct({
   topP: Schema.optional(Schema.Finite),
   temperature: Schema.optional(Schema.Finite),
   color: Schema.optional(Schema.String),
+  maxCost: Schema.optional(Schema.Finite),
   permission: Permission.Ruleset,
   model: Schema.optional(
     Schema.Struct({
@@ -302,6 +303,7 @@ export const layer = Layer.effect(
           item.hidden = value.hidden ?? item.hidden
           item.name = value.name ?? item.name
           item.steps = value.steps ?? item.steps
+          item.maxCost = (value as any).max_cost ?? item.maxCost
           item.options = mergeDeep(item.options, value.options ?? {})
           item.permission = Permission.merge(item.permission, Permission.fromConfig(value.permission ?? {}))
         }
