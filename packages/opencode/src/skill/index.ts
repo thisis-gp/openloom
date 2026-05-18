@@ -1,5 +1,5 @@
 import path from "path"
-import { pathToFileURL } from "url"
+import { pathToFileURL, fileURLToPath } from "url"
 import { Effect, Layer, Context, Schema } from "effect"
 import { NamedError } from "@openloom/core/util/error"
 import type { Agent } from "@/agent/agent"
@@ -23,6 +23,10 @@ const AGENTS_EXTERNAL_DIR = ".agents"
 const EXTERNAL_SKILL_PATTERN = "skills/**/SKILL.md"
 const OPENLOOM_SKILL_PATTERN = "{skill,skills}/**/SKILL.md"
 const SKILL_PATTERN = "**/SKILL.md"
+
+// Built-in skills directory: packages/opencode/skills/ — scanned unconditionally
+// so user-supplied skills (from cfg.skills.paths) can override them by name.
+const BUILTIN_SKILLS_DIR = fileURLToPath(new URL("../../skills", import.meta.url))
 
 // Built-in skill that ships with openloom. The model's intuition for what an
 // openloom.json should look like is often wrong, and openloom hard-fails on
@@ -190,6 +194,11 @@ const discoverSkills = Effect.fnUntraced(function* (
     for (const root of upDirs) {
       yield* scan(state, root, EXTERNAL_SKILL_PATTERN, { dot: true, scope: "project" })
     }
+  }
+
+  // Scan built-in skills shipped with the package (lowest precedence — user/config skills override)
+  if (yield* fsys.isDir(BUILTIN_SKILLS_DIR)) {
+    yield* scan(state, BUILTIN_SKILLS_DIR, SKILL_PATTERN, { scope: "builtin" })
   }
 
   const configDirs = yield* config.directories()

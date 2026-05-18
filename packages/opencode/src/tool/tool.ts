@@ -1,10 +1,16 @@
 import { Effect, Schema } from "effect"
+import * as Option from "effect/Option"
 import type { JSONSchema7 } from "@ai-sdk/provider"
 import type { MessageV2 } from "../session/message-v2"
 import type { Permission } from "../permission"
 import type { SessionID, MessageID } from "../session/schema"
 import * as Truncate from "./truncate"
 import { Agent } from "@/agent/agent"
+import { Plugin } from "@/plugin"
+import { scan as aidefenceScan } from "@/security/aidefence"
+import * as Log from "@openloom/core/util/log"
+
+const log = Log.create({ service: "tool" })
 
 interface Metadata {
   [key: string]: any
@@ -108,12 +114,52 @@ function wrap<Parameters extends Schema.Decoder<unknown>, Result extends Metadat
                   ),
             ),
           )
-          const result = yield* execute(decoded as Schema.Schema.Type<Parameters>, ctx)
+
+          // AIDefence: scan tool input for prompt injection / PII threats
+          const inputText = JSON.stringify(decoded)
+          const inputThreat = aidefenceScan(inputText)
+          if (inputThreat.level === "critical") {
+            const types = inputThreat.threats.map((t) => `${t.type}/${t.pattern}`).join(", ")
+            log.warn("AIDefence blocked tool input", { tool: id, threats: types })
+            throw new Error(
+              `Security threat detected in tool input [${types}]. Tool execution blocked. Review and sanitize the input before retrying.`,
+            )
+          }
+          if (inputThreat.level === "warning") {
+            log.warn("AIDefence warning on tool input", {
+              tool: id,
+              threats: inputThreat.threats.map((t) => t.type + "/" + t.pattern),
+            })
+          }
+
+          // Plugin hooks (tool.execute.before / tool.execute.after) — optional: no-op if Plugin not in scope (e.g. tests)
+          const pluginOpt = yield* Effect.serviceOption(Plugin.Service)
+          const beforeOutput = { args: decoded as any }
+          if (Option.isSome(pluginOpt)) {
+            yield* pluginOpt.value.trigger("tool.execute.before", { tool: id, sessionID: ctx.sessionID, callID: ctx.callID ?? "" }, beforeOutput)
+          }
+
+          const result = yield* execute(beforeOutput.args as Schema.Schema.Type<Parameters>, ctx)
+
+          const afterOutput = { title: result.title, output: result.output, metadata: result.metadata }
+          if (Option.isSome(pluginOpt)) {
+            yield* pluginOpt.value.trigger("tool.execute.after", { tool: id, sessionID: ctx.sessionID, callID: ctx.callID ?? "", args: beforeOutput.args }, afterOutput)
+          }
+
+          // AIDefence: warn if output contains critical threats (don't block — output may contain searched-for content)
+          const outputThreat = aidefenceScan(afterOutput.output)
+          if (outputThreat.level === "critical") {
+            log.warn("AIDefence warning on tool output", {
+              tool: id,
+              threats: outputThreat.threats.map((t) => t.type + "/" + t.pattern),
+            })
+          }
+
           if (result.metadata.truncated !== undefined) {
-            return result
+            return { ...result, output: afterOutput.output }
           }
           const agent = yield* agents.get(ctx.agent)
-          const truncated = yield* truncate.output(result.output, {}, agent)
+          const truncated = yield* truncate.output(afterOutput.output, {}, agent)
           return {
             ...result,
             output: truncated.content,
