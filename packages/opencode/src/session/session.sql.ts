@@ -135,3 +135,20 @@ export const PermissionTable = sqliteTable("permission", {
   ...Timestamps,
   data: text({ mode: "json" }).notNull().$type<Permission.Ruleset>(),
 })
+
+// Lightweight session summary written at session close — not FK-constrained so it outlives session deletion.
+export const MemoryTable = sqliteTable(
+  "session_memory",
+  {
+    session_id: text().$type<SessionID>().primaryKey(),
+    date: text().notNull(),
+    title: text().notNull(),
+    agent: text(),
+    model_id: text(),
+    cost_usd: real().notNull().default(0),
+    cwd: text().notNull(),
+    slate_tasks: text({ mode: "json" }).$type<string[]>(),
+    ...Timestamps,
+  },
+  (table) => [index("session_memory_date_idx").on(table.date)],
+)

@@ -15,6 +15,7 @@ import PROMPT_KIMI from "./prompt/kimi.txt"
 import PROMPT_CODEX from "./prompt/codex.txt"
 import PROMPT_TRINITY from "./prompt/trinity.txt"
 import PROMPT_COPILOT_GPT5 from "./prompt/copilot-gpt-5.txt"
+import PROMPT_DEEPSEEK from "./prompt/deepseek.txt"
 import type { Provider } from "@/provider/provider"
 import type { Agent } from "@/agent/agent"
 import { Permission } from "@/permission"
@@ -23,11 +24,15 @@ import { Skill } from "@/skill"
 import SUPPLEMENT_BUILD from "../agent/prompt/build.supplement.md"
 import SUPPLEMENT_PLAN from "../agent/prompt/plan.supplement.md"
 import SUPPLEMENT_GENERAL from "../agent/prompt/general.supplement.md"
+import SUPPLEMENT_EXPLORE from "../agent/prompt/explore.supplement.md"
+import SUPPLEMENT_SCOUT from "../agent/prompt/scout.supplement.md"
 
 const BUILTIN_SUPPLEMENTS: Record<string, string> = {
   build: SUPPLEMENT_BUILD,
   plan: SUPPLEMENT_PLAN,
   general: SUPPLEMENT_GENERAL,
+  explore: SUPPLEMENT_EXPLORE,
+  scout: SUPPLEMENT_SCOUT,
 }
 
 export function provider(model: Provider.Model) {
@@ -48,6 +53,8 @@ export function provider(model: Provider.Model) {
   if (id.includes("grok")) return [PROMPT_BEAST]
   if (id.includes("trinity")) return [PROMPT_TRINITY]
   if (id.includes("kimi")) return [PROMPT_KIMI]
+  // DeepSeek (V3/V4/R1) and Qwen/QwQ — concise, instruction-following prompt
+  if (id.includes("deepseek") || id.includes("qwen") || id.includes("qwq")) return [PROMPT_DEEPSEEK]
   return [PROMPT_DEFAULT]
 }
 

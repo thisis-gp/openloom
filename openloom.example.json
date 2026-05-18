@@ -1,0 +1,36 @@
+{
+  "$schema": "https://openloom.ai/config.json",
+
+  "agent": {
+    "build": {
+      "model": "anthropic/claude-sonnet-4-6",
+      "steps": 80
+    },
+    "plan": {
+      "model": "anthropic/claude-sonnet-4-6",
+      "steps": 40
+    },
+    "general": {
+      "model": "anthropic/claude-opus-4-7",
+      "steps": 60
+    },
+    "explore": {
+      "model": "anthropic/claude-haiku-4-5-20251001"
+    },
+    "scout": {
+      "model": "anthropic/claude-haiku-4-5-20251001"
+    }
+  },
+
+  "provider": {
+    "anthropic": {
+      "api_key": "$ANTHROPIC_API_KEY"
+    },
+    "openai": {
+      "api_key": "$OPENAI_API_KEY"
+    },
+    "openrouter": {
+      "api_key": "$OPENROUTER_API_KEY"
+    }
+  }
+}
