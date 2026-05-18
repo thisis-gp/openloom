@@ -330,4 +330,20 @@ export interface Hooks {
    * Modify tool definitions (description and parameters) sent to LLM
    */
   "tool.definition"?: (input: { toolID: string }, output: { description: string; parameters: any }) => Promise<void>
+  /**
+   * Called when an agent session begins processing its first user message.
+   * Use to initialise per-session context (load Slate tasks, warm caches, etc.)
+   */
+  "session.start"?: (
+    input: { sessionID: string; agent: string; model: { providerID: string; modelID: string } },
+    output: { context: string[] },
+  ) => Promise<void>
+  /**
+   * Called when a session ends (lifecycle close). Use for cleanup, pattern
+   * persistence, or post-session Slate status updates.
+   */
+  "session.end"?: (
+    input: { sessionID: string; cwd: string; title: string | undefined; costUsd: number },
+    output: Record<string, never>,
+  ) => Promise<void>
 }
