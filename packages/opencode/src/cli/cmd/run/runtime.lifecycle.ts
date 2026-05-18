@@ -15,6 +15,7 @@ import { withRunSpan } from "./otel"
 import { resolveInteractiveStdin } from "./runtime.stdin"
 import { entrySplash, exitSplash, splashMeta } from "./splash"
 import { resolveRunTheme } from "./theme"
+import { writeSessionMemory } from "./memory"
 import type {
   FooterApi,
   FooterKeybinds,
@@ -271,9 +272,9 @@ export async function createRuntimeLifecycle(input: LifecycleInput): Promise<Lif
               try {
                 await footer.idle().catch(() => {})
 
+                const sessionID = next.sessionID || input.getSessionID?.() || input.sessionID
                 const show = renderer.isDestroyed ? false : next.showExit
                 if (!renderer.isDestroyed && show) {
-                  const sessionID = next.sessionID || input.getSessionID?.() || input.sessionID
                   const splash = splashInfo(next.sessionTitle ?? input.sessionTitle, next.history ?? input.history)
                   queueSplash(
                     renderer,
@@ -289,6 +290,15 @@ export async function createRuntimeLifecycle(input: LifecycleInput): Promise<Lif
                   )
                   await renderer.idle().catch(() => {})
                 }
+
+                // Append a one-liner to ~/.agents/memory/progress.md
+                const titleForMemory = next.sessionTitle ?? input.sessionTitle
+                const firstPrompt = (next.history ?? input.history).find((p) => p.text.trim())?.text
+                await writeSessionMemory({
+                  sessionID,
+                  title: titleForMemory ?? firstPrompt,
+                  cwd: input.directory,
+                })
               } finally {
                 footer.close()
                 await footer.idle().catch(() => {})

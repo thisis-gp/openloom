@@ -1,4 +1,7 @@
 import { Context, Effect, Layer } from "effect"
+import path from "node:path"
+import os from "node:os"
+import fs from "node:fs/promises"
 
 import { InstanceState } from "@/effect/instance-state"
 
@@ -15,6 +18,16 @@ import type { Provider } from "@/provider/provider"
 import type { Agent } from "@/agent/agent"
 import { Permission } from "@/permission"
 import { Skill } from "@/skill"
+
+import SUPPLEMENT_BUILD from "../agent/prompt/build.supplement.md"
+import SUPPLEMENT_PLAN from "../agent/prompt/plan.supplement.md"
+import SUPPLEMENT_GENERAL from "../agent/prompt/general.supplement.md"
+
+const BUILTIN_SUPPLEMENTS: Record<string, string> = {
+  build: SUPPLEMENT_BUILD,
+  plan: SUPPLEMENT_PLAN,
+  general: SUPPLEMENT_GENERAL,
+}
 
 export function provider(model: Provider.Model) {
   if (model.api.id.includes("gpt-4") || model.api.id.includes("o1") || model.api.id.includes("o3"))
@@ -35,6 +48,7 @@ export function provider(model: Provider.Model) {
 export interface Interface {
   readonly environment: (model: Provider.Model) => Effect.Effect<string[]>
   readonly skills: (agent: Agent.Info) => Effect.Effect<string | undefined>
+  readonly agentSupplement: (agent: Agent.Info) => Effect.Effect<string | undefined>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@openloom/SystemPrompt") {}
@@ -74,6 +88,29 @@ export const layer = Layer.effect(
           // version of them here and a less verbose version in tool description, rather than vice versa.
           Skill.fmt(list, { verbose: true }),
         ].join("\n")
+      }),
+
+      agentSupplement: Effect.fn("SystemPrompt.agentSupplement")(function* (agent: Agent.Info) {
+        const ctx = yield* InstanceState.context
+        const filename = `${agent.name}.md`
+
+        // Walk up from cwd, then check global ~/.agents/
+        const candidates: string[] = []
+        let dir = ctx.directory
+        for (let i = 0; i < 8; i++) {
+          candidates.push(path.join(dir, ".agents", filename))
+          const parent = path.dirname(dir)
+          if (parent === dir) break
+          dir = parent
+        }
+        candidates.push(path.join(os.homedir(), ".agents", filename))
+
+        for (const candidate of candidates) {
+          const content = yield* Effect.promise(() => fs.readFile(candidate, "utf-8").catch(() => null))
+          if (content && content.trim()) return content.trim()
+        }
+        // Fall back to built-in supplement for native agents
+        return BUILTIN_SUPPLEMENTS[agent.name] ?? undefined
       }),
     })
   }),
