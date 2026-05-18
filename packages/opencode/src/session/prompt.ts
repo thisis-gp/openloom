@@ -1679,13 +1679,19 @@ NOTE: At any point in time through this workflow you should feel free to ask the
           }
 
           step++
-          if (step === 1)
+          if (step === 1) {
             yield* title({
               session,
               modelID: lastUser.model.modelID,
               providerID: lastUser.model.providerID,
               history: msgs,
             }).pipe(Effect.ignore, Effect.forkIn(scope))
+            yield* plugin.trigger(
+              "session.start",
+              { sessionID, agent: lastUser.agent, model: { providerID: lastUser.model.providerID, modelID: lastUser.model.modelID } },
+              { context: [] },
+            )
+          }
 
           const model = yield* getModel(lastUser.model.providerID, lastUser.model.modelID, sessionID)
           const task = tasks.pop()
@@ -1890,6 +1896,12 @@ NOTE: At any point in time through this workflow you should feel free to ask the
         }
 
         yield* compaction.prune({ sessionID }).pipe(Effect.ignore, Effect.forkIn(scope))
+        const finishedSession = yield* sessions.get(sessionID).pipe(Effect.orDie)
+        yield* plugin.trigger(
+          "session.end",
+          { sessionID, cwd: ctx.directory, title: finishedSession.title, costUsd: finishedSession.cost ?? 0 },
+          {},
+        )
         return yield* lastAssistant(sessionID)
       },
     )

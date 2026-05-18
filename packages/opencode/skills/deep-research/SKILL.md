@@ -10,55 +10,81 @@ description: >
 
 Research before deciding. Don't code based on assumptions about external systems.
 
-## Research Protocol
+## GOAP Research Pipeline
 
-### 1. Define the Question
+Goal-Oriented Action Planning: decompose → parallel search → synthesize → verify.
 
-State the precise question before searching. Vague question = vague answer.
+### Stage 1 — Decompose
 
-- Bad: "research Redis"
-- Good: "What are the performance characteristics of Redis pub/sub at 10k messages/sec, and does it guarantee message ordering per channel?"
+Break the top-level question into independent sub-goals. Each sub-goal should be answerable on its own.
 
-### 2. Source Hierarchy
+**Example — "Should we use BullMQ or pg-boss for job queues?"**
+- Sub-goal A: What are BullMQ's reliability guarantees under crash?
+- Sub-goal B: What are pg-boss's reliability guarantees under crash?
+- Sub-goal C: What are the operational costs of Redis vs Postgres as queue backend?
+- Sub-goal D: Are there known edge cases in either library at >1k jobs/sec?
+
+Write these down before searching anything.
+
+### Stage 2 — Parallel Search
+
+Dispatch one subagent per sub-goal. Use the `explore` or `scout` agent.
+
+```
+Agent A → fetch BullMQ docs on job retention, failure handling
+Agent B → fetch pg-boss docs on durable delivery, at-least-once
+Agent C → search GitHub issues for BullMQ crash-recovery bugs
+Agent D → clone pg-boss, read src/worker.ts for delivery semantics
+```
+
+Rules:
+- All agents run in parallel
+- Each agent answers exactly one sub-goal
+- Use `scout` when you need to clone a repo; use `explore` for local codebase; use `WebSearch`/`WebFetch` for docs
+
+### Stage 3 — Synthesize
+
+Don't report what each agent said. Answer the original question:
+
+| Dimension | BullMQ | pg-boss |
+|-----------|--------|---------|
+| Durability | Redis AOF required; at-least-once | Postgres ACID; exactly-once option |
+| Ops burden | Redis cluster | Existing Postgres |
+| Throughput | ~10k jobs/sec | ~1k jobs/sec |
+
+**Verdict format:**
+- **Decision**: YES / NO / IT DEPENDS (state condition)
+- **Evidence**: 2-3 specific citations (file:line or URL + version)
+- **Caveats**: what changes this answer (version, config, load)
+- **Recommendation**: what to do, given this evidence
+
+### Stage 4 — Verify
+
+For any claim that drives an architectural decision, do a targeted follow-up:
+
+1. Find the primary source (code, spec, official doc)
+2. Note the version it applies to
+3. Check for known exceptions or recent regressions
+
+Dispatch a single verification agent with a targeted question, not a broad re-search.
+
+---
+
+## Source Hierarchy
 
 Search in this order — stop when you have enough:
 
 1. **Official docs** — `WebFetch` the official documentation page
-2. **Source code** — use the scout agent to clone and read the actual implementation
-3. **Changelog / release notes** — for understanding behavior changes over time
-4. **GitHub issues** — for known bugs, edge cases, and workarounds
+2. **Source code** — use `scout` to clone and read actual implementation
+3. **Changelog / release notes** — for behavior changes over versions
+4. **GitHub issues** — for known bugs, edge cases, workarounds
 5. **Benchmarks** — look for reproducible benchmark code, not marketing claims
 
-Avoid: blog posts, Medium articles, Stack Overflow (unless the answer links to official source).
+Avoid: blog posts, Medium articles, Stack Overflow unless the answer links to official source.
 
-### 2. Parallel Search
+---
 
-Dispatch multiple explore or scout subagents in parallel for independent questions:
-
-```
-Agent 1: fetch official Redis pub/sub documentation
-Agent 2: fetch Redis GitHub issues tagged "ordering"
-Agent 3: clone ioredis and read the pub/sub implementation
-```
-
-### 3. Verify Claims
-
-For any claim that affects an architectural decision:
-
-- Find the primary source (code, spec, or official doc)
-- Note the version it applies to
-- Check if there are known exceptions or edge cases
-
-### 4. Synthesize — Not Summarize
-
-Don't just report what you found. Answer the original question:
-
-- Verdict: YES / NO / IT DEPENDS (and under what conditions)
-- Evidence: 2-3 specific citations with file:line or URL
-- Caveats: what could change this answer (version, load, config)
-- Recommendation: what should we do, given this evidence?
-
-### 5. Document Findings
+## Document Findings
 
 If the research informs an architectural decision, write a short ADR:
 
@@ -69,7 +95,7 @@ If the research informs an architectural decision, write a short ADR:
 We will use X for Z.
 
 ## Rationale
-[Findings from research]
+[Findings from research — cite sources with version]
 
 ## Consequences
 [What gets easier, what gets harder]
