@@ -14,6 +14,7 @@ import PROMPT_KIMI from "./prompt/kimi.txt"
 
 import PROMPT_CODEX from "./prompt/codex.txt"
 import PROMPT_TRINITY from "./prompt/trinity.txt"
+import PROMPT_COPILOT_GPT5 from "./prompt/copilot-gpt-5.txt"
 import type { Provider } from "@/provider/provider"
 import type { Agent } from "@/agent/agent"
 import { Permission } from "@/permission"
@@ -30,18 +31,23 @@ const BUILTIN_SUPPLEMENTS: Record<string, string> = {
 }
 
 export function provider(model: Provider.Model) {
-  if (model.api.id.includes("gpt-4") || model.api.id.includes("o1") || model.api.id.includes("o3"))
+  const id = model.api.id.toLowerCase()
+  // Copilot GPT-5 has a bespoke structured prompt — check before generic gpt-5 catch
+  if (id.includes("copilot-gpt-5")) return [PROMPT_COPILOT_GPT5]
+  // GPT-4, GPT-5/5.5, and OpenAI reasoning models → ultra-autonomous BEAST prompt
+  if (id.includes("gpt-4") || id.includes("gpt-5") || id.includes("o1") || id.includes("o3"))
     return [PROMPT_BEAST]
-  if (model.api.id.includes("gpt")) {
-    if (model.api.id.includes("codex")) {
-      return [PROMPT_CODEX]
-    }
+  if (id.includes("gpt")) {
+    if (id.includes("codex")) return [PROMPT_CODEX]
     return [PROMPT_GPT]
   }
-  if (model.api.id.includes("gemini-")) return [PROMPT_GEMINI]
-  if (model.api.id.includes("claude")) return [PROMPT_ANTHROPIC]
-  if (model.api.id.toLowerCase().includes("trinity")) return [PROMPT_TRINITY]
-  if (model.api.id.toLowerCase().includes("kimi")) return [PROMPT_KIMI]
+  // Gemini covers all versions (2.0, 2.5, 3.1) via the gemini- prefix
+  if (id.includes("gemini-")) return [PROMPT_GEMINI]
+  if (id.includes("claude")) return [PROMPT_ANTHROPIC]
+  // Grok 4+ is a frontier model — BEAST autonomy fits well
+  if (id.includes("grok")) return [PROMPT_BEAST]
+  if (id.includes("trinity")) return [PROMPT_TRINITY]
+  if (id.includes("kimi")) return [PROMPT_KIMI]
   return [PROMPT_DEFAULT]
 }
 
