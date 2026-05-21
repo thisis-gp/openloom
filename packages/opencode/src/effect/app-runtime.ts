@@ -58,6 +58,8 @@ import { DataMigration } from "@/data-migration"
 import { BackgroundJob } from "@/background/job"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { RuntimeFlags } from "@/effect/runtime-flags"
+import { CronService } from "@/cron/cron"
+import { MemoryLayer } from "@/memory/index"
 
 export const AppLayer = Layer.mergeAll(
   Npm.defaultLayer,
@@ -92,6 +94,8 @@ export const AppLayer = Layer.mergeAll(
   SessionRevert.defaultLayer,
   SessionSummary.defaultLayer,
   SessionPrompt.defaultLayer,
+  CronService.layer,
+  MemoryLayer,
   Instruction.defaultLayer,
   LLM.defaultLayer,
   LSP.defaultLayer,
@@ -116,7 +120,8 @@ export const AppLayer = Layer.mergeAll(
   DataMigration.defaultLayer,
 ).pipe(Layer.provideMerge(InstanceLayer.layer), Layer.provideMerge(Observability.layer))
 
-const rt = ManagedRuntime.make(AppLayer, { memoMap })
+// Effect's Layer.mergeAll types duplicate Context.Service classes as bare `Service` in the requirement union.
+const rt = ManagedRuntime.make(AppLayer as Layer.Layer<never, never, never>, { memoMap })
 type Runtime = Pick<typeof rt, "runSync" | "runPromise" | "runPromiseExit" | "runFork" | "runCallback" | "dispose">
 
 /** Services provided by AppRuntime — i.e. what an Effect run via AppRuntime.runPromise can yield. */
