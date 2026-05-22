@@ -9,7 +9,9 @@ import { MessageID, PartID } from "../../../session/schema"
 import { ToolRegistry } from "@/tool/registry"
 import { Permission } from "../../../permission"
 import { iife } from "../../../util/iife"
-import { effectCmd, fail } from "../../effect-cmd"
+import { effectCmd, fail, CliError } from "../../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { InstanceRef } from "@/effect/instance-ref"
 import type { InstanceContext } from "@/project/instance-context"
 
@@ -31,11 +33,11 @@ export const AgentCommand = effectCmd({
         type: "string",
         description: "Tool params as JSON or a JS object literal",
       }),
-  handler: Effect.fn("Cli.debug.agent")(function* (args) {
+  handler: (Effect.fn("Cli.debug.agent")(function* (args: { name: string; tool?: string; params?: string }) {
     const ctx = yield* InstanceRef
     if (!ctx) return
     return yield* run(args, ctx)
-  }),
+  })) as unknown as (args: { name: string; tool?: string; params?: string }) => Effect.Effect<undefined, CliError, AppServices | InstanceStore.Service>,
 })
 
 const run = Effect.fn("Cli.debug.agent.body")(function* (

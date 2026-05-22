@@ -12,7 +12,10 @@ import { InstanceRef } from "@/effect/instance-ref"
 import { EOL } from "os"
 import type { Argv } from "yargs"
 import { Effect } from "effect"
-import { effectCmd } from "../effect-cmd"
+import { effectCmd, CliError } from "../effect-cmd"
+import type { WithDoubleDash } from "./cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 
 type AgentMode = "all" | "primary" | "subagent"
 
@@ -61,7 +64,7 @@ const AgentCreateCommand = effectCmd({
         alias: ["m"],
         describe: "model to use in the format of provider/model",
       }),
-  handler: Effect.fn("Cli.agent.create")(function* (args) {
+  handler: (Effect.fn("Cli.agent.create")(function* (args: WithDoubleDash<{ path?: string; description?: string; mode?: "all" | "primary" | "subagent"; permissions?: string; model?: string }>) {
     const maybeCtx = yield* InstanceRef
     if (!maybeCtx) return yield* Effect.die("InstanceRef not provided")
     const ctx = maybeCtx
@@ -228,13 +231,13 @@ const AgentCreateCommand = effectCmd({
         prompts.outro("Done")
       }
     })
-  }),
+  })) as unknown as (args: WithDoubleDash<{ path?: string; description?: string; mode?: "all" | "primary" | "subagent"; permissions?: string; model?: string }>) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const AgentListCommand = effectCmd({
   command: "list",
   describe: "list all available agents",
-  handler: Effect.fn("Cli.agent.list")(function* () {
+  handler: (Effect.fn("Cli.agent.list")(function* (_args) {
     const agents = yield* Agent.Service.use((svc) => svc.list())
     const sortedAgents = agents.sort((a, b) => {
       if (a.native !== b.native) {
@@ -247,7 +250,7 @@ const AgentListCommand = effectCmd({
       process.stdout.write(`${agent.name} (${agent.mode})` + EOL)
       process.stdout.write(`  ${JSON.stringify(agent.permission, null, 2)}` + EOL)
     }
-  }),
+  })) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const AgentCommand = cmd({

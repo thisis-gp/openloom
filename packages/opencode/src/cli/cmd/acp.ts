@@ -1,12 +1,14 @@
 import * as Log from "@openloom/core/util/log"
 import { Effect } from "effect"
-import { effectCmd } from "../effect-cmd"
+import { effectCmd, CliError } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { AgentSideConnection, ndJsonStream } from "@agentclientprotocol/sdk"
 import { ACP } from "@/acp/agent"
 import { Server } from "@/server/server"
 import { ServerAuth } from "@/server/auth"
 import { createOpencodeClient } from "@openloom/sdk/v2"
-import { withNetworkOptions, resolveNetworkOptions } from "../network"
+import { withNetworkOptions, resolveNetworkOptions, type NetworkOptions } from "../network"
 
 const log = Log.create({ service: "acp-command" })
 
@@ -20,7 +22,7 @@ export const AcpCommand = effectCmd({
       default: process.cwd(),
     })
   },
-  handler: Effect.fn("Cli.acp")(function* (args) {
+  handler: (Effect.fn("Cli.acp")(function* (args: NetworkOptions & { cwd: string }) {
     process.env.OPENLOOM_CLIENT = "acp"
     const opts = yield* resolveNetworkOptions(args)
     const server = yield* Effect.promise(() => Server.listen(opts))
@@ -69,5 +71,5 @@ export const AcpCommand = effectCmd({
           process.stdin.on("error", reject)
         }),
     )
-  }),
+  })) as unknown as (args: NetworkOptions & { cwd: string }) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })

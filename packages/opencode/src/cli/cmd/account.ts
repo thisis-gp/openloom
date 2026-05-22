@@ -3,7 +3,9 @@ import { Duration, Effect, Match, Option } from "effect"
 import { UI } from "../ui"
 import { Account } from "@/account/account"
 import { AccountID, OrgID, PollExpired, type PollResult, type AccountError } from "@/account/schema"
-import { effectCmd } from "../effect-cmd"
+import { effectCmd, CliError } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import * as Prompt from "../effect/prompt"
 import open from "open"
 
@@ -182,10 +184,10 @@ export const LoginCommand = effectCmd({
       type: "string",
       demandOption: true,
     }),
-  handler: Effect.fn("Cli.account.login")(function* (args) {
+  handler: (Effect.fn("Cli.account.login")(function* (args: { url: string }) {
     UI.empty()
     yield* Effect.orDie(loginEffect(args.url))
-  }),
+  })) as unknown as (args: { url: string }) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const LogoutCommand = effectCmd({
@@ -197,40 +199,40 @@ export const LogoutCommand = effectCmd({
       describe: "account email to log out from",
       type: "string",
     }),
-  handler: Effect.fn("Cli.account.logout")(function* (args) {
+  handler: (Effect.fn("Cli.account.logout")(function* (args: { email?: string }) {
     UI.empty()
     yield* Effect.orDie(logoutEffect(args.email))
-  }),
+  })) as unknown as (args: { email?: string }) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const SwitchCommand = effectCmd({
   command: "switch",
   describe: false,
   instance: false,
-  handler: Effect.fn("Cli.account.switch")(function* () {
+  handler: (Effect.fn("Cli.account.switch")(function* (_args) {
     UI.empty()
     yield* Effect.orDie(switchEffect())
-  }),
+  })) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const OrgsCommand = effectCmd({
   command: "orgs",
   describe: false,
   instance: false,
-  handler: Effect.fn("Cli.account.orgs")(function* () {
+  handler: (Effect.fn("Cli.account.orgs")(function* (_args) {
     UI.empty()
     yield* Effect.orDie(orgsEffect())
-  }),
+  })) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const OpenCommand = effectCmd({
   command: "open",
   describe: false,
   instance: false,
-  handler: Effect.fn("Cli.account.open")(function* () {
+  handler: (Effect.fn("Cli.account.open")(function* (_args) {
     UI.empty()
     yield* Effect.orDie(openEffect())
-  }),
+  })) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const ConsoleCommand = cmd({

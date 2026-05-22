@@ -1,7 +1,9 @@
 import { Session } from "@/session/session"
 import { MessageV2 } from "../../session/message-v2"
 import { SessionID } from "../../session/schema"
-import { effectCmd, fail } from "../effect-cmd"
+import { effectCmd, fail, CliError } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { UI } from "../ui"
 import * as prompts from "@clack/prompts"
 import { EOL } from "os"
@@ -231,9 +233,9 @@ export const ExportCommand = effectCmd({
         describe: "redact sensitive transcript and file data",
         type: "boolean",
       }),
-  handler: Effect.fn("Cli.export")(function* (args) {
+  handler: (Effect.fn("Cli.export")(function* (args: { sessionID?: string; sanitize?: boolean }) {
     return yield* run(args)
-  }),
+  })) as unknown as (args: { sessionID?: string; sanitize?: boolean }) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const run = Effect.fn("Cli.export.body")(function* (args: { sessionID?: string; sanitize?: boolean }) {
