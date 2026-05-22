@@ -16,7 +16,9 @@ export async function runDirectory<A, E>(input: { directory: string; effect: Eff
 export const defaultAgentInfo = (directory: string) =>
   runDirectory({
     directory,
-    effect: Agent.Service.use((svc) => svc.defaultInfo()),
+    // Agent.Service.use returns Effect<A, E, Agent.Service>; AppRuntime provides
+    // Agent.Service at runtime so the cast to AppServices is safe here.
+    effect: Agent.Service.use((svc) => svc.defaultInfo()) as unknown as Effect.Effect<Agent.Info, never, AppServices>,
   })
 
 export * as ACPRuntime from "./runtime"
