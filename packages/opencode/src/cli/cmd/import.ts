@@ -2,6 +2,8 @@ import type { Session as SDKSession, Message, Part } from "@openloom/sdk/v2"
 import { Session } from "@/session/session"
 import { MessageV2 } from "../../session/message-v2"
 import { CliError, effectCmd } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { Database } from "@/storage/db"
 import { SessionTable, MessageTable, PartTable } from "../../session/session.sql"
 import { InstanceRef } from "@/effect/instance-ref"
@@ -86,11 +88,11 @@ export const ImportCommand = effectCmd({
       type: "string",
       demandOption: true,
     }),
-  handler: Effect.fn("Cli.import")(function* (args) {
+  handler: (Effect.fn("Cli.import")(function* (args: { file: string }) {
     const ctx = yield* InstanceRef
     if (!ctx) return yield* Effect.die("InstanceRef not provided")
     return yield* runImport(args.file, ctx.project.id)
-  }),
+  })) as unknown as (args: { file: string }) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const runImport = Effect.fn("Cli.import.body")(function* (file: string, projectID: string) {

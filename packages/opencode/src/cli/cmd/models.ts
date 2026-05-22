@@ -3,7 +3,9 @@ import { Effect } from "effect"
 import { Provider } from "@/provider/provider"
 import { ProviderID } from "../../provider/schema"
 import { ModelsDev } from "@openloom/core/models"
-import { effectCmd, fail } from "../effect-cmd"
+import { effectCmd, fail, CliError } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { UI } from "../ui"
 
 export const ModelsCommand = effectCmd({
@@ -24,7 +26,7 @@ export const ModelsCommand = effectCmd({
         describe: "refresh the models cache from models.dev",
         type: "boolean",
       }),
-  handler: Effect.fn("Cli.models")(function* (args) {
+  handler: (Effect.fn("Cli.models")(function* (args: { provider?: string; verbose?: boolean; refresh?: boolean }) {
     if (args.refresh) {
       yield* ModelsDev.Service.use((s) => s.refresh(true))
       UI.println(UI.Style.TEXT_SUCCESS_BOLD + "Models cache refreshed" + UI.Style.TEXT_NORMAL)
@@ -62,5 +64,5 @@ export const ModelsCommand = effectCmd({
     })
 
     for (const providerID of ids) print(ProviderID.make(providerID), args.verbose)
-  }),
+  })) as unknown as (args: { provider?: string; verbose?: boolean; refresh?: boolean }) => Effect.Effect<undefined, CliError, AppServices | InstanceStore.Service>,
 })
