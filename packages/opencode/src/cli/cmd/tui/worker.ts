@@ -85,7 +85,7 @@ export const rpc = {
         const cfg = yield* Config.Service
         yield* cfg.invalidate()
         yield* disposeAllInstancesAndEmitGlobalDisposed({ swallowErrors: true })
-      }),
+      }) as unknown as Effect.Effect<void, never, never>,
     )
   },
   async shutdown() {

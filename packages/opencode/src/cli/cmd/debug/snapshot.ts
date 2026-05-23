@@ -1,7 +1,9 @@
 import { Effect } from "effect"
 import { Snapshot } from "../../../snapshot"
-import { effectCmd } from "../../effect-cmd"
+import { effectCmd, type CliError } from "../../effect-cmd"
 import { cmd } from "../cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 
 export const SnapshotCommand = cmd({
   command: "snapshot",
@@ -13,10 +15,10 @@ export const SnapshotCommand = cmd({
 const TrackCommand = effectCmd({
   command: "track",
   describe: "track current snapshot state",
-  handler: Effect.fn("Cli.debug.snapshot.track")(function* () {
+  handler: Effect.fn("Cli.debug.snapshot.track")(function* (_args) {
     const out = yield* Snapshot.Service.use((svc) => svc.track())
     console.log(out)
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const PatchCommand = effectCmd({
@@ -31,7 +33,7 @@ const PatchCommand = effectCmd({
   handler: Effect.fn("Cli.debug.snapshot.patch")(function* (args) {
     const out = yield* Snapshot.Service.use((svc) => svc.patch(args.hash))
     console.log(out)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const DiffCommand = effectCmd({
@@ -46,5 +48,5 @@ const DiffCommand = effectCmd({
   handler: Effect.fn("Cli.debug.snapshot.diff")(function* (args) {
     const out = yield* Snapshot.Service.use((svc) => svc.diff(args.hash))
     console.log(out)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })

@@ -18,7 +18,9 @@ import type {
 } from "@octokit/webhooks-types"
 import { UI } from "../ui"
 import { cmd } from "./cmd"
-import { effectCmd } from "../effect-cmd"
+import { effectCmd, type CliError } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { ModelsDev } from "@openloom/core/models"
 import { InstanceRef } from "@/effect/instance-ref"
 import { SessionShare } from "@/share/session"
@@ -191,7 +193,7 @@ export const GithubCommand = cmd({
 export const GithubInstallCommand = effectCmd({
   command: "install",
   describe: "install the GitHub agent",
-  handler: Effect.fn("Cli.github.install")(function* () {
+  handler: Effect.fn("Cli.github.install")(function* (_args) {
     const maybeCtx = yield* InstanceRef
     if (!maybeCtx) return yield* Effect.die("InstanceRef not provided")
     const ctx = maybeCtx
@@ -412,7 +414,7 @@ jobs:
         }
       }
     })
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<undefined, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const GithubRunCommand = effectCmd({
@@ -1644,5 +1646,5 @@ query($owner: String!, $repo: String!, $number: Int!) {
         })
       }
     })
-  }),
+  }) as unknown as (args: any) => Effect.Effect<undefined, CliError, AppServices | InstanceStore.Service>,
 })

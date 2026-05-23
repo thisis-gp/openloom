@@ -1,9 +1,11 @@
 import { EOL } from "os"
 import { Effect, Stream } from "effect"
 import { Ripgrep } from "../../../file/ripgrep"
-import { effectCmd } from "../../effect-cmd"
+import { effectCmd, type CliError } from "../../effect-cmd"
 import { cmd } from "../cmd"
 import { InstanceRef } from "@/effect/instance-ref"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 
 export const RipgrepCommand = cmd({
   command: "rg",
@@ -24,7 +26,7 @@ const TreeCommand = effectCmd({
     if (!ctx) return
     const tree = yield* Effect.orDie(Ripgrep.Service.use((svc) => svc.tree({ cwd: ctx.directory, limit: args.limit })))
     process.stdout.write(tree + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const FilesCommand = effectCmd({
@@ -60,7 +62,7 @@ const FilesCommand = effectCmd({
         Effect.orDie,
       )
     process.stdout.write(files.join(EOL) + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const SearchCommand = effectCmd({
@@ -95,5 +97,5 @@ const SearchCommand = effectCmd({
       ),
     )
     process.stdout.write(JSON.stringify(results.items, null, 2) + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })

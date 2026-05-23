@@ -1,9 +1,11 @@
 import { LSP } from "@/lsp/lsp"
 import { Effect } from "effect"
-import { effectCmd } from "../../effect-cmd"
+import { effectCmd, type CliError } from "../../effect-cmd"
 import { cmd } from "../cmd"
 import * as Log from "@openloom/core/util/log"
 import { EOL } from "os"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 
 export const LSPCommand = cmd({
   command: "lsp",
@@ -25,7 +27,7 @@ const DiagnosticsCommand = effectCmd({
       }),
     )
     process.stdout.write(JSON.stringify(out, null, 2) + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const SymbolsCommand = effectCmd({
@@ -36,7 +38,7 @@ export const SymbolsCommand = effectCmd({
     using _ = Log.Default.time("symbols")
     const results = yield* LSP.Service.use((lsp) => lsp.workspaceSymbol(args.query))
     process.stdout.write(JSON.stringify(results, null, 2) + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const DocumentSymbolsCommand = effectCmd({
@@ -47,5 +49,5 @@ export const DocumentSymbolsCommand = effectCmd({
     using _ = Log.Default.time("document-symbols")
     const results = yield* LSP.Service.use((lsp) => lsp.documentSymbol(args.uri))
     process.stdout.write(JSON.stringify(results, null, 2) + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })

@@ -1,8 +1,10 @@
 import { Effect } from "effect"
 import { Server } from "../../server/server"
-import { effectCmd } from "../effect-cmd"
+import { effectCmd, type CliError } from "../effect-cmd"
 import { withNetworkOptions, resolveNetworkOptions } from "../network"
 import { Flag } from "@openloom/core/flag/flag"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 
 export const ServeCommand = effectCmd({
   command: "serve",
@@ -20,5 +22,5 @@ export const ServeCommand = effectCmd({
     console.log(`openloom server listening on http://${server.hostname}:${server.port}`)
 
     yield* Effect.never
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
