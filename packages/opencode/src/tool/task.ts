@@ -44,10 +44,28 @@ const BaseParameters = Schema.Struct({
   command: Schema.optional(Schema.String).annotate({ description: "The command that triggered this task" }),
 })
 
+const TaskItem = Schema.Struct({
+  description: Schema.String,
+  prompt: Schema.String,
+  subagent_type: Schema.String,
+})
+
 export const Parameters = Schema.Struct({
-  description: Schema.String.annotate({ description: "A short (3-5 words) description of the task" }),
-  prompt: Schema.String.annotate({ description: "The task for the agent to perform" }),
-  subagent_type: Schema.String.annotate({ description: "The type of specialized agent to use for this task" }),
+  description: Schema.optional(Schema.String).annotate({
+    description: "A short (3-5 words) description of the task (required when tasks is omitted)",
+  }),
+  prompt: Schema.optional(Schema.String).annotate({
+    description: "The task for the agent to perform (required when tasks is omitted)",
+  }),
+  subagent_type: Schema.optional(Schema.String).annotate({
+    description: "The type of specialized agent to use for this task (required when tasks is omitted)",
+  }),
+  tasks: Schema.optional(Schema.Array(TaskItem)).annotate({
+    description: "Batch of independent tasks to run with max_concurrency",
+  }),
+  max_concurrency: Schema.optional(Schema.Number).annotate({
+    description: "Maximum parallel child sessions when using tasks (default 3)",
+  }),
   task_id: Schema.optional(Schema.String).annotate({
     description:
       "This should only be set if you mean to resume a previous task (you can pass a prior task_id and the task will continue the same subagent session as before instead of creating a fresh one)",
@@ -57,6 +75,22 @@ export const Parameters = Schema.Struct({
     description: "When true, launch the subagent in the background and return immediately",
   }),
 })
+
+export type TaskParameters = Schema.Schema.Type<typeof Parameters>
+
+/** Tools always denied on child sessions to prevent delegation loops and cron/memory mutation. */
+export const SUBAGENT_BLOCKED_TOOLS = [
+  "delegate_task",
+  "task",
+  "cron_create",
+  "cron_list",
+  "cron_delete",
+  "memory_graph",
+] as const
+
+export function subagentToolDenials(extra?: readonly string[]) {
+  return Object.fromEntries([...SUBAGENT_BLOCKED_TOOLS, ...(extra ?? [])].map((id) => [id, false]))
+}
 
 function output(sessionID: SessionID, text: string) {
   return [
@@ -112,8 +146,12 @@ export const TaskTool = Tool.define(
     const status = yield* SessionStatus.Service
     const flags = yield* RuntimeFlags.Service
 
-    const run = Effect.fn("TaskTool.execute")(function* (
-      params: Schema.Schema.Type<typeof Parameters>,
+    const runOne = Effect.fn("TaskTool.runOne")(function* (
+      params: TaskParameters & {
+        description: string
+        prompt: string
+        subagent_type: string
+      },
       ctx: Tool.Context,
     ) {
       const cfg = yield* config.get()
@@ -202,8 +240,8 @@ export const TaskTool = Tool.define(
           },
           agent: next.name,
           tools: {
+            ...subagentToolDenials(),
             ...(next.permission.some((rule) => rule.permission === "todowrite") ? {} : { todowrite: false }),
-            ...(next.permission.some((rule) => rule.permission === id) ? {} : { task: false }),
             ...Object.fromEntries((cfg.experimental?.primary_tools ?? []).map((item) => [item, false])),
           },
           parts,
@@ -331,6 +369,49 @@ export const TaskTool = Tool.define(
               }),
             ),
           ),
+      )
+    })
+
+    const run = Effect.fn("TaskTool.execute")(function* (params: TaskParameters, ctx: Tool.Context) {
+      if (params.tasks?.length) {
+        const concurrency = Math.max(1, Math.min(params.max_concurrency ?? 3, params.tasks.length))
+        const results = yield* Effect.forEach(
+          params.tasks,
+          (item) =>
+            runOne(
+              {
+                ...params,
+                description: item.description,
+                prompt: item.prompt,
+                subagent_type: item.subagent_type,
+              },
+              ctx,
+            ),
+          { concurrency },
+        )
+        const first = results[0]
+        if (!first) return yield* Effect.fail(new Error("batch task produced no results"))
+        return {
+          title: `Batch tasks (${results.length})`,
+          metadata: first.metadata,
+          output: results.map((r) => r.output).join("\n\n---\n\n"),
+        }
+      }
+
+      if (!params.description || !params.prompt || !params.subagent_type) {
+        return yield* Effect.fail(
+          new Error("task requires description, prompt, and subagent_type (or a tasks array)"),
+        )
+      }
+
+      return yield* runOne(
+        {
+          ...params,
+          description: params.description,
+          prompt: params.prompt,
+          subagent_type: params.subagent_type,
+        },
+        ctx,
       )
     })
 

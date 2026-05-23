@@ -1,6 +1,6 @@
 <!--
   Built-in skill. Name and description are registered in code at
-  packages/openloom/src/skill/index.ts (see CUSTOMIZE_OPENLOOM_SKILL_NAME
+  packages/opencode/src/skill/index.ts (see CUSTOMIZE_OPENLOOM_SKILL_NAME
   and CUSTOMIZE_OPENLOOM_SKILL_DESCRIPTION). The body below becomes the
   skill's content.
 -->

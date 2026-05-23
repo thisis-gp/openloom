@@ -1,6 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 import os from "node:os"
+import type { SessionID } from "@/session/schema"
 
 const GLOBAL_MEMORY_DIR = path.join(os.homedir(), ".agents", "memory")
 const MEMORY_FILE = "progress.md"
@@ -11,8 +12,9 @@ export async function writeSessionMemory(input: {
   title: string | undefined
   cwd: string
 }): Promise<void> {
+  const sessionID = input.sessionID as SessionID
   const date = new Date().toISOString().slice(0, 10)
-  const shortID = input.sessionID.slice(0, 8)
+  const shortID = sessionID.slice(0, 8)
   const title = (input.title ?? "untitled").replace(/\|/g, "-").trim().slice(0, 60)
 
   // Write markdown entry
@@ -44,12 +46,12 @@ export async function writeSessionMemory(input: {
           model: SessionTable.model,
         })
         .from(SessionTable)
-        .where(eq(SessionTable.id, input.sessionID as any))
+        .where(eq(SessionTable.id, sessionID))
         .get()
 
       db.insert(MemoryTable)
         .values({
-          session_id: input.sessionID as any,
+          session_id: sessionID,
           date,
           title,
           agent: session?.agent ?? null,
