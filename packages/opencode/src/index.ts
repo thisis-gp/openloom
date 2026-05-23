@@ -63,6 +63,7 @@ import { WebCommand } from "./cli/cmd/web"
 import { PrCommand } from "./cli/cmd/pr"
 import { SessionCommand } from "./cli/cmd/session"
 import { DbCommand } from "./cli/cmd/db"
+import { MemoryCommand } from "./cli/cmd/memory"
 import path from "path"
 import { Global } from "@openloom/core/global"
 import { JsonMigration } from "@/storage/json-migration"
@@ -211,6 +212,7 @@ const cli = yargs(args)
   .command(SessionCommand)
   .command(PluginCommand)
   .command(DbCommand)
+  .command(MemoryCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||

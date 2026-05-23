@@ -63,6 +63,10 @@ import * as DateTime from "effect/DateTime"
 import { eq } from "@/storage/db"
 import * as Database from "@/storage/db"
 import { SessionTable } from "./session.sql"
+import { RouterService } from "@/intelligence/router/router"
+import { routerDefaultLayer } from "@/intelligence/index"
+import { CuratorService } from "@/memory/curator/curator"
+import { MemoryLayer } from "@/memory/index"
 
 // @ts-ignore
 globalThis.AI_SDK_LOG_WARNINGS = false
@@ -207,6 +211,7 @@ export const layer = Layer.effect(
     const references = yield* Reference.Service
     const events = yield* EventV2Bridge.Service
     const flags = yield* RuntimeFlags.Service
+    const routerOpt = yield* Effect.serviceOption(RouterService)
     const runner = Effect.fn("SessionPrompt.runner")(function* () {
       return yield* EffectBridge.make()
     })
@@ -1071,6 +1076,69 @@ NOTE: At any point in time through this workflow you should feel free to ask the
       return yield* Effect.die(err)
     })
 
+    const maybeCurator = Effect.fnUntraced(function* (sessionID: SessionID, trigger: "message_threshold" | "session_end") {
+      const cronJobID = Database.use((db) =>
+        db
+          .select({ cron_job_id: SessionTable.cron_job_id })
+          .from(SessionTable)
+          .where(eq(SessionTable.id, sessionID))
+          .get(),
+      )?.cron_job_id
+      if (cronJobID) return
+      const curatorOpt = yield* Effect.serviceOption(CuratorService.Service)
+      if (Option.isNone(curatorOpt)) return
+      if (trigger === "message_threshold" && !(yield* curatorOpt.value.shouldRun(sessionID))) return
+      const result = yield* curatorOpt.value.run({ sessionID, trigger }).pipe(Effect.orElseSucceed(() => undefined))
+      if (!result?.nudgeText) return
+      const session = yield* sessions.get(sessionID).pipe(Effect.orDie)
+      yield* prompt({
+        sessionID,
+        noReply: true,
+        agent: session.agent ?? "build",
+        parts: [{ type: "text", synthetic: true, text: `[Memory curator] ${result.nudgeText}` }],
+      }).pipe(Effect.ignore)
+    })
+
+    const routedModel = Effect.fnUntraced(function* (input: {
+      sessionID: SessionID
+      agent: { mode: string }
+      explicit?: { providerID: ProviderID; modelID: ModelID; variant?: string }
+    }) {
+      if (input.explicit) return input.explicit
+      const cfg = yield* config.get()
+      if (cfg.model) return Provider.parseModel(cfg.model)
+      const pinned = Database.use((db) =>
+        db.select({ model: SessionTable.model }).from(SessionTable).where(eq(SessionTable.id, input.sessionID)).get(),
+      )
+      if (pinned?.model) {
+        return {
+          providerID: ProviderID.make(pinned.model.providerID),
+          modelID: ModelID.make(pinned.model.id),
+          ...(pinned.model.variant && pinned.model.variant !== "default"
+            ? { variant: pinned.model.variant }
+            : {}),
+        }
+      }
+      const routerOpt = yield* Effect.serviceOption(RouterService)
+      if (Option.isNone(routerOpt)) return yield* currentModel(input.sessionID)
+      const providers = yield* provider.list()
+      const candidates = Object.values(providers).flatMap((p) =>
+        Object.values(p.models).map((m) => ({ modelID: m.id, providerID: p.id })),
+      )
+      if (candidates.length === 0) return yield* currentModel(input.sessionID)
+      const taskType =
+        input.agent.mode === "plan" ? "reasoning" : input.agent.mode === "build" ? "code" : "chat"
+      const selected = yield* routerOpt.value.select({
+        taskType,
+        estimatedTokens: 4000,
+        candidates,
+      })
+      return {
+        providerID: ProviderID.make(selected.providerID),
+        modelID: ModelID.make(selected.modelID),
+      }
+    })
+
     const currentModel = Effect.fnUntraced(function* (sessionID: SessionID) {
       const current = Database.use((db) =>
         db.select({ model: SessionTable.model }).from(SessionTable).where(eq(SessionTable.id, sessionID)).get(),
@@ -1107,7 +1175,13 @@ NOTE: At any point in time through this workflow you should feel free to ask the
           .where(eq(SessionTable.id, input.sessionID))
           .get(),
       )
-      const model = input.model ?? ag.model ?? (yield* currentModel(input.sessionID))
+      const model =
+        input.model ??
+        ag.model ??
+        (yield* routedModel({
+          sessionID: input.sessionID,
+          agent: ag,
+        }))
       const same = ag.model && model.providerID === ag.model.providerID && model.modelID === ag.model.modelID
       const full =
         !input.variant && ag.variant && same
@@ -1640,7 +1714,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
       throw new Error("Impossible")
     })
 
-    const runLoop: (sessionID: SessionID) => Effect.Effect<MessageV2.WithParts> = Effect.fn("SessionPrompt.run")(
+    const runLoop = Effect.fn("SessionPrompt.run")(
       function* (sessionID: SessionID) {
         const ctx = yield* InstanceState.context
         const slog = elog.with({ sessionID })
@@ -1865,7 +1939,18 @@ NOTE: At any point in time through this workflow you should feel free to ask the
             }
 
             const finished = handle.message.finish && !["tool-calls", "unknown"].includes(handle.message.finish)
+            if (finished && Option.isSome(routerOpt)) {
+              yield* routerOpt.value
+                .recordOutcome({
+                  modelID: model.id,
+                  providerID: model.providerID,
+                  success: !handle.message.error,
+                  costUsd: handle.message.cost ?? 0,
+                })
+                .pipe(Effect.ignore)
+            }
             if (finished && !handle.message.error) {
+              yield* maybeCurator(sessionID, "message_threshold").pipe(Effect.ignore, Effect.forkIn(scope))
               if (format.type === "json_schema") {
                 handle.message.error = new MessageV2.StructuredOutputError({
                   message: "Model did not produce structured output",
@@ -1896,6 +1981,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
         }
 
         yield* compaction.prune({ sessionID }).pipe(Effect.ignore, Effect.forkIn(scope))
+        yield* maybeCurator(sessionID, "session_end")
         const finishedSession = yield* sessions.get(sessionID).pipe(Effect.orDie)
         yield* plugin.trigger(
           "session.end",
@@ -2067,9 +2153,11 @@ export const defaultLayer = Layer.suspend(() =>
     Layer.provide(Session.defaultLayer),
     Layer.provide(SessionRevert.defaultLayer),
     Layer.provide(SessionSummary.defaultLayer),
-    Layer.provide(Image.defaultLayer),
     Layer.provide(
       Layer.mergeAll(
+        Image.defaultLayer,
+        MemoryLayer,
+        routerDefaultLayer,
         EventV2Bridge.defaultLayer,
         Agent.defaultLayer,
         SystemPrompt.defaultLayer,

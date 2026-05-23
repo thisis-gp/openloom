@@ -7,6 +7,7 @@ import { GlobTool } from "./glob"
 import { GrepTool } from "./grep"
 import { ReadTool } from "./read"
 import { TaskTool } from "./task"
+import { DelegateTaskTool } from "@/subagent/delegate"
 import { TaskStatusTool } from "./task_status"
 import { TodoWriteTool } from "./todo"
 import { WebFetchTool } from "./webfetch"
@@ -25,6 +26,11 @@ import { ProviderID, type ModelID } from "../provider/schema"
 import { WebSearchTool } from "./websearch"
 import { RepoCloneTool } from "./repo_clone"
 import { RepoOverviewTool } from "./repo_overview"
+import { SessionSearchTool } from "./session_search"
+import { MemoryGraphTool } from "@/memory/graph/graph-tool"
+import { CronCreateTool, CronListTool, CronDeleteTool } from "@/cron/cron-tools"
+import { MemoryLayer } from "@/memory/index"
+import { CronService } from "@/cron/cron"
 import * as Log from "@openloom/core/util/log"
 import { LspTool } from "./lsp"
 import * as Truncate from "./truncate"
@@ -32,7 +38,7 @@ import { ApplyPatchTool } from "./apply_patch"
 import { Glob } from "@openloom/core/util/glob"
 import path from "path"
 import { pathToFileURL } from "url"
-import { Effect, Layer, Context } from "effect"
+import { Effect, Layer, Context, Option } from "effect"
 import { FetchHttpClient, HttpClient } from "effect/unstable/http"
 import { ChildProcessSpawner } from "effect/unstable/process/ChildProcessSpawner"
 import { CrossSpawnSpawner } from "@openloom/core/cross-spawn-spawner"
@@ -79,32 +85,7 @@ export interface Interface {
 
 export class Service extends Context.Service<Service, Interface>()("@openloom/ToolRegistry") {}
 
-export const layer: Layer.Layer<
-  Service,
-  never,
-  | Config.Service
-  | Plugin.Service
-  | Question.Service
-  | Todo.Service
-  | Agent.Service
-  | Skill.Service
-  | Session.Service
-  | SessionStatus.Service
-  | BackgroundJob.Service
-  | Provider.Service
-  | Git.Service
-  | Reference.Service
-  | LSP.Service
-  | Instruction.Service
-  | AppFileSystem.Service
-  | Bus.Service
-  | HttpClient.HttpClient
-  | ChildProcessSpawner
-  | Ripgrep.Service
-  | Format.Service
-  | Truncate.Service
-  | RuntimeFlags.Service
-> = Layer.effect(
+export const layer = Layer.effect(
   Service,
   Effect.gen(function* () {
     const config = yield* Config.Service
@@ -116,6 +97,7 @@ export const layer: Layer.Layer<
 
     const invalid = yield* InvalidTool
     const task = yield* TaskTool
+    const delegateTask = yield* DelegateTaskTool
     const taskStatus = yield* TaskStatusTool
     const read = yield* ReadTool
     const question = yield* QuestionTool
@@ -126,6 +108,12 @@ export const layer: Layer.Layer<
     const websearch = yield* WebSearchTool
     const repoClone = yield* RepoCloneTool
     const repoOverview = yield* RepoOverviewTool
+    const sessionSearch = yield* SessionSearchTool
+    const memoryGraph = yield* MemoryGraphTool
+    const cronOpt = yield* Effect.serviceOption(CronService.Service)
+    const cronCreate = Option.isSome(cronOpt) ? yield* CronCreateTool : undefined
+    const cronList = Option.isSome(cronOpt) ? yield* CronListTool : undefined
+    const cronDelete = Option.isSome(cronOpt) ? yield* CronDeleteTool : undefined
     const shell = yield* ShellTool
     const globtool = yield* GlobTool
     const writetool = yield* WriteTool
@@ -216,6 +204,14 @@ export const layer: Layer.Layer<
 
         yield* config.get()
         const questionEnabled = ["app", "cli", "desktop"].includes(flags.client) || flags.enableQuestionTool
+        const cronTools =
+          flags.experimentalBackgroundSubagents && cronCreate && cronList && cronDelete
+            ? yield* Effect.all({
+                cron_create: Tool.init(cronCreate),
+                cron_list: Tool.init(cronList),
+                cron_delete: Tool.init(cronDelete),
+              })
+            : undefined
 
         const tool = yield* Effect.all({
           invalid: Tool.init(invalid),
@@ -226,12 +222,15 @@ export const layer: Layer.Layer<
           edit: Tool.init(edit),
           write: Tool.init(writetool),
           task: Tool.init(task),
+          delegate_task: Tool.init(delegateTask),
           task_status: Tool.init(taskStatus),
           fetch: Tool.init(webfetch),
           todo: Tool.init(todo),
           search: Tool.init(websearch),
           repo_clone: Tool.init(repoClone),
           repo_overview: Tool.init(repoOverview),
+          session_search: Tool.init(sessionSearch),
+          memory_graph: Tool.init(memoryGraph),
           skill: Tool.init(skilltool),
           patch: Tool.init(patchtool),
           question: Tool.init(question),
@@ -251,10 +250,14 @@ export const layer: Layer.Layer<
             tool.edit,
             tool.write,
             tool.task,
+            tool.delegate_task,
             ...(flags.experimentalBackgroundSubagents ? [tool.task_status] : []),
             tool.fetch,
             tool.todo,
             tool.search,
+            tool.session_search,
+            tool.memory_graph,
+            ...(cronTools ? [cronTools.cron_create, cronTools.cron_list, cronTools.cron_delete] : []),
             ...(flags.experimentalScout ? [tool.repo_clone, tool.repo_overview] : []),
             tool.skill,
             tool.patch,
@@ -367,30 +370,35 @@ export const layer: Layer.Layer<
 )
 
 export const defaultLayer = Layer.suspend(() =>
-  layer
-    .pipe(
-      Layer.provide(Config.defaultLayer),
-      Layer.provide(Plugin.defaultLayer),
-      Layer.provide(Question.defaultLayer),
-      Layer.provide(Todo.defaultLayer),
-      Layer.provide(Skill.defaultLayer),
-      Layer.provide(Agent.defaultLayer),
-      Layer.provide(Session.defaultLayer),
-      Layer.provide(Layer.mergeAll(SessionStatus.defaultLayer, BackgroundJob.defaultLayer)),
-      Layer.provide(Provider.defaultLayer),
-      Layer.provide(Git.defaultLayer),
-      Layer.provide(Reference.defaultLayer),
-      Layer.provide(LSP.defaultLayer),
-      Layer.provide(Instruction.defaultLayer),
-      Layer.provide(AppFileSystem.defaultLayer),
-      Layer.provide(Bus.layer),
-      Layer.provide(FetchHttpClient.layer),
-      Layer.provide(Format.defaultLayer),
-      Layer.provide(CrossSpawnSpawner.defaultLayer),
-      Layer.provide(Ripgrep.defaultLayer),
-      Layer.provide(Truncate.defaultLayer),
-    )
-    .pipe(Layer.provide(RuntimeFlags.defaultLayer)),
+  layer.pipe(
+    Layer.provide(
+      Layer.mergeAll(
+        Config.defaultLayer,
+        Plugin.defaultLayer,
+        Question.defaultLayer,
+        Todo.defaultLayer,
+        Skill.defaultLayer,
+        Agent.defaultLayer,
+        Session.defaultLayer,
+        SessionStatus.defaultLayer,
+        BackgroundJob.defaultLayer,
+        Provider.defaultLayer,
+        Git.defaultLayer,
+        Reference.defaultLayer,
+        LSP.defaultLayer,
+        Instruction.defaultLayer,
+        AppFileSystem.defaultLayer,
+        Bus.layer,
+        FetchHttpClient.layer,
+        Format.defaultLayer,
+        CrossSpawnSpawner.defaultLayer,
+        Ripgrep.defaultLayer,
+        Truncate.defaultLayer,
+        MemoryLayer,
+        RuntimeFlags.defaultLayer,
+      ),
+    ),
+  ),
 )
 
 function isZodType(value: unknown): value is z.ZodType {

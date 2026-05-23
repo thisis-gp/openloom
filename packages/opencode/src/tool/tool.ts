@@ -13,7 +13,7 @@ import * as Log from "@openloom/core/util/log"
 const log = Log.create({ service: "tool" })
 
 interface Metadata {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // TODO: remove this hack
@@ -67,18 +67,22 @@ type Init<Parameters extends Schema.Decoder<unknown>, M extends Metadata> =
   | (() => Effect.Effect<DefWithoutID<Parameters, M>>)
 
 export type InferParameters<T> =
-  T extends Info<infer P, any>
+  T extends Info<infer P, infer _Metadata>
     ? Schema.Schema.Type<P>
-    : T extends Effect.Effect<Info<infer P, any>, any, any>
+    : T extends Effect.Effect<Info<infer P, infer _Metadata>, infer _Error, infer _Requirements>
       ? Schema.Schema.Type<P>
       : never
 export type InferMetadata<T> =
-  T extends Info<any, infer M> ? M : T extends Effect.Effect<Info<any, infer M>, any, any> ? M : never
+  T extends Info<Schema.Decoder<unknown>, infer M>
+    ? M
+    : T extends Effect.Effect<Info<Schema.Decoder<unknown>, infer M>, infer _Error, infer _Requirements>
+      ? M
+      : never
 
 export type InferDef<T> =
   T extends Info<infer P, infer M>
     ? Def<P, M>
-    : T extends Effect.Effect<Info<infer P, infer M>, any, any>
+    : T extends Effect.Effect<Info<infer P, infer M>, infer _Error, infer _Requirements>
       ? Def<P, M>
       : never
 
@@ -134,7 +138,7 @@ function wrap<Parameters extends Schema.Decoder<unknown>, Result extends Metadat
 
           // Plugin hooks (tool.execute.before / tool.execute.after) — optional: no-op if Plugin not in scope (e.g. tests)
           const pluginOpt = yield* Effect.serviceOption(Plugin.Service)
-          const beforeOutput = { args: decoded as any }
+          const beforeOutput = { args: decoded }
           if (Option.isSome(pluginOpt)) {
             yield* pluginOpt.value.trigger("tool.execute.before", { tool: id, sessionID: ctx.sessionID, callID: ctx.callID ?? "" }, beforeOutput)
           }

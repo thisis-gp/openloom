@@ -50,6 +50,8 @@ export const SessionTable = sqliteTable(
     ...Timestamps,
     time_compacting: integer(),
     time_archived: integer(),
+    /** ID of the cron job that spawned this session, null if human-initiated */
+    cron_job_id: text(),
   },
   (table) => [
     index("session_project_idx").on(table.project_id),
@@ -68,6 +70,12 @@ export const MessageTable = sqliteTable(
       .references(() => SessionTable.id, { onDelete: "cascade" }),
     ...Timestamps,
     data: text({ mode: "json" }).notNull().$type<InfoData>(),
+    /** 1 if this message was compressed by the context compression pipeline */
+    compressed: integer().default(0),
+    /** Curator-assigned memory tier; null until classified */
+    memory_tier: text().$type<"recent" | "archive" | "pruned">(),
+    /** CuratorRunTable.id that classified this message; null until classified */
+    curator_run_id: text(),
   },
   (table) => [index("message_session_time_created_id_idx").on(table.session_id, table.time_created, table.id)],
 )
