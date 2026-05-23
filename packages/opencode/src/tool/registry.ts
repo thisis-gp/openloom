@@ -395,6 +395,7 @@ export const defaultLayer = Layer.suspend(() =>
         Ripgrep.defaultLayer,
         Truncate.defaultLayer,
         MemoryLayer,
+        CronService.noopLayer,
         RuntimeFlags.defaultLayer,
       ),
     ),

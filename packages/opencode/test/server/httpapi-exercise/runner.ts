@@ -107,8 +107,8 @@ function withContext<A, E>(
               Effect.tap(() => trace(options, scenario, `${label} instance load done`)),
             )
           : undefined
-        const run = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
-          effect.pipe(Effect.provideService(modules.InstanceRef, instance), Effect.provide(modules.AppLayer))
+        const run = <A, E, R>(effect: Effect.Effect<A, E, R>): Effect.Effect<A, E, never> =>
+          effect.pipe(Effect.provideService(modules.InstanceRef, instance), Effect.provide(modules.AppLayer)) as unknown as Effect.Effect<A, E, never>
         const directory = () => {
           if (!context.dir?.path) throw new Error("scenario needs a project directory")
           return context.dir.path
