@@ -15,6 +15,8 @@ let hnswCache: HnswIndex | null = null
 const HNSW_THRESHOLD = 500
 
 function getOrBuildHnsw(entries: Array<{ id: string; vector: number[] }>): HnswIndex {
+  // Rebuild if size changed. A null cache (set after each insert) is the primary
+  // invalidation path; this size check is a secondary guard for concurrent reads.
   if (hnswCache && hnswCache.size === entries.length) return hnswCache
   const dim = entries[0]?.vector.length ?? 1536
   const idx = new HnswIndex(dim, Math.max(entries.length * 2, 1000))
