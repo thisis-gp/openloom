@@ -51,7 +51,7 @@ it.live("AppLayer also installs EffectLogger through Observability.layer", () =>
 
     expect(current.effectLogger).toBe(true)
     expect(current.defaultLogger).toBe(false)
-  }),
+  }) as unknown as Effect.Effect<void, never, never>,
 )
 
 it.instance(

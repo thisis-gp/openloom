@@ -62,6 +62,8 @@ import { Reference } from "../../src/reference/reference"
 import { SyncEvent } from "@/sync"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { EventV2Bridge } from "@/event-v2-bridge"
+import { MemoryLayer } from "@/memory/index"
+import { CronService } from "@/cron/cron"
 
 void Log.init({ print: false })
 
@@ -143,6 +145,8 @@ function makeHttp() {
     Layer.provide(Ripgrep.defaultLayer),
     Layer.provide(Format.defaultLayer),
     Layer.provide(RuntimeFlags.layer({ experimentalEventSystem: true })),
+    Layer.provide(MemoryLayer),
+    Layer.provide(CronService.noopLayer),
     Layer.provideMerge(todo),
     Layer.provideMerge(question),
     Layer.provideMerge(deps),

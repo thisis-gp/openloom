@@ -123,7 +123,7 @@ afterEach(async () => {
 
 async function withInstance<T>(fn: (ctx: InstanceContext) => T | Promise<T>) {
   await using tmp = await tmpdir({ git: true })
-  const ctx = await AppRuntime.runPromise(InstanceStore.Service.use((store) => store.load({ directory: tmp.path })))
+  const ctx = await AppRuntime.runPromise(InstanceStore.Service.use((store) => store.load({ directory: tmp.path })) as unknown as Effect.Effect<InstanceContext, never, never>)
   return await context.provide(ctx, () => fn(ctx))
 }
 
@@ -149,7 +149,7 @@ function currentInstance() {
 
 const runWorkspace = <A, E>(effect: Effect.Effect<A, E, Workspace.Service>) => {
   const ctx = currentInstance()
-  return AppRuntime.runPromise(ctx ? effect.pipe(Effect.provideService(InstanceRef, ctx)) : effect)
+  return AppRuntime.runPromise((ctx ? effect.pipe(Effect.provideService(InstanceRef, ctx)) : effect) as unknown as Effect.Effect<A, E, never>)
 }
 const createWorkspace = (input: Workspace.CreateInput) =>
   runWorkspace(Workspace.Service.use((workspace) => workspace.create(input)))
@@ -929,12 +929,12 @@ describe("workspace CRUD", () => {
       insertWorkspace(previous)
       registerAdapter(projectID, previousType, localAdapter(workspaceTmp.path, { createDir: false }).adapter)
       const session = await AppRuntime.runPromise(
-        SessionNs.Service.use((svc) => svc.create({})).pipe(Effect.provideService(InstanceRef, instance)),
+        SessionNs.Service.use((svc) => svc.create({})).pipe(Effect.provideService(InstanceRef, instance)) as unknown as Effect.Effect<{ id: SessionID }, never, never>,
       )
       attachSessionToWorkspace(session.id, previous.id)
 
       const workspaceCtx = await AppRuntime.runPromise(
-        InstanceStore.Service.use((store) => store.load({ directory: workspaceTmp.path })),
+        InstanceStore.Service.use((store) => store.load({ directory: workspaceTmp.path })) as unknown as Effect.Effect<InstanceContext, never, never>,
       )
       const workspaceProjectID = await context.provide(workspaceCtx, async () => {
         const id = workspaceCtx.project.id

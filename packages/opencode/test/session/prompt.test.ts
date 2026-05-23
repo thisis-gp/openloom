@@ -54,6 +54,8 @@ import { reply, TestLLMServer } from "../lib/llm-server"
 import { SyncEvent } from "@/sync"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { EventV2Bridge } from "@/event-v2-bridge"
+import { MemoryLayer } from "@/memory/index"
+import { CronService } from "@/cron/cron"
 
 void Log.init({ print: false })
 
@@ -194,6 +196,8 @@ function makeHttp(input?: { processor?: "blocking" }) {
     Layer.provide(Ripgrep.defaultLayer),
     Layer.provide(Format.defaultLayer),
     Layer.provide(RuntimeFlags.layer({ experimentalEventSystem: true })),
+    Layer.provide(MemoryLayer),
+    Layer.provide(CronService.noopLayer),
     Layer.provideMerge(todo),
     Layer.provideMerge(question),
     Layer.provideMerge(deps),
@@ -2135,7 +2139,7 @@ it.instance(
       const sessions = yield* Session.Service
       const session = yield* sessions.create({ title: "Prompt regression" })
 
-      yield* llm.text("packages/openloom/src/session/processor.ts")
+      yield* llm.text("packages/opencode/src/session/processor.ts")
 
       const result = yield* prompt.prompt({
         sessionID: session.id,

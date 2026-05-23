@@ -61,10 +61,11 @@ const providerLayer = (flags: Partial<RuntimeFlags.Info> = {}) =>
 
 async function run<A, E>(ctx: InstanceContext, fn: (provider: Provider.Interface) => Effect.Effect<A, E, never>) {
   return AppRuntime.runPromise(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Effect.gen(function* () {
       const provider = yield* Provider.Service
       return yield* fn(provider)
-    }).pipe(Effect.provideService(InstanceRef, ctx)),
+    }).pipe(Effect.provideService(InstanceRef, ctx)) as unknown as Effect.Effect<A, E, never>,
   )
 }
 
@@ -2648,13 +2649,14 @@ test("plugin config providers persist after instance dispose", async () => {
   const first = await withTestInstance({
     directory: tmp.path,
     fn: async (ctx) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       AppRuntime.runPromise(
         Effect.gen(function* () {
           const plugin = yield* Plugin.Service
           const provider = yield* Provider.Service
           yield* plugin.init()
           return yield* provider.list()
-        }).pipe(Effect.provideService(InstanceRef, ctx)),
+        }).pipe(Effect.provideService(InstanceRef, ctx)) as unknown as Effect.Effect<any, never, never>,
       ),
   })
   expect(first[ProviderID.make("demo")]).toBeDefined()

@@ -110,7 +110,7 @@ describe("event HttpApi", () => {
       const next = readEvent(reader)
       const ctx = await reloadTestInstance({ directory: tmp.path })
       await AppRuntime.runPromise(
-        Bus.Service.use((svc) => svc.publish(ServerEvent.Connected, {})).pipe(Effect.provideService(InstanceRef, ctx)),
+        Bus.Service.use((svc) => svc.publish(ServerEvent.Connected, {})).pipe(Effect.provideService(InstanceRef, ctx)) as unknown as Effect.Effect<void, never, never>,
       )
 
       expect(await next).toMatchObject({ type: "server.connected", properties: {} })

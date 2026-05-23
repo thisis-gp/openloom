@@ -23,7 +23,7 @@ async function getModel(providerID: ProviderID, modelID: ModelID, ctx: InstanceC
     const provider = yield* Provider.Service
     return yield* provider.getModel(providerID, modelID)
   })
-  return AppRuntime.runPromise(effect.pipe(Effect.provideService(InstanceRef, ctx)))
+  return AppRuntime.runPromise(effect.pipe(Effect.provideService(InstanceRef, ctx)) as unknown as Effect.Effect<Provider.Model, Provider.ModelNotFoundError, never>)
 }
 
 const llm = makeRuntime(LLM.Service, LLM.defaultLayer)

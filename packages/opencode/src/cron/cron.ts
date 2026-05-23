@@ -285,4 +285,16 @@ export const defaultLayer = layer.pipe(
   Layer.provideMerge(BackgroundJob.defaultLayer),
 )
 
+/** No-op layer for contexts where cron scheduling is not needed (e.g. test fixtures, ToolRegistry.defaultLayer). */
+export const noopLayer = Layer.succeed(
+  Service,
+  Service.of({
+    create: () => Effect.fail(new Error("CronService not available")),
+    list: () => Effect.succeed([]),
+    delete: () => Effect.void,
+    tick: () => Effect.void,
+    startLoop: () => Effect.void,
+  }),
+)
+
 export * as CronService from "./cron"

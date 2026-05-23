@@ -41,7 +41,8 @@ async function list(ctx: InstanceContext) {
     Effect.gen(function* () {
       const provider = yield* Provider.Service
       return yield* provider.list()
-    }).pipe(Effect.provideService(InstanceRef, ctx)),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }).pipe(Effect.provideService(InstanceRef, ctx)) as unknown as Effect.Effect<any, never, never>,
   )
 }
 
