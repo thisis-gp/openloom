@@ -2,8 +2,10 @@ import { EOL } from "os"
 import { Effect } from "effect"
 import { File } from "../../../file"
 import { Ripgrep } from "@/file/ripgrep"
-import { effectCmd } from "../../effect-cmd"
+import { effectCmd, type CliError } from "../../effect-cmd"
 import { cmd } from "../cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 
 const FileSearchCommand = effectCmd({
   command: "search <query>",
@@ -17,7 +19,7 @@ const FileSearchCommand = effectCmd({
   handler: Effect.fn("Cli.debug.file.search")(function* (args) {
     const results = yield* File.Service.use((svc) => svc.search({ query: args.query }))
     process.stdout.write(results.join(EOL) + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const FileReadCommand = effectCmd({
@@ -32,17 +34,17 @@ const FileReadCommand = effectCmd({
   handler: Effect.fn("Cli.debug.file.read")(function* (args) {
     const content = yield* File.Service.use((svc) => svc.read(args.path))
     process.stdout.write(JSON.stringify(content, null, 2) + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const FileStatusCommand = effectCmd({
   command: "status",
   describe: "show file status information",
   builder: (yargs) => yargs,
-  handler: Effect.fn("Cli.debug.file.status")(function* () {
+  handler: Effect.fn("Cli.debug.file.status")(function* (_args) {
     const status = yield* File.Service.use((svc) => svc.status())
     process.stdout.write(JSON.stringify(status, null, 2) + EOL)
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const FileListCommand = effectCmd({
@@ -57,7 +59,7 @@ const FileListCommand = effectCmd({
   handler: Effect.fn("Cli.debug.file.list")(function* (args) {
     const files = yield* File.Service.use((svc) => svc.list(args.path))
     process.stdout.write(JSON.stringify(files, null, 2) + EOL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const FileTreeCommand = effectCmd({
@@ -72,7 +74,7 @@ const FileTreeCommand = effectCmd({
   handler: Effect.fn("Cli.debug.file.tree")(function* (args) {
     const tree = yield* Effect.orDie(Ripgrep.Service.use((svc) => svc.tree({ cwd: args.dir, limit: 200 })))
     console.log(JSON.stringify(tree, null, 2))
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const FileCommand = cmd({

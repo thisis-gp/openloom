@@ -1,11 +1,13 @@
 import { Effect } from "effect"
 import { Server } from "../../server/server"
 import { UI } from "../ui"
-import { effectCmd } from "../effect-cmd"
+import { effectCmd, type CliError } from "../effect-cmd"
 import { withNetworkOptions, resolveNetworkOptions } from "../network"
 import { Flag } from "@openloom/core/flag/flag"
 import open from "open"
 import { networkInterfaces } from "os"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 
 function getNetworkIPs() {
   const nets = networkInterfaces()
@@ -80,5 +82,5 @@ export const WebCommand = effectCmd({
     }
 
     yield* Effect.never
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })

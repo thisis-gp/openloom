@@ -1,6 +1,8 @@
 import { Auth } from "../../auth"
 import { cmd } from "./cmd"
 import { CliError, effectCmd, fail } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { UI } from "../ui"
 import * as Prompt from "../effect/prompt"
 import { ModelsDev } from "@openloom/core/models"
@@ -292,7 +294,7 @@ export const ProvidersListCommand = effectCmd({
 
       yield* Prompt.outro(`${activeEnvVars.length} environment variable` + (activeEnvVars.length === 1 ? "" : "s"))
     }
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const ProvidersLoginCommand = effectCmd({
@@ -482,7 +484,7 @@ export const ProvidersLoginCommand = effectCmd({
     yield* Effect.orDie(authSvc.set(provider, { type: "api", key: apiKey }))
 
     yield* Prompt.outro("Done")
-  }),
+  }) as unknown as (args: any) => Effect.Effect<undefined, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const ProvidersLogoutCommand = effectCmd({
@@ -511,5 +513,5 @@ export const ProvidersLogoutCommand = effectCmd({
     })
     yield* Effect.orDie(authSvc.remove(yield* promptValue(selected)))
     yield* Prompt.outro("Logout successful")
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })

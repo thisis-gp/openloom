@@ -1,5 +1,7 @@
 import { Effect } from "effect"
-import { effectCmd } from "../effect-cmd"
+import { effectCmd, type CliError } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { Session } from "@/session/session"
 import { NotFoundError } from "@/storage/storage"
 import { Database } from "@/storage/db"
@@ -77,7 +79,7 @@ export const StatsCommand = effectCmd({
       modelLimit = args.models
     }
     displayStats(stats, args.tools, modelLimit)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const getAllSessions = Effect.sync(() =>

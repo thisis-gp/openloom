@@ -23,7 +23,7 @@ const provideContext = <A, E, R>(effect: Effect.Effect<A, E, R>, context: Worksp
   effect.pipe(
     Effect.provideService(InstanceRef, requireInstance(context)),
     Effect.provideService(WorkspaceRef, context?.workspaceID),
-  )
+  ) as unknown as Effect.Effect<A, E, never>
 
 export const WorktreeAdapter: WorkspaceAdapter = {
   name: "Worktree",

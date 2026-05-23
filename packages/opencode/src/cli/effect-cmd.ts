@@ -78,15 +78,18 @@ export const effectCmd = <Args, A>(opts: EffectCmdOpts<Args, A>) =>
       const args = rawArgs as unknown as WithDoubleDash<Args>
       const useInstance = typeof opts.instance === "function" ? opts.instance(args) : opts.instance !== false
       if (!useInstance) {
-        await AppRuntime.runPromise(opts.handler(args))
+        await AppRuntime.runPromise(opts.handler(args) as unknown as Effect.Effect<A, CliError, never>)
         return
       }
       const directory = opts.directory?.(args) ?? process.cwd()
-      const { store, ctx } = await AppRuntime.runPromise(
+      const loadResult = await (AppRuntime.runPromise as (e: unknown) => Promise<unknown>)(
         InstanceStore.Service.use((store) => store.load({ directory }).pipe(Effect.map((ctx) => ({ store, ctx })))),
       )
+      const { store, ctx } = loadResult as { store: InstanceStore.Interface; ctx: Parameters<InstanceStore.Interface["dispose"]>[0] }
       try {
-        await AppRuntime.runPromise(opts.handler(args).pipe(Effect.provideService(InstanceRef, ctx)))
+        await AppRuntime.runPromise(
+          opts.handler(args).pipe(Effect.provideService(InstanceRef, ctx)) as unknown as Effect.Effect<A, CliError, never>,
+        )
       } finally {
         await AppRuntime.runPromise(store.dispose(ctx))
       }

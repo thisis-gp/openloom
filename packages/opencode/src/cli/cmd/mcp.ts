@@ -1,5 +1,7 @@
 import { cmd } from "./cmd"
-import { effectCmd } from "../effect-cmd"
+import { effectCmd, type CliError } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { Cause } from "effect"
 import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
@@ -110,7 +112,7 @@ export const McpListCommand = effectCmd({
   command: "list",
   aliases: ["ls"],
   describe: "list MCP servers and their status",
-  handler: Effect.fn("Cli.mcp.list")(function* () {
+  handler: Effect.fn("Cli.mcp.list")(function* (_args) {
     UI.empty()
     prompts.intro("MCP Servers")
 
@@ -164,7 +166,7 @@ export const McpListCommand = effectCmd({
     }
 
     prompts.outro(`${servers.length} server(s)`)
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const McpAuthCommand = effectCmd({
@@ -305,14 +307,14 @@ export const McpAuthCommand = effectCmd({
     )
 
     prompts.outro("Done")
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const McpAuthListCommand = effectCmd({
   command: "list",
   aliases: ["ls"],
   describe: "list OAuth-capable MCP servers and their auth status",
-  handler: Effect.fn("Cli.mcp.auth.list")(function* () {
+  handler: Effect.fn("Cli.mcp.auth.list")(function* (_args) {
     UI.empty()
     prompts.intro("MCP OAuth Status")
 
@@ -335,7 +337,7 @@ export const McpAuthListCommand = effectCmd({
     }
 
     prompts.outro(`${servers.length} OAuth-capable server(s)`)
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const McpLogoutCommand = effectCmd({
@@ -393,7 +395,7 @@ export const McpLogoutCommand = effectCmd({
     yield* MCP.Service.use((mcp) => mcp.removeAuth(serverName))
     prompts.log.success(`Removed OAuth credentials for ${serverName}`)
     prompts.outro("Done")
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 async function resolveConfigPath(baseDir: string, global = false) {
@@ -771,5 +773,5 @@ export const McpDebugCommand = effectCmd({
 
       prompts.outro("Debug complete")
     })
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })

@@ -1,9 +1,11 @@
 import { Effect } from "effect"
 import { UI } from "../ui"
-import { effectCmd, fail } from "../effect-cmd"
+import { effectCmd, fail, type CliError } from "../effect-cmd"
 import { Git } from "@/git"
 import { InstanceRef } from "@/effect/instance-ref"
 import { Process } from "@/util/process"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 
 export const PrCommand = effectCmd({
   command: "pr <number>",
@@ -111,5 +113,5 @@ export const PrCommand = effectCmd({
     // Match legacy throw semantics — propagate as a defect so the top-level
     // index.ts catch handles it identically (exit 1, "Unexpected error" banner).
     if (code !== 0) return yield* Effect.die(new Error(`openloom exited with code ${code}`))
-  }),
+  }) as unknown as (args: any) => Effect.Effect<undefined, CliError, AppServices | InstanceStore.Service>,
 })

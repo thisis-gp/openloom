@@ -1,7 +1,9 @@
 import type { Argv } from "yargs"
 import { Effect } from "effect"
 import { cmd } from "./cmd"
-import { effectCmd, fail } from "../effect-cmd"
+import { effectCmd, fail, type CliError } from "../effect-cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { Session } from "@/session/session"
 import { SessionID } from "../../session/schema"
 import { UI } from "../ui"
@@ -64,7 +66,7 @@ export const SessionDeleteCommand = effectCmd({
       .remove(sessionID)
       .pipe(Effect.catchIf(NotFoundError.isInstance, () => fail(`Session not found: ${args.sessionID}`)))
     UI.println(UI.Style.TEXT_SUCCESS_BOLD + `Session ${args.sessionID} deleted` + UI.Style.TEXT_NORMAL)
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 export const SessionListCommand = effectCmd({
@@ -112,7 +114,7 @@ export const SessionListCommand = effectCmd({
     } else {
       console.log(output)
     }
-  }),
+  }) as unknown as (args: any) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 function formatSessionTable(sessions: Session.Info[]): string {

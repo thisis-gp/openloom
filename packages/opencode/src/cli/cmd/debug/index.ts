@@ -5,8 +5,10 @@ import os from "os"
 import { Duration, Effect } from "effect"
 import { Config } from "@/config/config"
 import { ConfigPlugin } from "@/config/plugin"
-import { effectCmd } from "../../effect-cmd"
+import { effectCmd, type CliError } from "../../effect-cmd"
 import { cmd } from "../cmd"
+import type { AppServices } from "@/effect/app-runtime"
+import { InstanceStore } from "@/project/instance-store"
 import { ConfigCommand } from "./config"
 import { FileCommand } from "./file"
 import { LSPCommand } from "./lsp"
@@ -43,15 +45,15 @@ export const DebugCommand = cmd({
 const WaitCommand = effectCmd({
   command: "wait",
   describe: "wait indefinitely (for debugging)",
-  handler: Effect.fn("Cli.debug.wait")(function* () {
+  handler: Effect.fn("Cli.debug.wait")(function* (_args) {
     yield* Effect.sleep(Duration.days(1))
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const InfoCommand = effectCmd({
   command: "info",
   describe: "show debug information",
-  handler: Effect.fn("Cli.debug.info")(function* () {
+  handler: Effect.fn("Cli.debug.info")(function* (_args) {
     const config = yield* Config.Service.use((cfg) => cfg.get())
     const termProgram = process.env.TERM_PROGRAM
       ? `${process.env.TERM_PROGRAM}${process.env.TERM_PROGRAM_VERSION ? ` ${process.env.TERM_PROGRAM_VERSION}` : ""}`
@@ -73,7 +75,7 @@ const InfoCommand = effectCmd({
     for (const plugin of config.plugin_origins) {
       console.log(`- ${ConfigPlugin.pluginSpecifier(plugin.spec)}`)
     }
-  }),
+  }) as unknown as (_args: unknown) => Effect.Effect<void, CliError, AppServices | InstanceStore.Service>,
 })
 
 const PathsCommand = cmd({

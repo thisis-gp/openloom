@@ -121,7 +121,7 @@ export const AppLayer = Layer.mergeAll(
 ).pipe(Layer.provideMerge(InstanceLayer.layer), Layer.provideMerge(Observability.layer))
 
 // Effect's Layer.mergeAll types duplicate Context.Service classes as bare `Service` in the requirement union.
-const rt = ManagedRuntime.make(AppLayer as Layer.Layer<never, never, never>, { memoMap })
+const rt = ManagedRuntime.make(AppLayer as unknown as Layer.Layer<never, never, never>, { memoMap })
 type Runtime = Pick<typeof rt, "runSync" | "runPromise" | "runPromiseExit" | "runFork" | "runCallback" | "dispose">
 
 /** Services provided by AppRuntime — i.e. what an Effect run via AppRuntime.runPromise can yield. */

@@ -57,11 +57,13 @@ export interface Interface {
 export class Service extends Context.Service<Service, Interface>()("@openloom/Plugin") {}
 
 // Built-in plugins that are directly imported (not installed from npm)
+// Some plugins come from packages that use a different `Plugin` type (@opencode-ai/plugin vs @openloom/plugin).
+// Cast to satisfy the local type; the runtime shape is compatible.
 const INTERNAL_PLUGINS: PluginInstance[] = [
   CodexAuthPlugin,
   CopilotAuthPlugin,
-  GitlabAuthPlugin,
-  PoeAuthPlugin,
+  GitlabAuthPlugin as unknown as PluginInstance,
+  PoeAuthPlugin as unknown as PluginInstance,
   CloudflareWorkersAuthPlugin,
   CloudflareAIGatewayAuthPlugin,
   AzureAuthPlugin,
