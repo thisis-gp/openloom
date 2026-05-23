@@ -1,5 +1,5 @@
 import { Bot, type Context } from "grammy"
-import { createOpencode, type ToolPart } from "@openloom/sdk"
+import { createOpencode } from "@openloom/sdk"
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 if (!BOT_TOKEN) {
@@ -13,28 +13,40 @@ console.log("✅ OpenLoom server ready")
 
 const bot = new Bot(BOT_TOKEN)
 
-const sessions = new Map<number, { sessionId: string }>()
+const sessions = new Map<number, { sessionId: string; lastUsed: number }>()
 
-void (async () => {
-  const events = await openloom.client.event.subscribe()
-  for await (const event of events.stream) {
-    if (event.type !== "message.part.updated") continue
-    const part = event.properties.part
-    if (part.type !== "tool") continue
-    const toolPart = part as ToolPart
-    if (toolPart.state.status !== "completed") continue
+// Prune sessions unused for more than 24 hours
+setInterval(() => {
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000
+  for (const [chatId, session] of sessions.entries()) {
+    if (session.lastUsed < cutoff) sessions.delete(chatId)
+  }
+}, 60 * 60 * 1000)
 
-    for (const [chatId, session] of sessions.entries()) {
-      if (session.sessionId !== toolPart.sessionID) continue
-      const completedState = toolPart.state
-      await bot.api
-        .sendMessage(chatId, `🔧 *${toolPart.tool}* — ${completedState.title}`, {
-          parse_mode: "Markdown",
-        })
-        .catch(() => {})
+async function startEventStream() {
+  while (true) {
+    try {
+      const events = await openloom.client.event.subscribe()
+      for await (const event of events.stream) {
+        if (event.type !== "message.part.updated") continue
+        const part = event.properties.part
+        if (part.type !== "tool") continue
+        if (part.state.status !== "completed") continue
+        const title = (part.state as any).title ?? ""
+        for (const [chatId, session] of sessions.entries()) {
+          if (session.sessionId !== part.sessionID) continue
+          await bot.api
+            .sendMessage(chatId, `🔧 *${part.tool}* — ${title}`, { parse_mode: "Markdown" })
+            .catch(() => {})
+        }
+      }
+    } catch (err) {
+      console.error("Event stream error, reconnecting in 5s:", err)
+      await new Promise((r) => setTimeout(r, 5000))
     }
   }
-})()
+}
+void startEventStream()
 
 bot.command("start", async (ctx: Context) => {
   await ctx.reply("👋 Hello! I'm your OpenLoom AI assistant. Send me a message to start coding.")
@@ -55,6 +67,10 @@ bot.on("message:text", async (ctx) => {
 
   let session = sessions.get(chatId)
 
+  if (session) {
+    session.lastUsed = Date.now()
+  }
+
   if (!session) {
     console.log("🆕 Creating new OpenLoom session for chat:", chatId)
     const createResult = await openloom.client.session.create({
@@ -67,7 +83,7 @@ bot.on("message:text", async (ctx) => {
       return
     }
 
-    session = { sessionId: createResult.data.id }
+    session = { sessionId: createResult.data.id, lastUsed: Date.now() }
     sessions.set(chatId, session)
     console.log("✅ Created OpenLoom session:", createResult.data.id)
   }
@@ -94,14 +110,10 @@ bot.on("message:text", async (ctx) => {
         .join("\n") ||
       "I received your message but didn't have a response."
 
-    await bot.api.editMessageText(chatId, ack.message_id, replyText, {
-      parse_mode: "Markdown",
-    })
+    await bot.api.editMessageText(chatId, ack.message_id, replyText)
   } catch (err) {
-    console.error("❌ Unexpected error:", err)
-    await bot.api
-      .editMessageText(chatId, ack.message_id, `❌ Error: ${String(err)}`)
-      .catch(() => {})
+    console.error("Session error for chat", chatId, err)
+    await bot.api.editMessageText(chatId, ack.message_id, "❌ Something went wrong. Please try again or send /reset.").catch(() => {})
   }
 })
 
