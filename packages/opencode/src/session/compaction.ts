@@ -48,6 +48,13 @@ export const REFERENCE_ONLY_SUMMARY_PREFIX =
 
 export const COMPACTION_FAILURE_COOLDOWN_MS = 5 * 60 * 1000
 
+const ABSTRACT_OUTPUT_FORMAT = `Output a compact Markdown summary with only these two sections:
+## Goal
+- [one sentence]
+
+## Status
+- [what was done, what's next — 3-5 bullets max]`
+
 const SUMMARY_TEMPLATE = `Output exactly the Markdown structure shown inside <template> and keep the section order unchanged. Do not include the <template> tags in your response.
 <template>
 ## Goal
@@ -129,7 +136,14 @@ function completedCompactions(messages: MessageV2.WithParts[]) {
   })
 }
 
-function buildPrompt(input: { previousSummary?: string; context: string[]; currentTokens?: number; hasReasoning?: boolean }) {
+function buildPrompt(input: {
+  previousSummary?: string
+  context: string[]
+  /** Pass 0 to always use default strategy (no overflow assumed). */
+  currentTokens?: number
+  /** Pass false when session has no reasoning parts (default). */
+  hasReasoning?: boolean
+}) {
   const strategy = selectStrategy(
     input.currentTokens ?? 0,
     PRUNE_MINIMUM,
@@ -165,7 +179,8 @@ function buildPrompt(input: { previousSummary?: string; context: string[]; curre
           ].join("\n")
   }
 
-  return [strategyPrompt, SUMMARY_TEMPLATE, ...input.context].join("\n\n")
+  const templateToUse = strategy === "abstract" ? ABSTRACT_OUTPUT_FORMAT : SUMMARY_TEMPLATE
+  return [strategyPrompt, templateToUse, ...input.context].join("\n\n")
 }
 
 function preserveRecentBudget(input: { cfg: Config.Info; model: Provider.Model }) {
