@@ -28,9 +28,25 @@ import { ModelV2 } from "@openloom/core/model"
 import { ProviderV2 } from "@openloom/core/provider"
 import * as DateTime from "effect/DateTime"
 import { RuntimeFlags } from "@/effect/runtime-flags"
+import { ThinkTagParser, usesThinkTags } from "./think-tag"
 
 const DOOM_LOOP_THRESHOLD = 3
 const log = Log.create({ service: "session.processor" })
+
+type ThinkTagEvent =
+  | { type: "reasoning-start" }
+  | { type: "reasoning-delta"; text: string }
+  | { type: "reasoning-end" }
+  | { type: "text-delta"; text: string }
+
+type ThinkTagState = {
+  parser: ThinkTagParser
+  pendingReasoningID: string | undefined
+  pending: ThinkTagEvent[]
+}
+
+/** Per-message ThinkTagParser state, keyed by "${sessionID}:${messageID}" */
+const thinkTagStateMap = new Map<string, ThinkTagState>()
 
 export type Result = "compact" | "stop" | "continue"
 
@@ -215,6 +231,16 @@ export const layer = Layer.effect(
         switch (value.type) {
           case "start":
             yield* status.set(ctx.sessionID, { type: "busy" })
+            if (usesThinkTags(ctx.model.id)) {
+              const stateKey = `${ctx.sessionID}:${ctx.assistantMessage.id}`
+              const parser = new ThinkTagParser()
+              const state: ThinkTagState = { parser, pendingReasoningID: undefined, pending: [] }
+              parser.on("reasoning-start", () => state.pending.push({ type: "reasoning-start" }))
+              parser.on("reasoning-delta", (text: string) => state.pending.push({ type: "reasoning-delta", text }))
+              parser.on("reasoning-end", () => state.pending.push({ type: "reasoning-end" }))
+              parser.on("text-delta", (text: string) => state.pending.push({ type: "text-delta", text }))
+              thinkTagStateMap.set(stateKey, state)
+            }
             return
 
           case "reasoning-start":
@@ -575,7 +601,63 @@ export const layer = Layer.effect(
             yield* session.updatePart(ctx.currentText)
             return
 
-          case "text-delta":
+          case "text-delta": {
+            const stateKey = `${ctx.sessionID}:${ctx.assistantMessage.id}`
+            const thinkState = thinkTagStateMap.get(stateKey)
+            if (thinkState) {
+              // Feed chunk into the parser — this synchronously populates thinkState.pending
+              thinkState.parser.feed(value.text)
+              const toProcess = thinkState.pending.splice(0)
+              for (const evt of toProcess) {
+                if (evt.type === "reasoning-start") {
+                  const reasoningID = PartID.ascending()
+                  thinkState.pendingReasoningID = reasoningID
+                  if (!(reasoningID in ctx.reasoningMap)) {
+                    ctx.reasoningMap[reasoningID] = {
+                      id: PartID.ascending(),
+                      messageID: ctx.assistantMessage.id,
+                      sessionID: ctx.assistantMessage.sessionID,
+                      type: "reasoning",
+                      text: "",
+                      time: { start: Date.now() },
+                      metadata: undefined,
+                    }
+                    yield* session.updatePart(ctx.reasoningMap[reasoningID])
+                  }
+                } else if (evt.type === "reasoning-delta") {
+                  const rid = thinkState.pendingReasoningID
+                  if (rid && rid in ctx.reasoningMap) {
+                    ctx.reasoningMap[rid].text += evt.text
+                    yield* session.updatePartDelta({
+                      sessionID: ctx.reasoningMap[rid].sessionID,
+                      messageID: ctx.reasoningMap[rid].messageID,
+                      partID: ctx.reasoningMap[rid].id,
+                      field: "text",
+                      delta: evt.text,
+                    })
+                  }
+                } else if (evt.type === "reasoning-end") {
+                  const rid = thinkState.pendingReasoningID
+                  if (rid && rid in ctx.reasoningMap) {
+                    ctx.reasoningMap[rid].time = { ...ctx.reasoningMap[rid].time, end: Date.now() }
+                    yield* session.updatePart(ctx.reasoningMap[rid])
+                    delete ctx.reasoningMap[rid]
+                    thinkState.pendingReasoningID = undefined
+                  }
+                } else if (evt.type === "text-delta") {
+                  if (!ctx.currentText) continue
+                  ctx.currentText.text += evt.text
+                  yield* session.updatePartDelta({
+                    sessionID: ctx.currentText.sessionID,
+                    messageID: ctx.currentText.messageID,
+                    partID: ctx.currentText.id,
+                    field: "text",
+                    delta: evt.text,
+                  })
+                }
+              }
+              return
+            }
             if (!ctx.currentText) return
             ctx.currentText.text += value.text
             if (value.providerMetadata) ctx.currentText.metadata = value.providerMetadata
@@ -587,6 +669,7 @@ export const layer = Layer.effect(
               delta: value.text,
             })
             return
+          }
 
           case "text-end":
             if (!ctx.currentText) return
@@ -620,8 +703,28 @@ export const layer = Layer.effect(
             ctx.currentText = undefined
             return
 
-          case "finish":
+          case "finish": {
+            const finishKey = `${ctx.sessionID}:${ctx.assistantMessage.id}`
+            const finishState = thinkTagStateMap.get(finishKey)
+            if (finishState) {
+              finishState.parser.flush()
+              const toProcess = finishState.pending.splice(0)
+              for (const evt of toProcess) {
+                if (evt.type === "text-delta" && ctx.currentText) {
+                  ctx.currentText.text += evt.text
+                  yield* session.updatePartDelta({
+                    sessionID: ctx.currentText.sessionID,
+                    messageID: ctx.currentText.messageID,
+                    partID: ctx.currentText.id,
+                    field: "text",
+                    delta: evt.text,
+                  })
+                }
+              }
+              thinkTagStateMap.delete(finishKey)
+            }
             return
+          }
 
           default:
             slog.info("unhandled", { event: value.type, value })
@@ -630,6 +733,10 @@ export const layer = Layer.effect(
       })
 
       const cleanup = Effect.fn("SessionProcessor.cleanup")(function* () {
+        // Clean up any ThinkTagParser state for this message
+        const cleanupKey = `${ctx.sessionID}:${ctx.assistantMessage.id}`
+        thinkTagStateMap.delete(cleanupKey)
+
         if (ctx.snapshot) {
           const patch = yield* snapshot.patch(ctx.snapshot)
           if (patch.files.length) {
