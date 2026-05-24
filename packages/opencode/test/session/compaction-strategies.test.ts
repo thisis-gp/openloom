@@ -11,6 +11,9 @@ describe("selectStrategy", () => {
   it("returns reasoning-aware when overflow > prune minimum and has reasoning", () => {
     expect(selectStrategy(25_000, 20_000, true)).toBe("reasoning-aware")
   })
+  it("returns abstract (not reasoning-aware) when overflow >= 2x AND hasReasoning=true", () => {
+    expect(selectStrategy(80_000, 20_000, true)).toBe("abstract")
+  })
 })
 
 describe("abstractStrategy", () => {
