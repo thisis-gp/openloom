@@ -17,6 +17,9 @@ export function selectStrategy(
   const overflow = currentTokens - pruneMinimum
   if (overflow <= 0) return "default"
   if (overflow >= pruneMinimum * 2) return "abstract"
+  // reasoning-aware activates at 25% overflow (lower than detail-prune's 50%) because
+  // preserving thought chains is most valuable when the session is starting to overflow,
+  // not just at peak pressure.
   if (hasReasoning && overflow >= pruneMinimum * 0.25) return "reasoning-aware"
   if (overflow >= pruneMinimum * 0.5) return "detail-prune"
   return "default"
