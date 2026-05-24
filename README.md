@@ -68,7 +68,7 @@ Custom agents: add `.md` files to `.openloom/agents/` in your project.
 |---------|--------|
 | Multi-provider LLM (Anthropic, OpenRouter, OpenAI, Gemini, Groq, Mistral, Bedrock, 15+ more) | ✅ |
 | Terminal UI (OpenTUI) | ✅ |
-| Desktop app (Tauri) | ✅ |
+| Desktop app (Electron) | ✅ |
 | Web UI (React/Vite) | ✅ |
 | Session persistence (SQLite) + resume | ✅ |
 | Built-in tools: read, write, edit, shell, glob, grep, webfetch, websearch, LSP | ✅ |
@@ -80,6 +80,37 @@ Custom agents: add `.md` files to `.openloom/agents/` in your project.
 | Zed extension | ✅ |
 | Slack integration | ✅ |
 | `.env` file support | ✅ |
+| Telegram bot integration | ✅ |
+| Docker shell backend | ✅ |
+| HNSW vector memory (scales to 500+ entries) | ✅ |
+| Codex CLI subagent (`agent: "codex"`) | ✅ |
+| Claude Code CLI subagent (`agent: "claude"`) | ✅ |
+| Cursor file-drop subagent (`agent: "cursor"`) | ✅ |
+
+---
+
+## External Agent Backends
+
+Use the `delegate_task` tool with an `agent` field to run tasks in external CLI tools:
+
+| Agent value | Requires | What it does |
+|-------------|----------|--------------|
+| `build` (default) | — | OpenLoom internal session |
+| `codex` | `npm i -g @openai/codex` + `codex login` | Runs goal in Codex CLI (uses ChatGPT Plus subscription) |
+| `claude` | Claude Code CLI in PATH | Runs goal in Claude Code CLI (uses Claude subscription) |
+| `cursor` | Cursor IDE open in workspace | Drops task file to `.cursor/tasks/` for Cursor Background Agent |
+
+**Example via chat:**
+> "Delegate to Codex: build a TypeScript utility that parses CSV files"
+
+**Or programmatically:**
+```json
+{
+  "tool": "delegate_task",
+  "goal": "Build a CSV parser utility in TypeScript",
+  "agent": "codex"
+}
+```
 
 ---
 
@@ -90,7 +121,7 @@ openloom/
 ├── packages/
 │   ├── opencode/     # Core CLI, agent runtime, server, tools, session DB
 │   ├── app/          # React web/desktop UI
-│   ├── desktop/      # Tauri desktop wrapper
+│   ├── desktop/      # Electron desktop wrapper
 │   ├── ui/           # Shared UI components
 │   ├── llm/          # LLM provider abstraction
 │   ├── plugin/       # Plugin system
@@ -109,7 +140,8 @@ openloom/
 ```bash
 bun run dev           # Start terminal UI
 bun run dev:web       # Start web app (React, localhost:5173)
-bun run dev:desktop   # Start desktop app (requires Rust + Tauri)
+bun run dev:desktop   # Start desktop app
+bun run dev:telegram  # Start Telegram bot
 bun run typecheck     # Type check all packages
 ```
 
