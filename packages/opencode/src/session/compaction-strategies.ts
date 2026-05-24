@@ -16,8 +16,8 @@ export function selectStrategy(
 ): CompressionStrategy {
   const overflow = currentTokens - pruneMinimum
   if (overflow <= 0) return "default"
-  if (hasReasoning && overflow >= pruneMinimum * 0.25) return "reasoning-aware"
   if (overflow >= pruneMinimum * 2) return "abstract"
+  if (hasReasoning && overflow >= pruneMinimum * 0.25) return "reasoning-aware"
   if (overflow >= pruneMinimum * 0.5) return "detail-prune"
   return "default"
 }
