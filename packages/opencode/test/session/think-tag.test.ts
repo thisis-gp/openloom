@@ -41,4 +41,33 @@ describe("ThinkTagParser", () => {
     parser.feed("plain text delta")
     expect(textParts).toEqual(["plain text delta"])
   })
+
+  it("flush() while inThink=true emits reasoning-delta and reasoning-end (not text-delta)", () => {
+    const parser = new ThinkTagParser()
+    const events: { type: string; text: string }[] = []
+    parser.on("reasoning-start", () => events.push({ type: "reasoning-start", text: "" }))
+    parser.on("reasoning-delta", (t: string) => events.push({ type: "reasoning-delta", text: t }))
+    parser.on("reasoning-end", () => events.push({ type: "reasoning-end", text: "" }))
+    parser.on("text-delta", (t: string) => events.push({ type: "text-delta", text: t }))
+
+    parser.feed("<think>incomplete reasoning")
+    parser.flush()
+
+    expect(events.find(e => e.type === "reasoning-delta")?.text).toBe("incomplete reasoning")
+    expect(events.some(e => e.type === "reasoning-end")).toBe(true)
+    expect(events.some(e => e.type === "text-delta")).toBe(false)
+  })
+
+  it("handles empty <think></think> tag", () => {
+    const parser = new ThinkTagParser()
+    const reasoningParts: string[] = []
+    const textParts: string[] = []
+    parser.on("reasoning-delta", (t: string) => reasoningParts.push(t))
+    parser.on("text-delta", (t: string) => textParts.push(t))
+
+    parser.feed("<think></think>after")
+
+    expect(reasoningParts.join("")).toBe("")
+    expect(textParts.join("")).toBe("after")
+  })
 })

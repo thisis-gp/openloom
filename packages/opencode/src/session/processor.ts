@@ -614,7 +614,7 @@ export const layer = Layer.effect(
                   thinkState.pendingReasoningID = reasoningID
                   if (!(reasoningID in ctx.reasoningMap)) {
                     ctx.reasoningMap[reasoningID] = {
-                      id: PartID.ascending(),
+                      id: reasoningID,
                       messageID: ctx.assistantMessage.id,
                       sessionID: ctx.assistantMessage.sessionID,
                       type: "reasoning",
@@ -710,7 +710,42 @@ export const layer = Layer.effect(
               finishState.parser.flush()
               const toProcess = finishState.pending.splice(0)
               for (const evt of toProcess) {
-                if (evt.type === "text-delta" && ctx.currentText) {
+                if (evt.type === "reasoning-start") {
+                  const reasoningID = PartID.ascending()
+                  finishState.pendingReasoningID = reasoningID
+                  if (!(reasoningID in ctx.reasoningMap)) {
+                    ctx.reasoningMap[reasoningID] = {
+                      id: reasoningID,
+                      messageID: ctx.assistantMessage.id,
+                      sessionID: ctx.assistantMessage.sessionID,
+                      type: "reasoning",
+                      text: "",
+                      time: { start: Date.now() },
+                      metadata: undefined,
+                    }
+                    yield* session.updatePart(ctx.reasoningMap[reasoningID])
+                  }
+                } else if (evt.type === "reasoning-delta") {
+                  const rid = finishState.pendingReasoningID
+                  if (rid && rid in ctx.reasoningMap) {
+                    ctx.reasoningMap[rid].text += evt.text
+                    yield* session.updatePartDelta({
+                      sessionID: ctx.reasoningMap[rid].sessionID,
+                      messageID: ctx.reasoningMap[rid].messageID,
+                      partID: ctx.reasoningMap[rid].id,
+                      field: "text",
+                      delta: evt.text,
+                    })
+                  }
+                } else if (evt.type === "reasoning-end") {
+                  const rid = finishState.pendingReasoningID
+                  if (rid && rid in ctx.reasoningMap) {
+                    ctx.reasoningMap[rid].time = { ...ctx.reasoningMap[rid].time, end: Date.now() }
+                    yield* session.updatePart(ctx.reasoningMap[rid])
+                    delete ctx.reasoningMap[rid]
+                    finishState.pendingReasoningID = undefined
+                  }
+                } else if (evt.type === "text-delta" && ctx.currentText) {
                   ctx.currentText.text += evt.text
                   yield* session.updatePartDelta({
                     sessionID: ctx.currentText.sessionID,
