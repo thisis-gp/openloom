@@ -66,7 +66,12 @@ export class ThinkTagParser extends EventEmitter {
 
   /** Call at stream end to flush any remaining buffer as text. */
   flush(): void {
-    if (this.buffer.length > 0) {
+    if (this.inThink) {
+      if (this.buffer.length > 0) this.emit("reasoning-delta", this.buffer)
+      this.emit("reasoning-end")
+      this.inThink = false
+      this.buffer = ""
+    } else if (this.buffer.length > 0) {
       this.emit("text-delta", this.buffer)
       this.buffer = ""
     }
