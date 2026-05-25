@@ -3,6 +3,7 @@ import path from "path"
 import { BackgroundJob } from "@/background/job"
 import { BusEvent } from "@/bus/bus-event"
 import { Bus } from "@/bus"
+import { LifecycleEvent } from "@/lifecycle"
 import { Decimal } from "decimal.js"
 import { type ProviderMetadata, type LanguageModelUsage } from "ai"
 import { InstallationVersion } from "@openloom/core/installation/version"
@@ -554,6 +555,7 @@ export const layer: Layer.Layer<
       log.info("created", result)
 
       yield* sync.run(Event.Created, { sessionID: result.id, info: result })
+      yield* bus.publish(LifecycleEvent.SessionStarted, { sessionID: result.id, title: result.title })
 
       if (!flags.experimentalWorkspaces) {
         // This only exist for backwards compatibility. We should not be
