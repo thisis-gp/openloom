@@ -60,6 +60,8 @@ import { EventV2Bridge } from "@/event-v2-bridge"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { CronService } from "@/cron/cron"
 import { MemoryLayer } from "@/memory/index"
+import { defaultLayer as routerDefaultLayer } from "@/intelligence/router/router"
+import { layer as hooksLayer } from "@/lifecycle/hooks"
 
 export const AppLayer = Layer.mergeAll(
   Npm.defaultLayer,
@@ -96,6 +98,8 @@ export const AppLayer = Layer.mergeAll(
   SessionPrompt.defaultLayer,
   CronService.layer,
   MemoryLayer,
+  routerDefaultLayer,
+  hooksLayer,
   Instruction.defaultLayer,
   LLM.defaultLayer,
   LSP.defaultLayer,
