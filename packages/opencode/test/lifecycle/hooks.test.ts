@@ -22,4 +22,11 @@ describe("LifecycleEvent types", () => {
     expect(isLifecycleEventType("lifecycle.session.started")).toBe(true)
     expect(isLifecycleEventType("session.compacted")).toBe(false)
   })
+  it("defines agent events", () => {
+    expect(LifecycleEvent.AgentStarted.type).toBe("lifecycle.agent.started")
+    expect(LifecycleEvent.AgentCompleted.type).toBe("lifecycle.agent.completed")
+  })
+  it("defines provider events", () => {
+    expect(LifecycleEvent.ProviderSelected.type).toBe("lifecycle.provider.selected")
+  })
 })

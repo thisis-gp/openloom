@@ -38,6 +38,11 @@ function spawnHook(hook: HookConfig, eventType: string, properties: unknown): vo
       log.warn("hook exited non-zero", { command: hook.command, code, eventType })
     }
   })
+
+  proc.on("error", (err) => {
+    clearTimeout(timer)
+    log.warn("hook spawn failed", { command: hook.command, err: err.message })
+  })
 }
 
 export interface HooksInterface {
@@ -73,7 +78,12 @@ export const layer = Layer.effect(
     yield* Stream.runForEach(bus.subscribeAll(), (event) => {
       if (!isLifecycleEventType(event.type)) return Effect.void
       return dispatch(event.type, event.properties)
-    }).pipe(Effect.forkDetach)
+    }).pipe(
+      Effect.catchCause((cause) =>
+        Effect.sync(() => log.warn("lifecycle hooks subscription ended", { cause: String(cause) }))
+      ),
+      Effect.forkDetach,
+    )
 
     return HooksService.of({ dispatch })
   }),
