@@ -96,6 +96,7 @@ export async function sshRun(
 
     client.on("error", (err) => {
       onData(`SSH connection error: ${err.message}\n`)
+      client.end()
       resolve({ exitCode: 1 })
     })
 
