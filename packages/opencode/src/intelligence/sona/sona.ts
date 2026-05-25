@@ -1,4 +1,5 @@
 import { Effect, Layer, Context } from "effect"
+import { sql } from "drizzle-orm"
 import { createHash } from "crypto"
 import { use as dbUse, eq } from "@/storage/db"
 import { SonaTrajectoryTable, SonaReasoningBankTable } from "./sona.sql"
@@ -40,33 +41,30 @@ export class SonaService extends Context.Service<SonaService, SonaInterface>()("
 export const layer: Layer.Layer<SonaService> = Layer.succeed(SonaService, {
   recordTrajectory(input) {
     return Effect.sync(() => {
-      const id = createID("sona", "ascending")
-      dbUse((db) =>
-        db
-          .insert(SonaTrajectoryTable)
-          .values({
-            id,
-            session_id: input.sessionID,
-            tool_sequence: JSON.stringify(input.toolSequence),
-            model_id: input.modelID,
-            provider_id: input.providerID,
-            success: input.success ? 1 : 0,
-            cost_usd: input.costUsd,
-            duration_ms: input.durationMs,
-            task_type: input.taskType,
-            time_created: Date.now(),
-            time_updated: Date.now(),
-          })
-          .run(),
-      )
-
-      if (input.success) {
-        const pattern = extractPattern(input.toolSequence)
-        const hash = hashToolSequence(pattern)
-        const existing = dbUse((db) =>
-          db.select().from(SonaReasoningBankTable).where(eq(SonaReasoningBankTable.pattern_hash, hash)).get(),
+      try {
+        const id = createID("sona", "ascending")
+        dbUse((db) =>
+          db
+            .insert(SonaTrajectoryTable)
+            .values({
+              id,
+              session_id: input.sessionID,
+              tool_sequence: JSON.stringify(input.toolSequence),
+              model_id: input.modelID,
+              provider_id: input.providerID,
+              success: input.success ? 1 : 0,
+              cost_usd: input.costUsd,
+              duration_ms: input.durationMs,
+              task_type: input.taskType,
+              time_created: Date.now(),
+              time_updated: Date.now(),
+            })
+            .run(),
         )
-        if (!existing) {
+
+        if (input.success) {
+          const pattern = extractPattern(input.toolSequence)
+          const hash = hashToolSequence(pattern)
           dbUse((db) =>
             db
               .insert(SonaReasoningBankTable)
@@ -77,29 +75,25 @@ export const layer: Layer.Layer<SonaService> = Layer.succeed(SonaService, {
                 best_model_id: input.modelID,
                 best_provider_id: input.providerID,
                 success_count: 1,
-                avg_cost_usd: input.costUsd,
-                task_type: input.taskType,
+                avg_cost_usd: input.costUsd ?? null,
+                task_type: input.taskType ?? null,
                 time_created: Date.now(),
                 time_updated: Date.now(),
               })
-              .run(),
-          )
-        } else {
-          const newCount = existing.success_count + 1
-          const newAvgCost =
-            input.costUsd != null && existing.avg_cost_usd != null
-              ? (existing.avg_cost_usd * existing.success_count + input.costUsd) / newCount
-              : existing.avg_cost_usd
-          dbUse((db) =>
-            db
-              .update(SonaReasoningBankTable)
-              .set({ success_count: newCount, avg_cost_usd: newAvgCost, time_updated: Date.now() })
-              .where(eq(SonaReasoningBankTable.pattern_hash, hash))
+              .onConflictDoUpdate({
+                target: SonaReasoningBankTable.pattern_hash,
+                set: {
+                  success_count: sql`${SonaReasoningBankTable.success_count} + 1`,
+                  time_updated: Date.now(),
+                },
+              })
               .run(),
           )
         }
+        log.info("trajectory recorded", { sessionID: input.sessionID, success: input.success })
+      } catch (err) {
+        log.warn("SONA trajectory record failed", { err: String(err), sessionID: input.sessionID })
       }
-      log.info("trajectory recorded", { sessionID: input.sessionID, success: input.success })
     })
   },
 
