@@ -20,4 +20,19 @@ describe("validateComputerUseAction", () => {
   it("accepts scroll with direction", () => {
     expect(() => validateComputerUseAction({ action: "scroll", direction: "down", amount: 3 })).not.toThrow()
   })
+  it("rejects double_click without coordinates", () => {
+    expect(() => validateComputerUseAction({ action: "double_click" })).toThrow("double_click requires x and y")
+  })
+  it("rejects right_click without coordinates", () => {
+    expect(() => validateComputerUseAction({ action: "right_click" })).toThrow("right_click requires x and y")
+  })
+  it("rejects move without coordinates", () => {
+    expect(() => validateComputerUseAction({ action: "move" })).toThrow("move requires x and y")
+  })
+  it("rejects key without key name", () => {
+    expect(() => validateComputerUseAction({ action: "key" })).toThrow("key requires key name")
+  })
+  it("rejects scroll without direction", () => {
+    expect(() => validateComputerUseAction({ action: "scroll" })).toThrow("scroll requires direction")
+  })
 })
