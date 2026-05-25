@@ -27,6 +27,7 @@ import { WebSearchTool } from "./websearch"
 import { RepoCloneTool } from "./repo_clone"
 import { RepoOverviewTool } from "./repo_overview"
 import { SessionSearchTool } from "./session_search"
+import { ComputerUseTool } from "./computer-use"
 import { MemoryGraphTool } from "@/memory/graph/graph-tool"
 import { CronCreateTool, CronListTool, CronDeleteTool } from "@/cron/cron-tools"
 import { MemoryLayer } from "@/memory/index"
@@ -109,6 +110,7 @@ export const layer = Layer.effect(
     const repoClone = yield* RepoCloneTool
     const repoOverview = yield* RepoOverviewTool
     const sessionSearch = yield* SessionSearchTool
+    const computerUse = yield* ComputerUseTool
     const memoryGraph = yield* MemoryGraphTool
     const cronOpt = yield* Effect.serviceOption(CronService.Service)
     const cronCreate = Option.isSome(cronOpt) ? yield* CronCreateTool : undefined
@@ -230,6 +232,7 @@ export const layer = Layer.effect(
           repo_clone: Tool.init(repoClone),
           repo_overview: Tool.init(repoOverview),
           session_search: Tool.init(sessionSearch),
+          computer_use: Tool.init(computerUse),
           memory_graph: Tool.init(memoryGraph),
           skill: Tool.init(skilltool),
           patch: Tool.init(patchtool),
@@ -256,6 +259,7 @@ export const layer = Layer.effect(
             tool.todo,
             tool.search,
             tool.session_search,
+            tool.computer_use,
             tool.memory_graph,
             ...(cronTools ? [cronTools.cron_create, cronTools.cron_list, cronTools.cron_delete] : []),
             ...(flags.experimentalScout ? [tool.repo_clone, tool.repo_overview] : []),
