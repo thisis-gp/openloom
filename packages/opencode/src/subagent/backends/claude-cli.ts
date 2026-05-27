@@ -6,7 +6,7 @@ const log = Log.create({ service: "subagent.claude-cli" })
 
 export async function runClaudeCli(
   goal: string,
-  opts: { cwd?: string; maxTurns?: number; timeout?: number } = {},
+  opts: { cwd?: string; maxTurns?: number; timeout?: number; model?: string } = {},
 ): Promise<ExternalAgentResult> {
   const bin = await findClaudeBin()
   if (!bin) {
@@ -23,10 +23,12 @@ export async function runClaudeCli(
     "-p", goal,
   ]
 
+  if (opts.model) args.unshift("--model", opts.model)
+
   const cwd = opts.cwd ?? process.cwd()
   const timeout = opts.timeout ?? 10 * 60 * 1000
 
-  log.info("claude -p", { cwd, goal: goal.slice(0, 80) })
+  log.info("claude -p", { cwd, goal: goal.slice(0, 80), model: opts.model })
 
   return new Promise((resolve) => {
     const chunks: string[] = []

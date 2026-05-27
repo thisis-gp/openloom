@@ -10,7 +10,7 @@ export type ExternalAgentResult = {
 
 export async function runCodex(
   goal: string,
-  opts: { cwd?: string; timeout?: number } = {},
+  opts: { cwd?: string; timeout?: number; model?: string } = {},
 ): Promise<ExternalAgentResult> {
   const bin = await findBin("codex")
   if (!bin) {
@@ -22,10 +22,11 @@ export async function runCodex(
 
   const cwd = opts.cwd ?? process.cwd()
   const timeout = opts.timeout ?? 5 * 60 * 1000
+  const args = ["exec", "--quiet", ...(opts.model ? ["--model", opts.model] : []), "-"]
 
-  log.info("codex exec", { cwd, goal: goal.slice(0, 80) })
+  log.info("codex exec", { cwd, goal: goal.slice(0, 80), model: opts.model })
 
-  return spawnWithTimeout(bin, ["exec", "--quiet", "-"], { cwd, stdin: goal, timeout })
+  return spawnWithTimeout(bin, args, { cwd, stdin: goal, timeout })
 }
 
 export async function codexAvailable(): Promise<boolean> {
