@@ -475,7 +475,7 @@ describe("session HttpApi", () => {
 
         const query = new URLSearchParams({
           scope: "project",
-          path: "packages/openloom/src",
+          path: "packages/opencode/src",
           directory: currentDir,
         })
         const headers = { "x-openloom-directory": test.directory }

@@ -16,19 +16,18 @@ export async function runClaudeCli(
     }
   }
 
-  const args: string[] = [
+  const args = [
+    ...(opts.model ? ["--model", opts.model] : []),
     "--print",
     "--output-format", "text",
     "--max-turns", String(opts.maxTurns ?? 10),
     "-p", goal,
   ]
 
-  if (opts.model) args.unshift("--model", opts.model)
-
   const cwd = opts.cwd ?? process.cwd()
   const timeout = opts.timeout ?? 10 * 60 * 1000
 
-  log.info("claude -p", { cwd, goal: goal.slice(0, 80), model: opts.model })
+  log.info("claude -p", { cwd, goal: goal.slice(0, 80), ...(opts.model && { model: opts.model }) })
 
   return new Promise((resolve) => {
     const chunks: string[] = []

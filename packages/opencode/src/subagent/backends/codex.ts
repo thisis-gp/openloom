@@ -24,7 +24,7 @@ export async function runCodex(
   const timeout = opts.timeout ?? 5 * 60 * 1000
   const args = ["exec", "--quiet", ...(opts.model ? ["--model", opts.model] : []), "-"]
 
-  log.info("codex exec", { cwd, goal: goal.slice(0, 80), model: opts.model })
+  log.info("codex exec", { cwd, goal: goal.slice(0, 80), ...(opts.model && { model: opts.model }) })
 
   return spawnWithTimeout(bin, args, { cwd, stdin: goal, timeout })
 }

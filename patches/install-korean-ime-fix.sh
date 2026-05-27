@@ -50,7 +50,7 @@ else
 fi
 
 # ── 2. Verify the IME fix is present in source ────────────────────────
-PROMPT_FILE="$OPENLOOM_SRC/packages/openloom/src/cli/cmd/tui/component/prompt/index.tsx"
+PROMPT_FILE="$OPENLOOM_SRC/packages/opencode/src/cli/cmd/tui/component/prompt/index.tsx"
 if [ ! -f "$PROMPT_FILE" ]; then
   err "Prompt file not found: $PROMPT_FILE"
   exit 1
@@ -77,7 +77,7 @@ bun install --frozen-lockfile 2>/dev/null || bun install
 
 # ── 4. Build (current platform only) ──────────────────────────────────
 info "Building openloom for current platform ..."
-cd "$OPENLOOM_SRC/packages/openloom"
+cd "$OPENLOOM_SRC/packages/opencode"
 bun run build --single
 
 # ── 5. Install binary ──────────────────────────────────────────────────
@@ -90,10 +90,10 @@ ARCH=$(uname -m)
 [ "$PLATFORM" = "darwin" ] && true
 [ "$PLATFORM" = "linux" ] && true
 
-BUILT_BINARY="$OPENLOOM_SRC/packages/openloom/dist/openloom-${PLATFORM}-${ARCH}/bin/openloom"
+BUILT_BINARY="$OPENLOOM_SRC/packages/opencode/dist/openloom-${PLATFORM}-${ARCH}/bin/openloom"
 
 if [ ! -f "$BUILT_BINARY" ]; then
-  BUILT_BINARY=$(find "$OPENLOOM_SRC/packages/openloom/dist" -name "openloom" -type f -executable 2>/dev/null | head -1)
+  BUILT_BINARY=$(find "$OPENLOOM_SRC/packages/opencode/dist" -name "openloom" -type f -executable 2>/dev/null | head -1)
 fi
 
 if [ -f "$BUILT_BINARY" ]; then
@@ -106,7 +106,7 @@ if [ -f "$BUILT_BINARY" ]; then
 else
   err "Build failed - binary not found in dist/"
   info "Try running manually:"
-  echo "  cd $OPENLOOM_SRC/packages/openloom && bun run build --single"
+  echo "  cd $OPENLOOM_SRC/packages/opencode && bun run build --single"
   exit 1
 fi
 

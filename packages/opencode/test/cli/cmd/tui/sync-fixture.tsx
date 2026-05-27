@@ -10,7 +10,7 @@ import { SyncProvider, useSync } from "../../../../src/cli/cmd/tui/context/sync"
 import type { GlobalEvent } from "@openloom/sdk/v2"
 
 export const worktree = "/tmp/openloom"
-export const directory = `${worktree}/packages/openloom`
+export const directory = `${worktree}/packages/opencode`
 
 export async function wait(fn: () => boolean, timeout = 2000) {
   const start = Date.now()

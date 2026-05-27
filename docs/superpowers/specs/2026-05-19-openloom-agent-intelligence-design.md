@@ -1,14 +1,21 @@
 # Openloom Agent Capability & Intelligence Layer — Design Spec
 
 **Date:** 2026-05-19  
-**Status:** Approved  
+**Status:** Approved with implementation corrections  
 **Source:** Features ported/inspired from ruflo and hermes-agent  
 
 ---
 
 ## Overview
 
-Add seven integrated subsystems to openloom, all implemented as Effect Layers inside `packages/opencode/src/`. The goal: make openloom a capable always-on agentic OS with smart model routing, cost-efficient context handling, persistent cross-session memory, true parallel subagent work, and background scheduled jobs.
+Add seven integrated subsystems to openloom, all implemented inside `packages/opencode/src/`. The goal: make openloom a capable always-on agentic OS with smart model routing, cost-efficient context handling, persistent cross-session memory, true parallel subagent work, and background scheduled jobs.
+
+This spec must be read against the current OpenLoom implementation:
+
+- `SessionCompaction` already exists and owns automatic context compaction. The compression work extends that service instead of adding a parallel `CompressionService`.
+- The `task` and `task_status` tools already implement child-session delegation and background subagents. `delegate_task` is an optional compatibility alias or enhancement layer over that existing path, not a second runner.
+- Provider/model metadata already comes from OpenLoom's provider catalog. The router uses that catalog plus stored outcomes rather than a static model price file.
+- Cron and memory jobs must use instance-scoped app services so background work has the same project, permission, provider, and lifecycle context as interactive sessions.
 
 No new monorepo packages. Everything lives inside `packages/opencode`.
 
@@ -20,16 +27,16 @@ No new monorepo packages. Everything lives inside `packages/opencode`.
 packages/opencode/src/
   intelligence/
     router/       — multi-provider model router (Thompson sampling)
-    compression/  — context compression (multi-strategy, reasoning-aware)
+    compression/  — extensions to existing SessionCompaction
   memory/
     curator/      — periodic nudge + multi-tier memory (recent/archive/pruned)
-    vector/       — HNSW index for semantic search
+    vector/       — semantic search backend, HNSW when available with flat fallback
     graph/        — knowledge graph (entities + relationships)
-  subagent/       — delegate_task tool + isolated child agent execution
+  subagent/       — task/delegate_task adapter + isolated child agent execution
   cron/           — background job scheduler + cron_* tools
 ```
 
-Each subsystem exposes an Effect Layer and integrates with existing layers: `Session`, `Database`, `ToolRegistry`, `Provider`. No changes to the existing layer wiring contract — new layers are added to the composition root.
+Each subsystem integrates with existing layers: `Session`, `SessionCompaction`, `Database`, `ToolRegistry`, `Provider`, `BackgroundJob`, and instance state. New layers are added only where the current composition root does not already expose an equivalent service.
 
 ---
 
@@ -52,7 +59,7 @@ Each model has Beta(α, β) priors tracking success/failure outcomes. On each re
 Self-corrects after ~50 outcomes per model. Explicit user model selection bypasses routing.
 
 ### Config
-New `router.config.ts` alongside existing provider configs. Contains per-model metadata: cost per token, tier (fast/balanced/powerful), capability flags (vision, reasoning, code).
+Uses the existing provider catalog as the source of truth for model availability, price, context limits, and capabilities. Router-specific configuration is limited to policy knobs such as exploration rate, minimum quality tier, cost caps, and disabled providers.
 
 ### Data
 Priors stored in a new `RouterOutcomeTable` in SQLite: `model_id`, `provider_id`, `alpha`, `beta`, `total_calls`, `last_updated`.
@@ -61,26 +68,27 @@ Priors stored in a new `RouterOutcomeTable` in SQLite: `model_id`, `provider_id`
 
 ## Subsystem 2: Intelligence — Context Compression
 
-**Location:** `src/intelligence/compression/`
+**Location:** `src/session/compaction.ts` plus small helpers under `src/intelligence/compression/` if needed
 
 ### What it does
-Automatically compresses session context when approaching the context limit, reducing token costs and extending session length.
+Automatically compacts session context when approaching the context limit, reducing token costs and extending session length. This extends the existing `SessionCompaction` service and preserves its current behavior for pruning, summary compaction, overflow checks, tail selection, and `compaction` parts.
 
 ### Trigger
 Fires when a session reaches a configurable threshold of its context limit (default: 80%).
 
 ### Strategies (applied in order)
-1. **Pruning** — drop tool call results older than a configurable age (default: 10 turns)
-2. **Abstraction** — strip verbosity from older assistant messages, preserve structure and decisions
-3. **Summary** — LLM-based rolling summary of the oldest message window
+1. **Existing prune pass** — keep current tool-result/message pruning behavior.
+2. **Safe normalization** — shrink old tool arguments/results with JSON-aware truncation and secret redaction.
+3. **Summary** — LLM-based rolling summary through the existing compaction message path.
 
 ### Constraints
-- Reasoning/thinking tokens are never compressed
-- Focus mode: compress everything except the last N messages (configurable, default 10)
-- Compressed messages are flagged in `MessageTable` (`compressed: true`), never deleted — full history preserved
+- Reasoning/thinking tokens are never rewritten or summarized as authoritative user intent.
+- Focus mode protects the last N turns and an explicit token budget tail.
+- Summary text must be marked as reference-only context, not an active instruction.
+- Original messages are preserved in the database. `MessageTable.compressed` and `memory_tier` are metadata for search/memory bookkeeping; they do not automatically exclude messages from model context unless `MessageV2` assembly is explicitly updated and tested.
 
 ### Integration
-Hooks into the existing session message pipeline. Compression runs before a new message is sent if the threshold is breached.
+Hooks into the existing `SessionPrompt`/`SessionCompaction` pipeline. Compaction runs through the same overflow detection and message-part creation path already used by OpenLoom.
 
 ---
 
@@ -118,11 +126,11 @@ Periodically classifies, archives, and prunes session messages so the agent buil
 **Location:** `src/memory/vector/`
 
 ### What it does
-Adds semantic search on top of the existing SQLite session storage using an HNSW vector index.
+Adds semantic search on top of the existing SQLite session storage. HNSW is the target index for larger archives; a flat cosine search fallback is acceptable for the first MVP only when documented as such.
 
 ### How it works
-- Each message promoted to the archive tier gets an embedding via the active provider's embedding endpoint (OpenAI `text-embedding-3-small` or equivalent). If the active provider doesn't support embeddings, falls back to a configurable dedicated embedding provider (default: OpenAI)
-- HNSW index stored as a blob in SQLite alongside existing tables
+- Each message promoted to the archive tier gets an embedding through OpenLoom's provider/auth/config path. If the active chat provider doesn't support embeddings, use a configurable dedicated embedding provider and degrade gracefully when no embedding provider is configured.
+- HNSW index metadata is stored alongside SQLite rows when the backend is available; flat vectors remain queryable without the index.
 - Built incrementally — no bulk re-indexing required
 
 ### Integration with session_search
@@ -165,21 +173,24 @@ New `memory_graph` tool registered in `ToolRegistry`. Accepts a natural language
 ### What it does
 Lets the agent spawn isolated child agents to work on focused subtasks in parallel, without carrying parent session history.
 
-### New tool: `delegate_task`
+### Tool surface: `task` plus optional `delegate_task`
 
 **Parameters:**
 - `goal` (string) — the task for the child agent
 - `agent` (string, default: `build`) — which agent mode
 - `toolset_blocklist` (string[], optional) — tools to deny the child
+- `tasks` (array, optional) — batch delegation for independent parallel subtasks
+- `timeout` / `max_concurrency` (optional) — safety bounds for awaited or batch work
 - `await` (boolean, default: `true`) — block until done or fire-and-forget
 
-**Default blocklist:** `delegate_task` (prevents recursion), `cron_create`, `cron_delete`
+**Default blocklist:** `delegate_task`, recursive `task` usage where appropriate, cron mutation tools, memory mutation tools, direct messaging tools, and arbitrary code execution tools unless explicitly allowed by the parent permission policy.
 
 ### Execution
-1. Create a child session in `SessionTable` with `parent_id` = calling session id
-2. Spawn child agent with fresh context — goal becomes the system prompt, no parent history
-3. Apply toolset restrictions
-4. On completion, inject result as a structured message into the parent session (await mode) or leave in child session (fire-and-forget)
+1. Reuse the existing `TaskTool` child-session and background job path.
+2. Create a child session in `SessionTable` with `parent_id` = calling session id.
+3. Spawn child agent with fresh context and explicit self-contained goal.
+4. Apply the existing permission derivation plus the requested tool restrictions.
+5. On completion, inject or expose the structured result through the same parent-session resume/status behavior used by `task_status`.
 
 ### TUI
 Child sessions appear indented under their parent in the session list. The existing `rootSessionID` traversal in `session_search` handles parent/child relationships without changes.
@@ -208,6 +219,9 @@ New `CronJobTable` in SQLite:
 | enabled | boolean | |
 | last_run | timestamp | |
 | next_run | timestamp | Pre-computed |
+| last_error | string | Last scheduler/run error |
+| run_count | integer | Successful/attempted run accounting |
+| running_session_id | string | Current child session lock |
 | created_at | timestamp | |
 
 ### Scheduler loop
@@ -216,6 +230,8 @@ New `CronJobTable` in SQLite:
 - Checks for jobs where `next_run <= now` and `enabled = true`
 - Spawns via the subagent delegation system (reuses that infrastructure)
 - File-based lock prevents duplicate concurrent runs
+- Each job has timeout/interrupt behavior, output archival, and clear last status/error fields
+- Cron sessions skip memory writes by default unless the job explicitly opts in
 - Updates `last_run` and computes next `next_run` after each execution
 
 ### Job output
@@ -255,12 +271,12 @@ All tables use the existing `Database` layer and follow the existing Drizzle sch
 
 | Existing system | How new subsystems connect |
 |----------------|---------------------------|
-| `ToolRegistry` | `delegate_task`, `memory_graph`, `cron_create`, `cron_list`, `cron_delete` registered as standard tools |
+| `ToolRegistry` | existing `task`/`task_status` enhanced, optional `delegate_task` alias, `memory_graph`, `cron_create`, `cron_list`, `cron_delete` registered as standard tools |
 | `SessionTable` | `parent_id` and `cron_job_id` columns added |
 | `MessageTable` | `compressed`, `memory_tier`, `curator_run_id` columns added |
 | `session_search` | Gains semantic search mode via vector index |
-| `Provider` | Router wraps provider selection; compression uses provider for summarisation and embeddings |
-| App startup | Scheduler loop and curator background tick started alongside existing services |
+| `Provider` | Router wraps provider selection through provider catalog metadata; compression and embeddings use provider/auth/config paths |
+| App startup | Scheduler loop and curator background tick are instance-scoped, not process-global |
 
 ---
 

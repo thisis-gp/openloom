@@ -41,7 +41,7 @@ https://github.com/anomalyco/models.dev
 
 ### Running against a different directory
 
-By default, `bun dev` runs Openloom in the `packages/openloom` directory. To run it against a different directory or repository:
+By default, `bun dev` runs Openloom in the `packages/opencode` directory. To run it against a different directory or repository:
 
 ```bash
 bun dev <directory>
@@ -58,20 +58,20 @@ bun dev .
 To compile a standalone executable:
 
 ```bash
-./packages/openloom/script/build.ts --single
+./packages/opencode/script/build.ts --single
 ```
 
 Then run it with:
 
 ```bash
-./packages/openloom/dist/openloom-<platform>/bin/openloom
+./packages/opencode/dist/openloom-<platform>/bin/openloom
 ```
 
 Replace `<platform>` with your platform (e.g., `darwin-arm64`, `linux-x64`).
 
 - Core pieces:
-  - `packages/openloom`: Openloom core business logic & server.
-  - `packages/openloom/src/cli/cmd/tui/`: The TUI code, written in SolidJS with [opentui](https://github.com/sst/opentui)
+  - `packages/opencode`: Openloom core business logic & server.
+  - `packages/opencode/src/cli/cmd/tui/`: The TUI code, written in SolidJS with [opentui](https://github.com/sst/opentui)
   - `packages/app`: The shared web UI components, written in SolidJS
   - `packages/desktop`: The native desktop app, built with Electron (wraps `packages/app`)
   - `packages/plugin`: Source for `@openloom/plugin`
@@ -139,7 +139,7 @@ bun run --cwd packages/desktop package
 ```
 
 > [!NOTE]
-> If you make changes to the API or SDK (e.g. `packages/openloom/src/server/server.ts`), run `./script/generate.ts` to regenerate the SDK and related files.
+> If you make changes to the API or SDK (e.g. `packages/opencode/src/server/server.ts`), run `./script/generate.ts` to regenerate the SDK and related files.
 
 Please try to follow the [style guide](./AGENTS.md)
 
@@ -155,9 +155,9 @@ Caveats:
 - If you want to run the Openloom TUI and have breakpoints triggered in the server code, you might need to run `bun dev spawn` instead of
   the usual `bun dev`. This is because `bun dev` runs the server in a worker thread and breakpoints might not work there.
 - If `spawn` does not work for you, you can debug the server separately:
-  - Debug server: `bun run --inspect=ws://localhost:6499/ --cwd packages/openloom ./src/index.ts serve --port 4096`,
+  - Debug server: `bun run --inspect=ws://localhost:6499/ --cwd packages/opencode ./src/index.ts serve --port 4096`,
     then attach TUI with `openloom attach http://localhost:4096`
-  - Debug TUI: `bun run --inspect=ws://localhost:6499/ --cwd packages/openloom --conditions=browser ./src/index.ts`
+  - Debug TUI: `bun run --inspect=ws://localhost:6499/ --cwd packages/opencode --conditions=browser ./src/index.ts`
 
 Other tips and tricks:
 

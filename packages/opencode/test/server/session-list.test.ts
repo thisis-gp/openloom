@@ -121,7 +121,7 @@ describe("session.list", () => {
         const pathIDs = (yield* SessionNs.Service.use((session) =>
           session.list({
             directory: path.join(test.directory, "packages", "app"),
-            path: "packages/openloom/src",
+            path: "packages/opencode/src",
           }),
         )).map((session) => session.id)
         expect(pathIDs).not.toContain(parent.id)
@@ -163,7 +163,7 @@ describe("session.list", () => {
         const pathIDs = (yield* SessionNs.Service.use((session) =>
           session.list({
             directory: path.join(test.directory, "packages", "openloom", "src"),
-            path: "packages/openloom/src",
+            path: "packages/opencode/src",
           }),
         )).map((session) => session.id)
         expect(pathIDs).toContain(current.id)
