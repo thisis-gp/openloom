@@ -12,6 +12,7 @@ import PROMPT_EXPLORE from "./prompt/explore.txt"
 import PROMPT_SCOUT from "./prompt/scout.txt"
 import PROMPT_SUMMARY from "./prompt/summary.txt"
 import PROMPT_TITLE from "./prompt/title.txt"
+import PROMPT_ORCHESTRATOR from "./prompt/orchestrator.txt"
 import { Permission } from "@/permission"
 import { mergeDeep, pipe, sortBy, values } from "remeda"
 import { Global } from "@openloom/core/global"
@@ -175,6 +176,25 @@ export const layer = Layer.effect(
             ),
             options: {},
             mode: "subagent",
+            native: true,
+          },
+          orchestrator: {
+            name: "orchestrator",
+            description:
+              "Decomposes goals into Slate tasks and delegates each to Claude CLI, Codex CLI, or Cursor workers. Use when the user wants a multi-step workflow coordinated across multiple workers.",
+            prompt: PROMPT_ORCHESTRATOR,
+            permission: Permission.merge(
+              defaults,
+              Permission.fromConfig({
+                question: "allow",
+                delegate_task: "allow",
+                bash: "allow",
+                todowrite: "deny",
+              }),
+              user,
+            ),
+            options: {},
+            mode: "primary",
             native: true,
           },
           explore: {
