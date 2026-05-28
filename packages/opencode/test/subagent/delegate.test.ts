@@ -43,3 +43,10 @@ describe("SLATE_CLI", () => {
     expect(SLATE_CLI.length).toBeGreaterThan(0)
   })
 })
+
+describe("buildWorkerPrompt blockNote passthrough", () => {
+  it("buildWorkerPrompt does not include blockNote (that is added by buildFinalPrompt)", () => {
+    const result = buildWorkerPrompt("Fix bug", "t-1", "claude-worker")
+    expect(result).not.toContain("Subagent tool restrictions")
+  })
+})

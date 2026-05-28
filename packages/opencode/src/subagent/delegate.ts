@@ -8,10 +8,12 @@ import { dropCursorTask } from "./backends/cursor"
 
 const DEFAULT_BLOCKLIST = ["delegate_task", "cron_create", "cron_delete", "cron_list", "memory_graph"] as const
 
-const SLATE_CORE_DIR = path.join(
-  process.env.USERPROFILE ?? process.env.HOME ?? "",
-  "Desktop", "Projects", "slate", "packages", "core",
-)
+const SLATE_CORE_DIR =
+  process.env.SLATE_CORE_DIR ??
+  path.join(
+    process.env.USERPROFILE ?? process.env.HOME ?? "",
+    "Desktop", "Projects", "slate", "packages", "core",
+  )
 
 export const SLATE_CLI = `uv run --directory "${SLATE_CORE_DIR}" slate`
 
@@ -79,16 +81,19 @@ function agentName(agent: string): string {
   return map[agent] ?? `${agent}-worker`
 }
 
-function toTaskParams(params: Params): TaskParameters {
+function buildFinalPrompt(params: Params): string {
   const extraBlock = params.toolset_blocklist ?? []
   const blockNote =
     extraBlock.length > 0
       ? `\n\n[Subagent tool restrictions: ${[...DEFAULT_BLOCKLIST, ...extraBlock].join(", ")}]`
       : ""
-  const prompt = buildWorkerPrompt(params.goal, params.task_id, agentName(params.agent ?? "build"))
+  return buildWorkerPrompt(params.goal, params.task_id, agentName(params.agent ?? "build")) + blockNote
+}
+
+function toTaskParams(params: Params): TaskParameters {
   return {
     description: `Delegated: ${params.goal.slice(0, 40)}${params.goal.length > 40 ? "…" : ""}`,
-    prompt: prompt + blockNote,
+    prompt: buildFinalPrompt(params),
     subagent_type: params.agent ?? "build",
     background: params.await === false ? true : undefined,
   }
@@ -111,14 +116,12 @@ export const DelegateTaskTool = Tool.define(
       parameters: Parameters,
       execute: (params: Params, ctx: Tool.Context) => {
         const agent = params.agent ?? "build"
-        const workerName = agentName(agent)
-        const prompt = buildWorkerPrompt(params.goal, params.task_id, workerName)
 
         if (agent === "codex") {
           return Effect.tryPromise(async (): Promise<Tool.ExecuteResult> => {
             const ok = await codexAvailable()
             const output = ok
-              ? (await runCodex(prompt, { model: params.model })).output || "Codex completed."
+              ? (await runCodex(buildFinalPrompt(params), { model: params.model })).output || "Codex completed."
               : "Codex CLI not installed. Run: npm install -g @openai/codex && codex login"
             return { title: "codex", metadata: { task_id: params.task_id }, output }
           }).pipe(Effect.orDie)
@@ -127,15 +130,15 @@ export const DelegateTaskTool = Tool.define(
         if (agent === "claude") {
           return Effect.tryPromise(async (): Promise<Tool.ExecuteResult> => {
             const ok = await claudeCliAvailable()
-            if (!ok) return { title: "claude", metadata: {}, output: "Claude CLI not found in PATH." }
-            const result = await runClaudeCli(prompt, { model: params.model })
+            if (!ok) return { title: "claude", metadata: { task_id: params.task_id }, output: "Claude CLI not found in PATH." }
+            const result = await runClaudeCli(buildFinalPrompt(params), { model: params.model })
             return { title: "claude", metadata: { task_id: params.task_id }, output: result.output || "Claude CLI completed." }
           }).pipe(Effect.orDie)
         }
 
         if (agent === "cursor") {
           return Effect.tryPromise(async (): Promise<Tool.ExecuteResult> => {
-            const { taskFile } = await dropCursorTask(prompt, { taskId: params.task_id })
+            const { taskFile } = await dropCursorTask(buildFinalPrompt(params), { taskId: params.task_id })
             return { title: "cursor", metadata: { task_id: params.task_id }, output: `Task dropped to Cursor: ${taskFile}` }
           }).pipe(Effect.orDie)
         }
