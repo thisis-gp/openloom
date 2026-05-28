@@ -10,6 +10,7 @@ import { Identifier } from "@/id/id"
 import { Cron } from "croner"
 import * as Log from "@openloom/core/util/log"
 import type { ProjectID } from "@/project/schema"
+import { CuratorJob } from "./curator"
 
 const log = Log.create({ service: "cron" })
 
@@ -216,8 +217,24 @@ export const layer: Layer.Layer<Service, never, Session.Service | BackgroundJob.
       )
     })
 
-    const startLoop: Interface["startLoop"] = (scope) =>
-      Effect.repeat(
+    const startLoop: Interface["startLoop"] = (scope) => {
+      // Curator startup catch-up: if we missed the weekly window, fork a background run
+      const curatorState = CuratorJob.readState()
+      if (CuratorJob.shouldRunNow(curatorState.lastRunAt)) {
+        log.info("curator: missed window detected on startup, scheduling background run")
+        const daemonEffect = Effect.tryPromise(async () => {
+          log.info("curator: background run starting")
+          CuratorJob.writeState({
+            ...curatorState,
+            lastRunAt: Date.now(),
+          })
+        }).pipe(
+          Effect.catch(() => Effect.sync(() => log.error("curator startup run failed"))),
+        )
+        void Effect.runFork(daemonEffect)
+      }
+
+      return Effect.repeat(
         tick().pipe(
           Effect.catch((err: unknown) =>
             Effect.sync(() => log.error("CronService.tick error", { error: String(err) })),
@@ -229,6 +246,7 @@ export const layer: Layer.Layer<Service, never, Session.Service | BackgroundJob.
         Effect.forkIn(scope),
         Effect.asVoid,
       )
+    }
 
     const create: Interface["create"] = Effect.fn("CronService.create")(function* (input) {
       const validationError = validateSchedule(input.schedule)
