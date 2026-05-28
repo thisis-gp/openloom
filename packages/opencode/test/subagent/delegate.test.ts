@@ -1,5 +1,7 @@
 import { describe, it, expect } from "bun:test"
 import { buildWorkerPrompt, SLATE_CLI } from "../../src/subagent/delegate"
+import { dropCursorTask } from "../../src/subagent/backends/cursor"
+import { readFileSync, existsSync } from "fs"
 
 // Stubs — real assertions added in later tasks
 describe("claude-cli model flag", () => {
@@ -48,5 +50,28 @@ describe("buildWorkerPrompt blockNote passthrough", () => {
   it("buildWorkerPrompt does not include blockNote (that is added by buildFinalPrompt)", () => {
     const result = buildWorkerPrompt("Fix bug", "t-1", "claude-worker")
     expect(result).not.toContain("Subagent tool restrictions")
+  })
+})
+
+describe("dropCursorTask", () => {
+  it("creates a task file containing the goal", async () => {
+    const { taskFile } = await dropCursorTask("Implement login form", {})
+    expect(existsSync(taskFile)).toBe(true)
+    const content = readFileSync(taskFile, "utf8")
+    expect(content).toContain("Implement login form")
+  })
+
+  it("accepts taskId in opts without error", async () => {
+    const { taskFile } = await dropCursorTask("Fix auth bug", { taskId: "slate-xyz-123" })
+    expect(existsSync(taskFile)).toBe(true)
+    const content = readFileSync(taskFile, "utf8")
+    expect(content).toContain("Fix auth bug")
+  })
+
+  it("embeds goal verbatim including any Slate CLI instructions", async () => {
+    const goalWithSlate = "Fix auth bug\n---\nSLATE TASK TRACKING (task_id: abc-123):\nuv run slate task move abc-123 in_progress"
+    const { taskFile } = await dropCursorTask(goalWithSlate, { taskId: "abc-123" })
+    const content = readFileSync(taskFile, "utf8")
+    expect(content).toContain("slate task move abc-123 in_progress")
   })
 })

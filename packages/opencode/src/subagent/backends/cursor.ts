@@ -6,8 +6,8 @@ const log = Log.create({ service: "subagent.cursor" })
 
 /**
  * Drop a task file into .cursor/tasks/ for Cursor Background Agent to pick up.
- * Cursor must be open in the target workspace.
- * Note: Cursor has no stable CLI invocation API — this is a file-drop integration.
+ * The goal string already contains Slate CLI instructions when task_id is set
+ * (injected by buildFinalPrompt in delegate.ts).
  */
 export async function dropCursorTask(
   goal: string,
@@ -21,6 +21,6 @@ export async function dropCursorTask(
   const taskFile = path.join(tasksDir, `openloom-${id}.md`)
   fs.writeFileSync(taskFile, `# OpenLoom Task\n\n${goal}\n`, "utf8")
 
-  log.info("cursor task dropped", { taskFile, taskId: opts.taskId })
+  log.info("cursor task dropped", { taskFile, ...(opts.taskId && { taskId: opts.taskId }) })
   return { taskFile }
 }
