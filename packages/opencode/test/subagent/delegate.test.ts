@@ -1,6 +1,7 @@
 import { describe, it, expect } from "bun:test"
 import { buildWorkerPrompt, SLATE_CLI } from "../../src/subagent/delegate"
 import { dropCursorTask } from "../../src/subagent/backends/cursor"
+import { claudeCliAvailable, runClaudeCli } from "../../src/subagent/backends/claude-cli"
 import { readFileSync, existsSync } from "fs"
 
 // Stubs — real assertions added in later tasks
@@ -73,5 +74,32 @@ describe("dropCursorTask", () => {
     const { taskFile } = await dropCursorTask(goalWithSlate, { taskId: "abc-123" })
     const content = readFileSync(taskFile, "utf8")
     expect(content).toContain("slate task move abc-123 in_progress")
+  })
+})
+
+describe("claude-cli integration smoke", () => {
+  it("passes --model flag and gets a response (skipped if claude not in PATH)", async () => {
+    const available = await claudeCliAvailable()
+    if (!available) {
+      console.log("  [SKIP] claude not in PATH")
+      return
+    }
+    const result = await runClaudeCli("Reply with exactly the word: SMOKE_OK", {
+      model: "claude-haiku-4-5",
+      maxTurns: 3,
+      timeout: 60_000,
+    })
+    expect(result.output).toContain("SMOKE_OK")
+    expect(result.exitCode).toBe(0)
+  })
+})
+
+describe("buildWorkerPrompt uses SLATE_CLI constant", () => {
+  it("injected slate CLI commands reference the SLATE_CLI path", () => {
+    const prompt = buildWorkerPrompt("Do something", "task-abc-123", "claude-worker")
+    expect(prompt).toContain(SLATE_CLI)
+    expect(prompt).toContain("task-abc-123")
+    expect(prompt).toContain("in_progress")
+    expect(prompt).toContain("done")
   })
 })
