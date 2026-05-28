@@ -6,7 +6,7 @@ import { runCodex, codexAvailable } from "./backends/codex"
 import { runClaudeCli, claudeCliAvailable } from "./backends/claude-cli"
 import { dropCursorTask } from "./backends/cursor"
 
-const DEFAULT_BLOCKLIST = ["delegate_task", "cron_create", "cron_delete", "cron_list", "memory_graph"] as const
+const DEFAULT_BLOCKLIST = ["delegate_task", "cron_job", "memory_graph"] as const
 
 const SLATE_CORE_DIR =
   process.env.SLATE_CORE_DIR ??

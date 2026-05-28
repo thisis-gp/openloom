@@ -82,9 +82,7 @@ export type TaskParameters = Schema.Schema.Type<typeof Parameters>
 export const SUBAGENT_BLOCKED_TOOLS = [
   "delegate_task",
   "task",
-  "cron_create",
-  "cron_list",
-  "cron_delete",
+  "cron_job",
   "memory_graph",
 ] as const
 

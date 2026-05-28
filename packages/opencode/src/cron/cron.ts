@@ -14,7 +14,7 @@ import { CuratorJob } from "./curator"
 
 const log = Log.create({ service: "cron" })
 
-const CRON_CHILD_BLOCKLIST = ["delegate_task", "task", "cron_create", "cron_list", "cron_delete"]
+const CRON_CHILD_BLOCKLIST = ["delegate_task", "task", "cron_job"]
 
 export interface CronJob {
   id: string

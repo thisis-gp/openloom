@@ -30,7 +30,7 @@ import { SessionSearchTool } from "./session_search"
 import { ComputerUseTool } from "./computer-use"
 import { SSHTool } from "./ssh"
 import { MemoryGraphTool } from "@/memory/graph/graph-tool"
-import { CronCreateTool, CronListTool, CronDeleteTool } from "@/cron/cron-tools"
+import { CronJobTool } from "@/cron/cron-tools"
 import { MemoryLayer } from "@/memory/index"
 import { CronService } from "@/cron/cron"
 import * as Log from "@openloom/core/util/log"
@@ -115,9 +115,7 @@ export const layer = Layer.effect(
     const ssh = yield* SSHTool
     const memoryGraph = yield* MemoryGraphTool
     const cronOpt = yield* Effect.serviceOption(CronService.Service)
-    const cronCreate = Option.isSome(cronOpt) ? yield* CronCreateTool : undefined
-    const cronList = Option.isSome(cronOpt) ? yield* CronListTool : undefined
-    const cronDelete = Option.isSome(cronOpt) ? yield* CronDeleteTool : undefined
+    const cronJob = Option.isSome(cronOpt) ? yield* CronJobTool : undefined
     const shell = yield* ShellTool
     const globtool = yield* GlobTool
     const writetool = yield* WriteTool
@@ -209,11 +207,9 @@ export const layer = Layer.effect(
         yield* config.get()
         const questionEnabled = ["app", "cli", "desktop"].includes(flags.client) || flags.enableQuestionTool
         const cronTools =
-          flags.experimentalBackgroundSubagents && cronCreate && cronList && cronDelete
+          flags.experimentalBackgroundSubagents && cronJob
             ? yield* Effect.all({
-                cron_create: Tool.init(cronCreate),
-                cron_list: Tool.init(cronList),
-                cron_delete: Tool.init(cronDelete),
+                cron_job: Tool.init(cronJob),
               })
             : undefined
 
@@ -264,7 +260,7 @@ export const layer = Layer.effect(
             tool.session_search,
             tool.computer_use,
             tool.memory_graph,
-            ...(cronTools ? [cronTools.cron_create, cronTools.cron_list, cronTools.cron_delete] : []),
+            ...(cronTools ? [cronTools.cron_job] : []),
             ...(flags.experimentalScout ? [tool.repo_clone, tool.repo_overview] : []),
             tool.skill,
             tool.patch,

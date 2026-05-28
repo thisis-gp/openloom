@@ -12,8 +12,7 @@ describe("cron.integration", () => {
   })
 
   test("cron child sessions block delegation and cron mutation tools", () => {
-    expect(SUBAGENT_BLOCKED_TOOLS).toContain("cron_create")
-    expect(SUBAGENT_BLOCKED_TOOLS).toContain("cron_delete")
+    expect(SUBAGENT_BLOCKED_TOOLS).toContain("cron_job")
     expect(SUBAGENT_BLOCKED_TOOLS).toContain("delegate_task")
   })
 })
