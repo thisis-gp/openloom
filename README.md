@@ -1,6 +1,6 @@
 # Openloom
 
-An agentic OS for personal and team use — built on top of [OpenCode](https://github.com/anomalyco/opencode) (MIT), extended with Slate task tracking, session memory, and multi-agent coordination.
+An agentic OS for personal and team use — orchestrate goals into tasks, delegate to AI workers (Claude, Codex, Cursor), gate with QA and review agents, and self-improve over time via a weekly skill curator.
 
 ---
 
@@ -86,6 +86,15 @@ Custom agents: add `.md` files to `.openloom/agents/` in your project.
 | Codex CLI subagent (`agent: "codex"`) | ✅ |
 | Claude Code CLI subagent (`agent: "claude"`) | ✅ |
 | Cursor file-drop subagent (`agent: "cursor"`) | ✅ |
+| Orchestrator agent (goal → Slate tasks → sequential workers) | ✅ |
+| Slate task tracking (todo → in_progress → done/blocked) | ✅ |
+| Per-task worklog (started_at, ended_at, duration, summary) | ✅ |
+| QA agent (typecheck + test + build → structured pass/fail report) | ✅ |
+| Review agent (git diff → correctness/security/requirements findings) | ✅ |
+| Two-stage approval gate (QA + review in parallel → user approval) | ✅ |
+| Signal logger (zero-cost run telemetry → `~/.agents/signals/`) | ✅ |
+| Skill curator (weekly haiku-model batch review → global/project skills) | ✅ |
+| Startup catch-up (curator runs on next start if weekly window missed) | ✅ |
 
 ---
 
@@ -147,9 +156,6 @@ bun run typecheck     # Type check all packages
 
 ---
 
-## Based On
+## Credits
 
-Openloom is a fork of [OpenCode](https://github.com/anomalyco/opencode) (MIT License) by the SST team.
-The core architecture — agent runtime, tool system, session persistence, TUI, desktop app — comes from OpenCode.
-
-Openloom adds: `.env` support, Slate task tracking integration, branding, and agentic OS features.
+The core agent runtime, tool system, session persistence, TUI, and desktop app architecture are derived from [OpenCode](https://github.com/sst/opencode) (MIT License) by the SST team.
