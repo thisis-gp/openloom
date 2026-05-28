@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git check-ignore *)",
+      "Bash(bun run *)",
+      "Bash(awk -F'\\(' '{print $1}')",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(bun test *)",
+      "mcp__plugin_claude-mem_mcp-search__smart_search",
+      "Bash(awk 'NR>=191 && NR<=416' src/cli/cmd/github.ts)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:help.openai.com)",
+      "WebFetch(domain:support.claude.com)",
+      "WebFetch(domain:x.com)",
+      "WebFetch(domain:hermes-agent.nousresearch.com)",
+      "WebFetch(domain:blogs.nvidia.com)",
+      "WebFetch(domain:pub.towardsai.net)",
+      "WebFetch(domain:www.theunwindai.com)",
+      "WebFetch(domain:developers.openai.com)",
+      "WebFetch(domain:www.linkedin.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.youtube.com)",
+      "WebFetch(domain:robotpaper.ai)",
+      "WebFetch(domain:www.mindstudio.ai)",
+      "WebFetch(domain:blog.laozhang.ai)",
+      "WebFetch(domain:openclawconsult.com)",
+      "Bash(bun tsc *)",
+      "mcp__plugin_claude-mem_mcp-search__search",
+      "mcp__plugin_claude-mem_mcp-search__get_observations"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+Search prior OpenLoom sessions for relevant conversation history.
+
+Use this when the user refers to earlier work, asks what happened before, or when past context may prevent asking them to repeat themselves.
+
+Calling modes:
+- Search: provide query to find matching prior session messages.
+- Browse: provide no arguments to list recent sessions.
+- Scroll: provide session_id and around_message_id to read more messages around a known result.
+
+The tool only reads local OpenLoom session history for the current project.

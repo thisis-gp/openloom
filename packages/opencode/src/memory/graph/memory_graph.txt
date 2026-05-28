@@ -1,0 +1,10 @@
+Query the knowledge graph built from past session memory.
+
+Use this when the user asks about files worked on, decisions made, people mentioned, or concepts discussed across sessions.
+
+Examples:
+- "what files have we changed related to auth?"
+- "what decisions did we make about the database schema?"
+- "what concepts have we discussed related to memory?"
+
+Returns nodes from the graph with their related entities and PageRank importance scores.

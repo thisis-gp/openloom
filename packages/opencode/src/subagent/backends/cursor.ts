@@ -11,7 +11,7 @@ const log = Log.create({ service: "subagent.cursor" })
  */
 export async function dropCursorTask(
   goal: string,
-  opts: { cwd?: string } = {},
+  opts: { cwd?: string; taskId?: string } = {},
 ): Promise<{ taskFile: string }> {
   const cwd = opts.cwd ?? process.cwd()
   const tasksDir = path.join(cwd, ".cursor", "tasks")
@@ -21,6 +21,6 @@ export async function dropCursorTask(
   const taskFile = path.join(tasksDir, `openloom-${id}.md`)
   fs.writeFileSync(taskFile, `# OpenLoom Task\n\n${goal}\n`, "utf8")
 
-  log.info("cursor task dropped", { taskFile })
+  log.info("cursor task dropped", { taskFile, taskId: opts.taskId })
   return { taskFile }
 }
