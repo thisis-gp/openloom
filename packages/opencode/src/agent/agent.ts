@@ -13,6 +13,8 @@ import PROMPT_SCOUT from "./prompt/scout.txt"
 import PROMPT_SUMMARY from "./prompt/summary.txt"
 import PROMPT_TITLE from "./prompt/title.txt"
 import PROMPT_ORCHESTRATOR from "./prompt/orchestrator.txt"
+import PROMPT_QA from "./prompt/qa.txt"
+import PROMPT_REVIEW from "./prompt/review.txt"
 import { Permission } from "@/permission"
 import { mergeDeep, pipe, sortBy, values } from "remeda"
 import { Global } from "@openloom/core/global"
@@ -196,6 +198,44 @@ export const layer = Layer.effect(
             options: {},
             mode: "primary",
             native: true,
+          },
+          qa: {
+            name: "qa",
+            description:
+              "Runs build, tests, and typecheck on the current project and writes a structured pass/fail report to the assigned Slate task. Only used by the orchestrator dispatcher — not for interactive use.",
+            prompt: PROMPT_QA,
+            permission: Permission.merge(
+              defaults,
+              Permission.fromConfig({
+                question: "deny",
+                delegate_task: "deny",
+                cron_job: "deny",
+              }),
+              user,
+            ),
+            options: {},
+            mode: "subagent" as const,
+            native: true,
+            hidden: true,
+          },
+          review: {
+            name: "review",
+            description:
+              "Reviews changed files for correctness, security, and missed requirements. Writes a structured findings report to the assigned Slate task. Only used by the orchestrator dispatcher.",
+            prompt: PROMPT_REVIEW,
+            permission: Permission.merge(
+              defaults,
+              Permission.fromConfig({
+                question: "deny",
+                delegate_task: "deny",
+                cron_job: "deny",
+              }),
+              user,
+            ),
+            options: {},
+            mode: "subagent" as const,
+            native: true,
+            hidden: true,
           },
           explore: {
             name: "explore",
