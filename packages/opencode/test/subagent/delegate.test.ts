@@ -91,7 +91,7 @@ describe("claude-cli integration smoke", () => {
     })
     expect(result.output).toContain("SMOKE_OK")
     expect(result.exitCode).toBe(0)
-  })
+  }, { timeout: 90_000 })
 })
 
 describe("buildWorkerPrompt uses SLATE_CLI constant", () => {
