@@ -103,3 +103,24 @@ describe("buildWorkerPrompt uses SLATE_CLI constant", () => {
     expect(prompt).toContain("done")
   })
 })
+
+describe("buildWorkerPrompt worklog injection", () => {
+  it("includes worklog instructions when task_id is provided", () => {
+    const result = buildWorkerPrompt("Fix login bug", "TASK-42", "claude-worker")
+    expect(result).toContain("WORKLOG")
+    expect(result).toContain("started_at")
+    expect(result).toContain("ended_at")
+    expect(result).toContain("summary")
+  })
+
+  it("worklog instructions reference the correct task_id", () => {
+    const result = buildWorkerPrompt("Fix login bug", "TASK-42", "claude-worker")
+    expect(result).toContain("TASK-42")
+  })
+
+  it("does not include worklog when no task_id", () => {
+    const result = buildWorkerPrompt("Fix login bug", undefined, "claude-worker")
+    expect(result).not.toContain("WORKLOG")
+    expect(result).toBe("Fix login bug")
+  })
+})

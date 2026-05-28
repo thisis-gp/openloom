@@ -24,6 +24,8 @@ export function buildWorkerPrompt(
 ): string {
   if (!taskId) return goal
 
+  const now = new Date().toISOString()
+
   return `${goal}
 
 ---
@@ -39,6 +41,23 @@ ${SLATE_CLI} task move ${taskId} done --by ${agentName}
 
 # 3. If you are blocked and cannot complete the task:
 ${SLATE_CLI} task move ${taskId} blocked --by ${agentName} --reason "<why you are blocked>"
+
+---
+WORKLOG TRACKING (task_id: ${taskId}):
+You have structured WORKLOG capability. At the end of your work, you MUST:
+1. Record your started_at timestamp: "${now}"
+2. Record your ended_at timestamp: use current ISO timestamp when done
+3. Provide a summary (1-2 sentences of what you did)
+4. Mark outcome as "done" or "blocked"
+
+When recording the WORKLOG, use the slate CLI task comment command with JSON format containing:
+- type: "worklog"
+- agent: "${agentName}"
+- started_at: ISO timestamp when you began
+- ended_at: ISO timestamp when you completed
+- duration_seconds: integer duration
+- summary: brief description of work completed
+- outcome: "done" or "blocked"
 `
 }
 
