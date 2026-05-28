@@ -84,7 +84,7 @@ const Parameters = Schema.Struct({
   }),
   toolset_blocklist: Schema.optional(Schema.Array(Schema.String)).annotate({
     description:
-      "Additional tool IDs to deny the subagent. delegate_task, cron_create, cron_delete, cron_list, and memory_graph are always blocked.",
+      "Additional tool IDs to deny the subagent. delegate_task, cron_job, and memory_graph are always blocked.",
   }),
 })
 
